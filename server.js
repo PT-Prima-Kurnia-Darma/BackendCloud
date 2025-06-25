@@ -1,54 +1,35 @@
-require('dotenv').config();
+require('dotenv').config();  // <— harus di paling atas
+
 const Hapi = require('@hapi/hapi');
+const registerPlugin = require('./src/plugins/auth/register');
 
 const init = async () => {
-  try {
-    const portEnv = process.env.PORT;
-    if (!portEnv) {
-      console.error('Error: PORT environment variable belum di-set. Silakan set di .env.');
-      process.exit(1);
-    }
-    const port = parseInt(portEnv, 10);
-    if (isNaN(port)) {
-      console.error('Error: PORT environment variable tidak valid:', portEnv);
-      process.exit(1);
-    }
-    const host = process.env.HOST || 'localhost';
+  const server = Hapi.server({
+    port: process.env.PORT,
+    host: process.env.HOST,
+    routes: { cors: { origin: ['*'] } },
+  });
 
-    const server = Hapi.server({
-      port,
-      host,
-      routes: {
-        cors: true
-      }
-    });
+  // // (Optional) debug env:
+  // console.log('ENV FIREBASE_PROJECT_ID:', process.env.FIREBASE_PROJECT_ID ? 'OK' : 'MISSING');
+  // console.log('ENV FIREBASE_CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL ? 'OK' : 'MISSING');
+  // console.log('ENV FIREBASE_PRIVATE_KEY present:', process.env.FIREBASE_PRIVATE_KEY ? 'OK' : 'MISSING');
 
-    server.route({
-      method: 'GET',
-      path: '/health',
-      handler: (request, h) => ({ status: 'ok', timestamp: Date.now(), port, host })
-    });
+  await server.register(registerPlugin);
 
-    server.route({
-      method: 'GET',
-      path: '/',
-      handler: (request, h) => ({ message: `Welcome to Hapi server running on ${host}:${port}` })
-    });
+  server.route({
+    method: 'GET',
+    path: '/',
+    handler: () => 'API berjalan',
+  });
 
-    process.on('unhandledRejection', (err) => {
-      console.error('Unhandled Rejection:', err);
-    });
-
-    process.on('uncaughtException', (err) => {
-      console.error('Uncaught Exception:', err);
-    });
-
-    await server.start();
-    console.log(`Server berjalan pada: ${server.info.uri}`);
-  } catch (err) {
-    console.error('Gagal memulai server:', err);
-    process.exit(1);
-  }
+  await server.start();
+  console.log('Server berjalan pada:', server.info.uri);
 };
+
+process.on('unhandledRejection', (err) => {
+  console.error(err);
+  process.exit(1);
+});
 
 init();
