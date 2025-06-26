@@ -104,6 +104,18 @@ const updateProfile = async (firestore, userId, { name, username, oldPassword, n
   await userRef.update(updateData);
 };
 
+const logout = async (firestore, token) => {
+  // decode tanpa verifikasi supaya bisa dapat exp
+  const decoded = jwt.decode(token);
+  if (!decoded || !decoded.exp) {
+    throw Boom.badRequest('Token tidak valid');
+  }
+
+  const blacklistRef = firestore.collection('token_blacklist').doc(token);
+  // simpan dengan field exp (sebagai UNIX timestamp)
+  await blacklistRef.set({ exp: decoded.exp });
+};
+
 const deleteUser = async (firestore, id) => {
   const userRef = firestore.collection('users').doc(id);
   const doc = await userRef.get();
@@ -118,5 +130,6 @@ module.exports = {
   register,
   deleteUser,
   login,
-  updateProfile
+  updateProfile,
+  logout
 };

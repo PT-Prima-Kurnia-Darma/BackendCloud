@@ -35,6 +35,16 @@ module.exports = [
     tags: ['api','auth'],
   },
   },
+    {
+    method: 'POST',
+    path: '/auth/logout',
+    handler: handlers.logout,
+    options: {
+      auth: 'jwt',    // hanya user yang sudah login
+      description: 'Logout dan hanguskan JWT saat ini',
+      tags: ['api','auth'],
+    }
+  },
   {
     method: 'DELETE',
     path: '/auth/delete/{id}',

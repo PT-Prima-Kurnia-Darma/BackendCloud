@@ -54,6 +54,24 @@ const updateProfile = async (request, h) => {
   }
 };
 
+const logout = async (request, h) => {
+  try {
+    // ambil token raw dari header Authorization: 'Bearer <token>'
+    const authorization = request.headers.authorization || '';
+    const token = authorization.replace(/^Bearer\s+/i, '');
+    if (!token) {
+      throw Boom.badRequest('Header Authorization (Bearer token) diperlukan');
+    }
+
+    await services.logout(request.server.app.firestore, token);
+    return h.response({ status: 'success', message: 'Logout berhasil' }).code(200);
+  } catch (err) {
+    if (Boom.isBoom(err)) throw err;
+    console.error('Error di handler.logout:', err);
+    throw Boom.internal('Gagal melakukan logout');
+  }
+};
+
 const deleteUser = async (request, h) => {
   try {
     const { id } = request.params;
@@ -70,4 +88,5 @@ module.exports = {
   updateProfile,
   deleteUser,
   login,
+  logout
 };

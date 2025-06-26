@@ -1,7 +1,9 @@
+// server.js
 'use strict';
 
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
+const { Firestore } = require('@google-cloud/firestore');
 const config = require('./config');
 
 const init = async () => {
@@ -13,18 +15,32 @@ const init = async () => {
     },
   });
 
+  // —– Inisialisasi Firestore di root server.app
+  let privateKey = config.FIRESTORE_PRIVATE_KEY;
+  if (privateKey && privateKey.includes('\\n')) {
+    privateKey = privateKey.replace(/\\n/g, '\n');
+  }
+  server.app.firestore = new Firestore({
+    projectId: config.FIRESTORE_PROJECT_ID,
+    credentials: {
+      client_email: config.FIRESTORE_CLIENT_EMAIL,
+      private_key: privateKey,
+    },
+  });
+
   // Logging sederhana
   server.ext('onRequest', (request, h) => {
     console.log(`[${new Date().toISOString()}] ${request.method.toUpperCase()} ${request.path}`);
     return h.continue;
   });
 
-  //  —— Health-check endpoint ——
+  //  —— Health-check endpoint ——  
   server.route({
     method: 'GET',
     path: '/',
     handler: async (request, h) => {
       try {
+        // sekarang server.app.firestore sudah ter-set
         await request.server.app.firestore.listCollections();
         return h
           .response({ status: 'success', message: 'Server is up and running' })
@@ -43,7 +59,7 @@ const init = async () => {
     },
   });
 
-  //plugin auth
+  // Daftarkan plugin auth (yang sekarang hanya mengatur JWT & routes)
   await server.register(require('./src/plugins/auth'));
 
   // Global error formatting (404, Boom errors)
@@ -58,7 +74,6 @@ const init = async () => {
     return h.continue;
   });
 
-  //Start server dengan try/catch untuk logging error ——
   try {
     await server.start();
     console.log(`✅ Server berjalan pada ${server.info.uri}`);
