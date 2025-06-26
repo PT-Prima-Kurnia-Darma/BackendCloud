@@ -54,6 +54,7 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
   ```json
   {
     "status": "success",
+    "message": "Registrasi berhasil",
     "data": {
         "id": "userIdBaru",
         "name": "Nama Lengkap",
@@ -98,6 +99,7 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
   ```json
   {
     "status": "success",
+    "message": "Login berhasil",
         "data": {
          "user": {
          "id": "userId",
