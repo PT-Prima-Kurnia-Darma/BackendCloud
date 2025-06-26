@@ -1,34 +1,75 @@
-require('dotenv').config();  // <— harus di paling atas
+'use strict';
 
+require('dotenv').config();
 const Hapi = require('@hapi/hapi');
-const registerPlugin = require('./src/plugins/auth/register');
+const config = require('./config');
 
 const init = async () => {
   const server = Hapi.server({
-    port: process.env.PORT,
-    host: process.env.HOST,
-    routes: { cors: { origin: ['*'] } },
+    port: config.PORT,
+    host: config.HOST,
+    routes: {
+      cors: { origin: ['*'] },
+    },
   });
 
-  // // (Optional) debug env:
-  // console.log('ENV FIREBASE_PROJECT_ID:', process.env.FIREBASE_PROJECT_ID ? 'OK' : 'MISSING');
-  // console.log('ENV FIREBASE_CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL ? 'OK' : 'MISSING');
-  // console.log('ENV FIREBASE_PRIVATE_KEY present:', process.env.FIREBASE_PRIVATE_KEY ? 'OK' : 'MISSING');
+  // Logging sederhana
+  server.ext('onRequest', (request, h) => {
+    console.log(`[${new Date().toISOString()}] ${request.method.toUpperCase()} ${request.path}`);
+    return h.continue;
+  });
 
-  await server.register(registerPlugin);
-
+  //  —— Health-check endpoint ——
   server.route({
     method: 'GET',
     path: '/',
-    handler: () => 'API berjalan',
+    handler: async (request, h) => {
+      try {
+        await request.server.app.firestore.listCollections();
+        return h
+          .response({ status: 'success', message: 'Server is up and running' })
+          .code(200);
+      } catch (err) {
+        console.error('Health-check failed:', err);
+        return h
+          .response({ status: 'error', message: err.message })
+          .code(500);
+      }
+    },
+    options: {
+      auth: false,
+      description: 'Health-check endpoint',
+      tags: ['api'],
+    },
   });
 
-  await server.start();
-  console.log('Server berjalan pada:', server.info.uri);
+  //plugin auth
+  await server.register(require('./src/plugins/auth'));
+
+  // Global error formatting (404, Boom errors)
+  server.ext('onPreResponse', (request, h) => {
+    const response = request.response;
+    if (response.isBoom) {
+      const { statusCode, payload } = response.output;
+      return h
+        .response({ status: 'error', message: payload.message })
+        .code(statusCode);
+    }
+    return h.continue;
+  });
+
+  //Start server dengan try/catch untuk logging error ——
+  try {
+    await server.start();
+    console.log(`✅ Server berjalan pada ${server.info.uri}`);
+  } catch (err) {
+    console.error('❌ Gagal memulai server:', err);
+    process.exit(1);
+  }
 };
 
 process.on('unhandledRejection', (err) => {
-  console.error(err);
+  console.error('Unhandled Rejection:', err);
   process.exit(1);
 });
 
