@@ -24,6 +24,19 @@ const register = async (request, h) => {
   }
 };
 
+const login = async (request, h) => {
+  try {
+    const { username, password } = request.payload;
+    const { user, token } = await services.login(request.server.app.firestore, { username, password });
+
+    return h.response({ status: 'success', data: { user, token } }).code(200);
+  } catch (err) {
+    if (Boom.isBoom(err)) throw err;
+    console.error('Error di handler.login:', err);
+    throw Boom.internal('Gagal melakukan login');
+  }
+};
+
 const deleteUser = async (request, h) => {
   try {
     const { id } = request.params;
@@ -37,5 +50,6 @@ const deleteUser = async (request, h) => {
 
 module.exports = {
   register,
-  deleteUser
+  deleteUser,
+  login,
 };

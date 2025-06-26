@@ -2,6 +2,8 @@
 
 const bcrypt = require('bcrypt');
 const Boom = require('@hapi/boom');
+const jwt = require('jsonwebtoken');
+const config = require('../../../config');
 
 const register = async (firestore, payload) => {
   const { name, username, password } = payload;
@@ -38,6 +40,34 @@ const register = async (firestore, payload) => {
   };
 };
 
+const login = async (firestore, { username, password }) => {
+  const usersRef = firestore.collection('users');
+  const querySnap = await usersRef.where('username', '==', username).limit(1).get();
+  if (querySnap.empty) {
+    throw Boom.unauthorized('Username atau password salah');
+  }
+  const doc = querySnap.docs[0];
+  const data = doc.data();
+
+  const match = await bcrypt.compare(password, data.passwordHash);
+  if (!match) {
+    throw Boom.unauthorized('Username atau password salah');
+  }
+
+  // Payload minimal untuk token
+  const payload = {
+    id: doc.id,
+    username: data.username,
+    name: data.name,
+  };
+
+  // Generate JWT dengan exp 7 hari
+  const token = jwt.sign(payload, config.JWT_SECRET, { expiresIn: '7d' });
+
+  return { user: payload, token };
+};
+
+
 const deleteUser = async (firestore, id) => {
   const userRef = firestore.collection('users').doc(id);
   const doc = await userRef.get();
@@ -50,5 +80,6 @@ const deleteUser = async (firestore, id) => {
 
 module.exports = {
   register,
-  deleteUser
+  deleteUser,
+  login
 };

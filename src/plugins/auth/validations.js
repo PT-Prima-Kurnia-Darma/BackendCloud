@@ -26,11 +26,29 @@ const registerPayload = Joi.object({
   }),
 });
 
+const loginPayload = Joi.object({
+  username: Joi.string().alphanum().min(3).max(30).required().messages({
+    'string.base': 'Username harus berupa teks alfanumerik',
+    'string.empty': 'Username tidak boleh kosong',
+    'string.alphanum': 'Username hanya boleh berisi huruf dan angka tanpa spasi',
+    'string.min': 'Username minimal {#limit} karakter',
+    'string.max': 'Username maksimal {#limit} karakter',
+    'any.required': 'Username wajib diisi',
+  }),
+  password: Joi.string().min(6).required().messages({
+    'string.base': 'Password harus berupa teks',
+    'string.empty': 'Password tidak boleh kosong',
+    'string.min': 'Password minimal {#limit} karakter',
+    'any.required': 'Password wajib diisi',
+  }),
+});
+
 const deletePayload = Joi.object({
   id: Joi.string().required(),
 });
 
 module.exports = {
   registerPayload,
-  deletePayload
+  deletePayload,
+  loginPayload
 };
