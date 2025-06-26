@@ -22,6 +22,20 @@ module.exports = [
     },
   },
   {
+  method: 'PUT',
+  path: '/auth/change',
+  handler: handlers.updateProfile,
+  options: {
+    auth: 'jwt',  // User harus login
+    validate: {
+      payload: validations.updateProfilePayload,
+      failAction: (r,h,e) => { throw e; }
+    },
+    description: 'Perbarui name, username, dan/atau password user yang sedang login',
+    tags: ['api','auth'],
+  },
+  },
+  {
     method: 'DELETE',
     path: '/auth/delete/{id}',
     handler: handlers.deleteUser,

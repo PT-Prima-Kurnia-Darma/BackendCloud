@@ -67,6 +67,42 @@ const login = async (firestore, { username, password }) => {
   return { user: payload, token };
 };
 
+const updateProfile = async (firestore, userId, { name, username, oldPassword, newPassword }) => {
+  const userRef = firestore.collection('users').doc(userId);
+  const doc = await userRef.get();
+  if (!doc.exists) {
+    throw Boom.notFound('User tidak ditemukan');
+  }
+  const data = doc.data();
+
+  // 1. Verifikasi oldPassword jika user ingin mengganti password
+  if (oldPassword && newPassword) {
+    const match = await bcrypt.compare(oldPassword, data.passwordHash);
+    if (!match) {
+      throw Boom.unauthorized('Password lama salah');
+    }
+  }
+
+  // 2. Persiapkan update object
+  const updateData = {};
+  if (name) updateData.name = name;
+  if (username) {
+    // Cek duplikasi username
+    const usersRef = firestore.collection('users');
+    const exists = await usersRef.where('username', '==', username).limit(1).get();
+    if (!exists.empty && exists.docs[0].id !== userId) {
+      throw Boom.conflict('Username sudah digunakan');
+    }
+    updateData.username = username;
+  }
+  if (newPassword) {
+    const hashed = await bcrypt.hash(newPassword, 10);
+    updateData.passwordHash = hashed;
+  }
+
+  // 3. Lakukan update
+  await userRef.update(updateData);
+};
 
 const deleteUser = async (firestore, id) => {
   const userRef = firestore.collection('users').doc(id);
@@ -81,5 +117,6 @@ const deleteUser = async (firestore, id) => {
 module.exports = {
   register,
   deleteUser,
-  login
+  login,
+  updateProfile
 };

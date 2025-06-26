@@ -37,6 +37,23 @@ const login = async (request, h) => {
   }
 };
 
+const updateProfile = async (request, h) => {
+  try {
+    const userId = request.auth.credentials.id;
+    const { name, username, oldPassword, newPassword } = request.payload;
+    await services.updateProfile(
+      request.server.app.firestore,
+      userId,
+      { name, username, oldPassword, newPassword }
+    );
+    return h.response({ status: 'success', message: 'Profil berhasil diperbarui' }).code(200);
+  } catch (err) {
+    if (Boom.isBoom(err)) throw err;
+    console.error('Error di handler.updateProfile:', err);
+    throw Boom.internal('Gagal memperbarui profil');
+  }
+};
+
 const deleteUser = async (request, h) => {
   try {
     const { id } = request.params;
@@ -50,6 +67,7 @@ const deleteUser = async (request, h) => {
 
 module.exports = {
   register,
+  updateProfile,
   deleteUser,
   login,
 };
