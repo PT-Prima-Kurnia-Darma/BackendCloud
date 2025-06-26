@@ -191,7 +191,7 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
    "message": "User tidak ditemukan"
   }
 
-#### Modifikasi Pengguna
+#### Delete Pengguna
 **URL:**
 `/auth/delete{id}`
 **Method:**
