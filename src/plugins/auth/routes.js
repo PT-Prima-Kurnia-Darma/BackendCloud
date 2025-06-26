@@ -18,4 +18,13 @@ module.exports = [
       tags: ['api', 'auth'],
     },
   },
+    {
+    method: 'DELETE',
+    path: '/auth/delete/{id}',
+    handler: handlers.deleteUser,
+    options: {
+      auth: false,
+      validate: { params: validations.deleteParams, failAction: (r, h, e) => { throw e; } },
+    },
+  },
 ];

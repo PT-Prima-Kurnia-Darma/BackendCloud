@@ -7,7 +7,7 @@ const register = async (request, h) => {
   try {
     const payload = request.payload;
     const firestore = request.server.app.firestore;
-    const user = await services.createUser(firestore, payload);
+    const user = await services.register(firestore, payload);
     const responseData = {
       id: user.id,
       name: user.name,
@@ -19,11 +19,23 @@ const register = async (request, h) => {
     if (Boom.isBoom(err)) {
       throw err;
     }
-    console.error('Error di handler.register:', err);
+    console.error('Error di handler.register user:', err);
     throw Boom.internal('Gagal melakukan registrasi');
+  }
+};
+
+const deleteUser = async (request, h) => {
+  try {
+    const { id } = request.params;
+    await services.deleteUser(request.server.app.firestore, id);
+    return h.response({ status: 'success', message: 'User berhasil dihapus' });
+  } catch (err) {
+    if (Boom.isBoom(err)) throw err;
+    throw Boom.internal(err.message);
   }
 };
 
 module.exports = {
   register,
+  deleteUser
 };

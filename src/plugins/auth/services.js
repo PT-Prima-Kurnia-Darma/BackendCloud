@@ -3,12 +3,7 @@
 const bcrypt = require('bcrypt');
 const Boom = require('@hapi/boom');
 
-/**
- * @param {Firestore} firestore
- * @param {{ name: string, username: string, password: string }} payload
- * @returns {Promise<{ id: string, name: string, username: string, createdAt: string }>}
- */
-async function createUser(firestore, payload) {
+const register = async (firestore, payload) => {
   const { name, username, password } = payload;
   const usersRef = firestore.collection('users');
 
@@ -41,8 +36,19 @@ async function createUser(firestore, payload) {
     username,
     createdAt,
   };
-}
+};
+
+const deleteUser = async (firestore, id) => {
+  const userRef = firestore.collection('users').doc(id);
+  const doc = await userRef.get();
+  if (!doc.exists) {
+    throw Boom.notFound('User tidak ditemukan');
+  }
+  await userRef.delete();
+  return;
+};
 
 module.exports = {
-  createUser,
+  register,
+  deleteUser
 };

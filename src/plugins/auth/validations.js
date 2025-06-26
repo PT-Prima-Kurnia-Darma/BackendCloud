@@ -26,6 +26,11 @@ const registerPayload = Joi.object({
   }),
 });
 
+const deletePayload = Joi.object({
+  id: Joi.string().required(),
+});
+
 module.exports = {
   registerPayload,
+  deletePayload
 };
