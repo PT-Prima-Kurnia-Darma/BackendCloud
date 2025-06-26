@@ -29,3 +29,184 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
   FIRESTORE_CLIENT_EMAIL=
   FIRESTORE_PRIVATE_KEY=
   ```
+
+## API EndPoint
+
+### Fitur Autentifikasi
+
+#### Register
+**URL:**
+`/auth/register`
+**Method:**
+`POST`
+
+**Body Request**
+  ```json
+  {
+  "name": "Nama Lengkap",
+  "username": "usernamebaru",
+  "password": "passwordrahasia"
+  }
+  ```
+
+**Response:**
+- **Success:**
+  ```json
+  {
+    "status": "success",
+    "data": {
+        "id": "userIdBaru",
+        "name": "Nama Lengkap",
+        "username": "usernamebaru",
+        "createdAt": "2023-10-27T10:00:00.000Z"
+    }
+  }
+  ```
+
+- **Failur (409 Conflict - Username sudah ada)**
+  ```json
+  {
+   "status": "error",
+   "message": "Username sudah terdaftar"
+  }
+  ```
+
+- **Failure (400 Bad Request - Validasi gagal))**
+  ```json
+  {
+   "status": "error",
+   "message": "Name minimal 3 karakter"
+  }
+  ```
+
+#### Login
+**URL:**
+`/auth/login`
+**Method:**
+`POST`
+
+**Body Request**
+  ```json
+  {
+  "username": "usernamebaru",
+  "password": "passwordrahasia"
+  }
+  ```
+
+**Response:**
+- **Success (200 OK)**
+  ```json
+  {
+    "status": "success",
+        "data": {
+         "user": {
+         "id": "userId",
+         "username": "usernamebaru",
+         "name": "Nama Lengkap"
+         },
+           "token": "jwt.token.panjang"
+    }
+  }
+  ```
+
+- **Failur (401 Unauthorized - Kredensial salah)**
+  ```json
+  {
+    "status": "error",
+    "message": "Username atau password salah"
+  }
+  ```
+
+#### Logout
+**URL:**
+`/auth/logout`
+**Method:**
+`POST`
+**Headers**
+`Authorization: Bearer jwt.token.panjang`
+
+**Response:**
+- **Success (200 OK)**
+  ```json
+  {
+   "status": "success",
+   "message": "Logout berhasil"
+  }
+  ```
+
+- **Failur (401 Unauthorized - Kredensial salah)**
+  ```json
+  {
+   "status": "error",
+   "message": "Missing authentication"
+  }
+
+#### Modifikasi Pengguna
+**URL:**
+`/auth/change`
+**Method:**
+`PUT`
+**Headers**
+`Authorization: Bearer jwt.token.panjang`
+
+**Body Request**
+  ```json
+{
+  "name": "Nama Baru",
+  "username": "usernamebaru_diubah",
+  "oldPassword": "pasword lama",
+  "newPassword": "password baru",
+}
+  ```
+
+**Response:**
+- **Success (200 OK)**
+  ```json
+  {
+   "status": "success",
+   "message": "Profil berhasil diperbarui"
+  }
+  ```
+
+- **Failur (401 Unauthorized - Kata sandi lama salah)**
+  ```json
+  {
+   "status": "error",
+   "message": "Password lama salah"
+  }
+
+- **Failur (409 Conflict - Username baru sudah digunakan)**
+  ```json
+  {
+   "status": "error",
+   "message": "Username sudah digunakan"
+  }
+
+- **Failur (404 Not Found - Pengguna tidak ditemukan)**
+  ```json
+  {
+   "status": "error",
+   "message": "User tidak ditemukan"
+  }
+
+#### Modifikasi Pengguna
+**URL:**
+`/auth/delete{id}`
+**Method:**
+`DELETE`
+
+**Response:**
+- **Success (200 OK)**
+  ```json
+  {
+   "status": "success",
+   "message": "User berhasil dihapus"
+  }
+  ```
+
+- **Failure (404 Not Found - Pengguna tidak ditemukan)**
+  ```json
+  {
+   "status": "error",
+   "message": "User tidak ditemukan"
+  }
