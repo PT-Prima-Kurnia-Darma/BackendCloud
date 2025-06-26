@@ -14,7 +14,9 @@ const register = async (request, h) => {
       username: user.username,
       createdAt: user.createdAt,
     };
-    return h.response({ status: 'success', data: responseData }).code(201);
+    return h
+      .response({ status: 'success', message: 'Registrasi berhasil', data: responseData })
+      .code(201);
   } catch (err) {
     if (Boom.isBoom(err)) {
       throw err;
@@ -29,7 +31,9 @@ const login = async (request, h) => {
     const { username, password } = request.payload;
     const { user, token } = await services.login(request.server.app.firestore, { username, password });
 
-    return h.response({ status: 'success', data: { user, token } }).code(200);
+    return h
+      .response({ status: 'success', message: 'Login berhasil', data: { user, token } })
+      .code(200);
   } catch (err) {
     if (Boom.isBoom(err)) throw err;
     console.error('Error di handler.login:', err);
@@ -46,7 +50,9 @@ const updateProfile = async (request, h) => {
       userId,
       { name, username, oldPassword, newPassword }
     );
-    return h.response({ status: 'success', message: 'Profil berhasil diperbarui' }).code(200);
+    return h
+      .response({ status: 'success', message: 'Profil berhasil diperbarui' })
+      .code(200);
   } catch (err) {
     if (Boom.isBoom(err)) throw err;
     console.error('Error di handler.updateProfile:', err);
@@ -64,7 +70,9 @@ const logout = async (request, h) => {
     }
 
     await services.logout(request.server.app.firestore, token);
-    return h.response({ status: 'success', message: 'Logout berhasil' }).code(200);
+    return h
+      .response({ status: 'success', message: 'Logout berhasil' })
+      .code(200);
   } catch (err) {
     if (Boom.isBoom(err)) throw err;
     console.error('Error di handler.logout:', err);
@@ -76,7 +84,9 @@ const deleteUser = async (request, h) => {
   try {
     const { id } = request.params;
     await services.deleteUser(request.server.app.firestore, id);
-    return h.response({ status: 'success', message: 'User berhasil dihapus' });
+    return h
+      .response({ status: 'success', message: 'User berhasil dihapus' })
+      .code(200);
   } catch (err) {
     if (Boom.isBoom(err)) throw err;
     throw Boom.internal(err.message);
