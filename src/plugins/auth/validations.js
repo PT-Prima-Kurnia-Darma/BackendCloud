@@ -35,10 +35,8 @@ const loginPayload = Joi.object({
     'string.max': 'Username maksimal {#limit} karakter',
     'any.required': 'Username wajib diisi',
   }),
-  password: Joi.string().min(6).required().messages({
-    'string.base': 'Password harus berupa teks',
+  password: Joi.string().required().messages({
     'string.empty': 'Password tidak boleh kosong',
-    'string.min': 'Password minimal {#limit} karakter',
     'any.required': 'Password wajib diisi',
   }),
 });
