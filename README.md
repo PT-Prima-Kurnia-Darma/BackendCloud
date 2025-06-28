@@ -212,3 +212,32 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
    "status": "error",
    "message": "User tidak ditemukan"
   }
+
+#### Validasi Token
+**URL:**
+`/auth/validateToken`
+**Method:**
+`POST`
+
+**Body Request**
+  ```json
+  {
+   "token": "jwt token"
+  }
+  ```
+
+**Response:**
+- **Success (200 OK)**
+  ```json
+  {
+   "status": "success",
+   "message": "token valid"
+  }
+  ```
+
+- **Failure (404 Not Found - Pengguna tidak ditemukan)**
+  ```json
+  {
+   "status": "error",
+   "message": "token invalid"
+  }

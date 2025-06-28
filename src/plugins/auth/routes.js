@@ -3,7 +3,6 @@ const handlers = require('./handlers');
 const validations = require('./validations');
 
 module.exports = [
-  // Register dan deleteUser seperti sebelumnya
   {
     method: 'POST',
     path: '/auth/register',

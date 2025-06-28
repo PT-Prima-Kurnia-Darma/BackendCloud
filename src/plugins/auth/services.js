@@ -128,16 +128,15 @@ const deleteUser = async (firestore, id) => {
 
 const validateToken = async (firestore, token) => {
   try {
-    // 1. Verifikasi token menggunakan secret key
+
     jwt.verify(token, config.JWT_SECRET);
 
-    // 2. Cek apakah token ada di blacklist
     const blackDoc = await firestore.collection('token_blacklist').doc(token).get();
     if (blackDoc.exists) {
       throw Boom.unauthorized('Token invalid');
     }
 
-    return true; // Token valid
+    return true;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
       throw Boom.unauthorized('Token kadaluarsa');
