@@ -93,10 +93,26 @@ const deleteUser = async (request, h) => {
   }
 };
 
+const validateToken = async (request, h) => {
+  try {
+    const { token } = request.payload;
+    if (!token) {
+      throw Boom.badRequest('membutuhkan token');
+    }
+    await services.validateToken(request.server.app.firestore, token);
+    return h.response({ status: 'success', message: 'Token valid' }).code(200);
+  } catch (err) {
+    if (Boom.isBoom(err)) throw err;
+    console.error('Error in handler.validateToken:', err);
+    throw Boom.internal('gagal validasi token');
+  }
+};
+
 module.exports = {
   register,
   updateProfile,
   deleteUser,
   login,
-  logout
+  logout,
+  validateToken
 };

@@ -51,4 +51,14 @@ module.exports = [
     handler: handlers.deleteUser,
     options: { auth: false, validate: { params: validations.deletePayload, failAction: (r,h,e) => { throw e; } } },
   },
+  {
+    method: 'POST',
+    path: '/auth/validateToken',
+    handler: handlers.validateToken,
+    options: {
+      auth: false, // Tidak memerlukan autentikasi karena kita akan memvalidasi token yang dikirim
+      description: 'Validate a JWT token',
+      tags: ['api', 'auth'],
+    },
+  },
 ];

@@ -72,7 +72,7 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
   }
   ```
 
-- **Failure (400 Bad Request - Validasi gagal))**
+- **Failure (400 Bad Request - Validasi gagal)**
   ```json
   {
    "status": "error",

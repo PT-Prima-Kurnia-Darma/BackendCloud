@@ -126,10 +126,34 @@ const deleteUser = async (firestore, id) => {
   return;
 };
 
+const validateToken = async (firestore, token) => {
+  try {
+    // 1. Verifikasi token menggunakan secret key
+    jwt.verify(token, config.JWT_SECRET);
+
+    // 2. Cek apakah token ada di blacklist
+    const blackDoc = await firestore.collection('token_blacklist').doc(token).get();
+    if (blackDoc.exists) {
+      throw Boom.unauthorized('Token invalid');
+    }
+
+    return true; // Token valid
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw Boom.unauthorized('Token kadaluarsa');
+    }
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw Boom.unauthorized('token invalid');
+    }
+    throw error;
+  }
+};
+
 module.exports = {
   register,
   deleteUser,
   login,
   updateProfile,
-  logout
+  logout,
+  validateToken
 };
