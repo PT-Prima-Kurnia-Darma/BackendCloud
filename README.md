@@ -163,16 +163,51 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
   ```
 
 **Response:**
-- **Success (200 OK)**
+- **Success (200 OK - Update seluruh data)**
   ```json
   {
     "status": "success",
     "message": "Profil berhasil diperbarui",
     "data": {
-        "username": "hadriannew",
-        "name": "hadriannew",
-        "userId": "XffGBpu1bn6ZfFVZ7LR6"
+        "username": "username new",
+        "name": "name new",
+        "userId": "id"
       }
+  }
+  ```
+
+- **Success (200 OK - Update Username)**
+  ```json
+  {
+    "status": "success",
+    "message": "Profil berhasil diperbarui",
+    "data": {
+        "username": "name",
+        "userId": "id"
+    }
+  }
+  ```
+
+- **Success (200 OK - Update Name)**
+  ```json
+  {
+    "status": "success",
+    "message": "Profil berhasil diperbarui",
+    "data": {
+        "name": "name",
+        "userId": "id"
+    }
+  }
+  ```
+
+- **Success (200 OK - Update Password)**
+  ```json
+  {
+    "status": "success",
+    "message": "Profil berhasil diperbarui",
+    "data": {
+        "userId": "id"
+    }
   }
   ```
 
@@ -197,35 +232,35 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
    "message": "User tidak ditemukan"
   }
 
-- **Failur (404 Not Found - Password tidak boleh sama)**
+- **Failur (400 Bad Request  - Password tidak boleh sama)**
   ```json
   {
     "status": "error",
     "message": "Password lama dan baru tidak bole sama"
   }
 
-- **Failur (404 Bad Request - Data tidak boleh sama)**
+- **Failur (400 Bad Request - Data tidak boleh sama)**
   ```json
   {
     "status": "error",
     "message": "Data pengguna tidak boleh sama seperti sebelumnya"
   }
 
-- **Failur (404 Bad Request  - Username tidak boleh sama)**
+- **Failur (400 Bad Request  - Username tidak boleh sama)**
   ```json
   {
     "status": "error",
     "message": "Username tidak boleh sama seperti sebelumnya"
   }
 
-- **Failur (404 Bad Request  - Name tidak boleh sama)**
+- **Failur (400 Bad Request  - Name tidak boleh sama)**
   ```json
   {
     "status": "error",
     "message": "Name tidak boleh sama seperti sebelumnya"
   }
 
-- **Failur (404 Bad Request - Password minimal 6 karakter)**
+- **Failur (400 Bad Request - Password minimal 6 karakter)**
   ```json
   {
     "status": "error",
