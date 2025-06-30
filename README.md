@@ -166,8 +166,13 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
 - **Success (200 OK)**
   ```json
   {
-   "status": "success",
-   "message": "Profil berhasil diperbarui"
+    "status": "success",
+    "message": "Profil berhasil diperbarui",
+    "data": {
+        "username": "hadriannew",
+        "name": "hadriannew",
+        "userId": "XffGBpu1bn6ZfFVZ7LR6"
+      }
   }
   ```
 

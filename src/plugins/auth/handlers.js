@@ -51,7 +51,7 @@ const updateProfile = async (request, h) => {
       { name, username, oldPassword, newPassword }
     );
     return h
-      .response({ status: 'success', message: 'Profil berhasil diperbarui' })
+      .response({ status: 'success', message: 'Profil berhasil diperbarui', data: { username, name, userId } })
       .code(200);
   } catch (err) {
     if (Boom.isBoom(err)) throw err;

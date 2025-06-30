@@ -102,6 +102,17 @@ const updateProfile = async (firestore, userId, { name, username, oldPassword, n
 
   // 3. Lakukan update
   await userRef.update(updateData);
+
+  // 4. Ambil data terbaru setelah diupdate
+  const updatedDoc = await userRef.get();
+  const updatedData = updatedDoc.data();
+
+  // 5. Kembalikan data yang relevan
+  return {
+    id: updatedDoc.id,
+    name: updatedData.name,
+    username: updatedData.username,
+  };
 };
 
 const logout = async (firestore, token) => {
