@@ -75,25 +75,39 @@ const updateProfile = async (firestore, userId, { name, username, oldPassword, n
   }
   const data = doc.data();
 
-  // 1. Verifikasi jika user ingin mengganti password
+  const isNameSame = name && name === data.name;
+  const isUsernameSame = username && username === data.username;
+
+  if (isNameSame && isUsernameSame) {
+    throw Boom.badRequest('data pengguna tidak boleh sama seperti sebelumnya');
+  }
+
+  if (isNameSame) {
+    throw Boom.badRequest('name sama seperti sebelumnya');
+  }
+  if (isUsernameSame) {
+    throw Boom.badRequest('username sama seperti sebelumnya');
+  }
+  
   if (oldPassword && newPassword) {
-    // VALIDASI BARU: Cek apakah password lama dan baru sama
     if (oldPassword === newPassword) {
-      // Jika sama, lemparkan error Boom.badRequest
       throw Boom.badRequest('password lama dan baru tidak bole sama');
     }
-
-    // Pengecekan password lama yang sudah ada sebelumnya
+    if (newPassword.length < 6) {
+      throw Boom.badRequest('password minimal 6 karakter');
+    }
     const match = await bcrypt.compare(oldPassword, data.passwordHash);
     if (!match) {
       throw Boom.unauthorized('Password lama salah');
     }
+  } else if (newPassword && !oldPassword) {
+      throw Boom.badRequest('Password lama harus diisi untuk mengubah password');
   }
 
-  // 2. Persiapkan objek untuk update
   const updateData = {};
   if (name) updateData.name = name;
   if (username) {
+
     const usersRef = firestore.collection('users');
     const exists = await usersRef.where('username', '==', username).limit(1).get();
     if (!exists.empty && exists.docs[0].id !== userId) {
@@ -106,14 +120,15 @@ const updateProfile = async (firestore, userId, { name, username, oldPassword, n
     updateData.passwordHash = hashed;
   }
 
-  // 3. Lakukan update
+  if (Object.keys(updateData).length === 0) {
+      throw Boom.badRequest('Tidak ada data yang diperbarui');
+  }
+
   await userRef.update(updateData);
 
-  // 4. Ambil data terbaru setelah update
   const updatedDoc = await userRef.get();
   const updatedData = updatedDoc.data();
 
-  // 5. Kembalikan data yang relevan
   return {
     id: updatedDoc.id,
     name: updatedData.name,

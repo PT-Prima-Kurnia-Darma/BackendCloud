@@ -197,11 +197,32 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
    "message": "User tidak ditemukan"
   }
 
-- **Failur (404 Not Found - Pengguna tidak ditemukan)**
+- **Failur (404 Not Found - password tidak boleh sama)**
   ```json
   {
     "status": "error",
     "message": "password lama dan baru tidak bole sama"
+  }'
+
+- **Failur (404 Not Found - data tidak boleh sama)**
+  ```json
+  {
+    "status": "error",
+    "message": "data pengguna tidak boleh sama seperti sebelumnya"
+  }
+
+- **Failur (404 Not Found - username tidak boleh sama)**
+  ```json
+  {
+    "status": "error",
+    "message": "username tidak boleh sama seperti sebelumnya"
+  }
+
+- **Failur (404 Not Found - name tidak boleh sama)**
+  ```json
+  {
+    "status": "error",
+    "message": "name tidak boleh sama seperti sebelumnya"
   }
 
 #### Delete Pengguna
