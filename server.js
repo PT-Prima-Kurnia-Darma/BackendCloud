@@ -1,10 +1,10 @@
-// server.js
+// server.js (setelah diubah)
 'use strict';
 
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
-const { Firestore } = require('@google-cloud/firestore');
 const config = require('./config');
+const firestore = require('./src/utils/firestore');
 
 const init = async () => {
   const server = Hapi.server({
@@ -15,18 +15,8 @@ const init = async () => {
     },
   });
 
-  // —– Inisialisasi Firestore di root server.app
-  let privateKey = config.FIRESTORE_PRIVATE_KEY;
-  if (privateKey && privateKey.includes('\\n')) {
-    privateKey = privateKey.replace(/\\n/g, '\n');
-  }
-  server.app.firestore = new Firestore({
-    projectId: config.FIRESTORE_PROJECT_ID,
-    credentials: {
-      client_email: config.FIRESTORE_CLIENT_EMAIL,
-      private_key: privateKey,
-    },
-  });
+  // —– Inisialisasi Firestore menjadi lebih sederhana —–
+  server.app.firestore = firestore;
 
   // Logging sederhana
   server.ext('onRequest', (request, h) => {
@@ -34,13 +24,12 @@ const init = async () => {
     return h.continue;
   });
 
-  //  —— Health-check endpoint ——  
+  //  —— Health-check endpoint ——
   server.route({
     method: 'GET',
     path: '/',
     handler: async (request, h) => {
       try {
-        // sekarang server.app.firestore sudah ter-set
         await request.server.app.firestore.listCollections();
         return h
           .response({ status: 'success', message: 'Server is up and running' })
