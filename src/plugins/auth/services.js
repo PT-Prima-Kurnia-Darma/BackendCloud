@@ -54,7 +54,6 @@ const login = async (firestore, { username, password }) => {
     throw Boom.unauthorized('Username atau password salah');
   }
 
-  // Payload minimal untuk token
   const payload = {
     id: doc.id,
     username: data.username,
@@ -79,28 +78,32 @@ const updateProfile = async (firestore, userId, { name, username, oldPassword, n
   const isUsernameSame = username && username === data.username;
 
   if (isNameSame && isUsernameSame) {
-    throw Boom.badRequest('data pengguna tidak boleh sama seperti sebelumnya');
+    throw Boom.badRequest('Data pengguna tidak boleh sama seperti sebelumnya');
   }
-
   if (isNameSame) {
-    throw Boom.badRequest('name sama seperti sebelumnya');
+    throw Boom.badRequest('Name sama seperti sebelumnya');
   }
   if (isUsernameSame) {
-    throw Boom.badRequest('username sama seperti sebelumnya');
+    throw Boom.badRequest('Username sama seperti sebelumnya');
   }
   
+  if (oldPassword && oldPassword.length < 6) {
+    throw Boom.badRequest('Password minimal 6 karakter');
+  }
+  if (newPassword && newPassword.length < 6) {
+    throw Boom.badRequest('Password minimal 6 karakter');
+  }
+
   if (oldPassword && newPassword) {
     if (oldPassword === newPassword) {
-      throw Boom.badRequest('password lama dan baru tidak bole sama');
-    }
-    if (newPassword.length < 6) {
-      throw Boom.badRequest('password minimal 6 karakter');
+      throw Boom.badRequest('Password lama dan baru tidak bole sama');
     }
     const match = await bcrypt.compare(oldPassword, data.passwordHash);
     if (!match) {
       throw Boom.unauthorized('Password lama salah');
     }
   } else if (newPassword && !oldPassword) {
+  
       throw Boom.badRequest('Password lama harus diisi untuk mengubah password');
   }
 
@@ -124,6 +127,7 @@ const updateProfile = async (firestore, userId, { name, username, oldPassword, n
       throw Boom.badRequest('Tidak ada data yang diperbarui');
   }
 
+  // --- LAKUKAN UPDATE ---
   await userRef.update(updateData);
 
   const updatedDoc = await userRef.get();
@@ -134,7 +138,7 @@ const updateProfile = async (firestore, userId, { name, username, oldPassword, n
     name: updatedData.name,
     username: updatedData.username,
   };
-};
+}
 
 const logout = async (firestore, token) => {
   // decode tanpa verifikasi supaya bisa dapat exp

@@ -44,8 +44,13 @@ const loginPayload = Joi.object({
 const updateProfilePayload = Joi.object({
   name: Joi.string().min(3).max(100).optional(),
   username: Joi.string().alphanum().min(3).max(30).optional(),
-  oldPassword: Joi.string().min(6).when('newPassword', { is: Joi.exist(), then: Joi.required() }),
-  newPassword: Joi.string().min(6).optional(),
+  oldPassword: Joi.string().min(6).when('newPassword', { is: Joi.exist(), then: Joi.required() }).messages({
+    'string.min': 'password minimal 6 karakter',
+    'any.required': 'Password lama wajib diisi jika ingin mengganti password'
+  }),
+  newPassword: Joi.string().min(6).optional().messages({
+    'string.min': 'password minimal 6 karakter'
+  }),
 }).or('name','username','newPassword');
 
 const deletePayload = Joi.object({

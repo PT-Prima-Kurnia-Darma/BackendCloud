@@ -97,7 +97,7 @@ const validateToken = async (request, h) => {
   try {
     const { token } = request.payload;
     if (!token) {
-      throw Boom.badRequest('membutuhkan token');
+      throw Boom.badRequest('Membutuhkan token');
     }
     await services.validateToken(request.server.app.firestore, token);
     return h.response({ status: 'success', message: 'Token valid' }).code(200);

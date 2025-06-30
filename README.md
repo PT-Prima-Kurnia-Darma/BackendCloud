@@ -197,32 +197,39 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
    "message": "User tidak ditemukan"
   }
 
-- **Failur (404 Not Found - password tidak boleh sama)**
+- **Failur (404 Not Found - Password tidak boleh sama)**
   ```json
   {
     "status": "error",
-    "message": "password lama dan baru tidak bole sama"
-  }'
-
-- **Failur (404 Not Found - data tidak boleh sama)**
-  ```json
-  {
-    "status": "error",
-    "message": "data pengguna tidak boleh sama seperti sebelumnya"
+    "message": "Password lama dan baru tidak bole sama"
   }
 
-- **Failur (404 Not Found - username tidak boleh sama)**
+- **Failur (404 Bad Request - Data tidak boleh sama)**
   ```json
   {
     "status": "error",
-    "message": "username tidak boleh sama seperti sebelumnya"
+    "message": "Data pengguna tidak boleh sama seperti sebelumnya"
   }
 
-- **Failur (404 Not Found - name tidak boleh sama)**
+- **Failur (404 Bad Request  - Username tidak boleh sama)**
   ```json
   {
     "status": "error",
-    "message": "name tidak boleh sama seperti sebelumnya"
+    "message": "Username tidak boleh sama seperti sebelumnya"
+  }
+
+- **Failur (404 Bad Request  - Name tidak boleh sama)**
+  ```json
+  {
+    "status": "error",
+    "message": "Name tidak boleh sama seperti sebelumnya"
+  }
+
+- **Failur (404 Bad Request - Password minimal 6 karakter)**
+  ```json
+  {
+    "status": "error",
+    "message": "Name tidak boleh sama seperti sebelumnya"
   }
 
 #### Delete Pengguna
