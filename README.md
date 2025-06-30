@@ -197,6 +197,13 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
    "message": "User tidak ditemukan"
   }
 
+- **Failur (404 Not Found - Pengguna tidak ditemukan)**
+  ```json
+  {
+    "status": "error",
+    "message": "password lama dan baru tidak bole sama"
+  }
+
 #### Delete Pengguna
 **URL:**
 `/auth/delete{id}`

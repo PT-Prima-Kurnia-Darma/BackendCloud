@@ -75,19 +75,25 @@ const updateProfile = async (firestore, userId, { name, username, oldPassword, n
   }
   const data = doc.data();
 
-  // 1. Verifikasi oldPassword jika user ingin mengganti password
+  // 1. Verifikasi jika user ingin mengganti password
   if (oldPassword && newPassword) {
+    // VALIDASI BARU: Cek apakah password lama dan baru sama
+    if (oldPassword === newPassword) {
+      // Jika sama, lemparkan error Boom.badRequest
+      throw Boom.badRequest('password lama dan baru tidak bole sama');
+    }
+
+    // Pengecekan password lama yang sudah ada sebelumnya
     const match = await bcrypt.compare(oldPassword, data.passwordHash);
     if (!match) {
       throw Boom.unauthorized('Password lama salah');
     }
   }
 
-  // 2. Persiapkan update object
+  // 2. Persiapkan objek untuk update
   const updateData = {};
   if (name) updateData.name = name;
   if (username) {
-    // Cek duplikasi username
     const usersRef = firestore.collection('users');
     const exists = await usersRef.where('username', '==', username).limit(1).get();
     if (!exists.empty && exists.docs[0].id !== userId) {
@@ -103,7 +109,7 @@ const updateProfile = async (firestore, userId, { name, username, oldPassword, n
   // 3. Lakukan update
   await userRef.update(updateData);
 
-  // 4. Ambil data terbaru setelah diupdate
+  // 4. Ambil data terbaru setelah update
   const updatedDoc = await userRef.get();
   const updatedData = updatedDoc.data();
 
