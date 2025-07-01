@@ -21,7 +21,7 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/audits.getData',
+        path: '/audits/getData',
         handler: handlers.getAllAuditsHandler,
         options: {
             description: 'Get all audit data entries',
