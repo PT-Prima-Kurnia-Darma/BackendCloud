@@ -18,6 +18,12 @@ const init = async () => {
   // —– Inisialisasi Firestore menjadi lebih sederhana —–
   server.app.firestore = firestore;
 
+  await server.register([
+    require('./src/plugins/auth'),      // Plugin otentikasi Anda
+    require('./src/plugins/audits'),    // DAFTARKAN PLUGIN AUDITS
+    require('./src/plugins/documents'), // DAFTARKAN PLUGIN DOCUMENTS
+  ]);
+
   // Logging sederhana
   server.ext('onRequest', (request, h) => {
     console.log(`[${new Date().toISOString()}] ${request.method.toUpperCase()} ${request.path}`);
@@ -47,9 +53,6 @@ const init = async () => {
       tags: ['api'],
     },
   });
-
-  // Daftarkan plugin auth (yang sekarang hanya mengatur JWT & routes)
-  await server.register(require('./src/plugins/auth'));
 
   // Global error formatting (404, Boom errors)
   server.ext('onPreResponse', (request, h) => {
