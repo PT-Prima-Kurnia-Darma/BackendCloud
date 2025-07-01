@@ -7,7 +7,7 @@ const { laporanPetirPayload } = require('../documents/validations/listrikPetirSc
 module.exports = [
     {
         method: 'POST',
-        path: '/audits',
+        path: '/audits/sendData',
         handler: handlers.createAuditHandler,
         options: {
             description: 'Create a new audit data entry',
@@ -21,7 +21,7 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/audits',
+        path: '/audits.getData',
         handler: handlers.getAllAuditsHandler,
         options: {
             description: 'Get all audit data entries',
@@ -30,7 +30,7 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/audits/{id}',
+        path: '/audits/getDataById/{id}',
         handler: handlers.getAuditByIdHandler,
         options: {
             description: 'Get a specific audit data entry by ID',
@@ -42,7 +42,7 @@ module.exports = [
     },
     {
         method: 'PUT',
-        path: '/audits/{id}',
+        path: '/audits/edit/{id}',
         handler: handlers.updateAuditByIdHandler,
         options: {
             description: 'Update an audit data entry by ID',
@@ -55,7 +55,7 @@ module.exports = [
     },
     {
         method: 'DELETE',
-        path: '/audits/{id}',
+        path: '/audits/Delete/{id}',
         handler: handlers.deleteAuditByIdHandler,
         options: {
             description: 'Delete an audit data entry by ID',
