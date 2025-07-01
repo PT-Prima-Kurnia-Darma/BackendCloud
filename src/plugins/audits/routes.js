@@ -55,7 +55,7 @@ module.exports = [
     },
     {
         method: 'DELETE',
-        path: '/audits/Delete/{id}',
+        path: '/audits/delete/{id}',
         handler: handlers.deleteAuditByIdHandler,
         options: {
             description: 'Delete an audit data entry by ID',

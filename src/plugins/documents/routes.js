@@ -6,7 +6,7 @@ const handlers = require('./handlers');
 module.exports = [
     {
         method: 'POST',
-        path: '/audits/{id}/documents',
+        path: '/audits/documents/{id}',
         handler: handlers.generateDocumentHandler,
         options: {
             description: 'Generate and download a document based on audit data',
