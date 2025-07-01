@@ -16,9 +16,11 @@
     "@hapi/joi": "^17.1.1",
     "@hapi/jwt": "^3.2.0",
     "bcrypt": "^6.0.0",
+    "docxtemplater": "^3.65.1",
     "dotenv": "^16.5.0",
     "firebase-admin": "^13.4.0",
     "jsonwebtoken": "^9.0.2",
+    "pizzip": "^3.2.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

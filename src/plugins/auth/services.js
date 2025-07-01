@@ -3,7 +3,7 @@
 const bcrypt = require('bcrypt');
 const Boom = require('@hapi/boom');
 const jwt = require('jsonwebtoken');
-const config = require('../../../config');
+const config = require('../../config');
 
 const register = async (firestore, payload) => {
   const { name, username, password } = payload;

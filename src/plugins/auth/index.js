@@ -1,6 +1,6 @@
 // src/plugins/auth/index.js
 'use strict';
-const config = require('../../../config');
+const config = require('../../config');
 const routes = require('./routes');
 const Jwt = require('@hapi/jwt');
 

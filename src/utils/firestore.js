@@ -2,7 +2,7 @@
 'use strict';
 
 const { Firestore } = require('@google-cloud/firestore');
-const config = require('../../config');
+const config = require('../config');
 
 // Logika untuk memformat private key dipindahkan ke sini
 let privateKey = config.FIRESTORE_PRIVATE_KEY;

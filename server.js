@@ -3,7 +3,7 @@
 
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
-const config = require('./config');
+const config = require('./src/config');
 const firestore = require('./src/utils/firestore');
 
 const init = async () => {
