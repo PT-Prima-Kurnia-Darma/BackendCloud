@@ -15,13 +15,12 @@ const init = async () => {
     },
   });
 
-  // —– Inisialisasi Firestore menjadi lebih sederhana —–
   server.app.firestore = firestore;
 
   await server.register([
-    require('./src/plugins/auth'),      // Plugin otentikasi Anda
-    require('./src/plugins/audits'),    // DAFTARKAN PLUGIN AUDITS
-    require('./src/plugins/documents'), // DAFTARKAN PLUGIN DOCUMENTS
+    require('./src/plugins/auth'), 
+    require('./src/plugins/audits'),    
+    require('./src/plugins/documents'), 
   ]);
 
   // Logging sederhana
