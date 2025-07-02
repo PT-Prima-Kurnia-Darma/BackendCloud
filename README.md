@@ -366,6 +366,4 @@ FIRESTORE_PRIVATE_KEY=
    "status": "error",
    "message": "token invalid"
   }
-
-  tetew
   ```
