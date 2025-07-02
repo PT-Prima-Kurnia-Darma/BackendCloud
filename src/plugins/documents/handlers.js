@@ -6,9 +6,8 @@ const { createLaporanPetir } = require('../../services/documentGenerator/listrik
 
 const generateDocumentHandler = async (request, h) => {
     const { id } = request.params;
-    const { docType } = request.payload; // mis: 'laporan_petir', 'bap_petir'
+    const { docType } = request.payload; 
 
-    // 1. Ambil data audit lengkap dari Firestore
     const auditData = await auditService.getAuditById(id);
     if (!auditData) {
         return Boom.notFound('Audit data not found for this ID');
@@ -16,21 +15,18 @@ const generateDocumentHandler = async (request, h) => {
 
     let result;
 
-    // 2. Tentukan generator mana yang akan digunakan berdasarkan docType
     switch (docType) {
         case 'laporan_petir':
-            result = createLaporanPetir(auditData);
+            // TAMBAHKAN 'await' di sini karena createLaporanPetir sekarang async
+            result = await createLaporanPetir(auditData); 
             break;
-        // case 'bap_petir':
-        //     result = createBapPetir(auditData); // Untuk nanti
-        //     break;
+        // case 'bap_petir': ...
         default:
             return Boom.badRequest('Invalid document type requested');
     }
 
     const { docxBuffer, fileName } = result;
 
-    // 3. Kirim file ke pengguna sebagai response untuk diunduh
     return h.response(docxBuffer)
         .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
         .header('Content-Disposition', `attachment; filename=${fileName}`);
