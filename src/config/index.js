@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const {
   PORT = 3000,
-  HOST = 'localhost',
+  HOST = '0.0.0.0',
   FIRESTORE_PROJECT_ID,
   FIRESTORE_CLIENT_EMAIL,
   FIRESTORE_PRIVATE_KEY,

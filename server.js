@@ -9,7 +9,7 @@ const firestore = require('./src/utils/firestore');
 const init = async () => {
   const server = Hapi.server({
     port: config.PORT,
-    host: config.HOST,
+    host: '0.0.0.0',
     routes: {
       cors: { origin: ['*'] },
     },
