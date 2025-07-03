@@ -2,7 +2,7 @@
 
 const Joi = require('joi');
 const handlers = require('./handlers');
-const { laporanPetirPayload } = require('../documents/validations/listrikPetirSchemas'); // Ambil skema dari documents
+const { laporanPetirPayload } = require('../documents/validations/elevatorEskalatorSchema'); // Ambil skema dari documents
 
 module.exports = [
     {
