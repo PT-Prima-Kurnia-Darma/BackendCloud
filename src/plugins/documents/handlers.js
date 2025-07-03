@@ -1,8 +1,11 @@
+// src/plugins/documents/handlers.js
+
 'use strict';
 
 const Boom = require('@hapi/boom');
-const auditService = require('../audits/services'); // Memanggil service dari plugin audits
+const auditService = require('../audits/services');
 const { createLaporanPetir } = require('../../services/documentGenerator/listrikPetirGenerator');
+const { createLaporanElevator } = require('../../services/documentGenerator/elevatorEskalatorGenerator'); // Impor generator baru
 
 const generateDocumentHandler = async (request, h) => {
     const { id } = request.params;
@@ -17,10 +20,11 @@ const generateDocumentHandler = async (request, h) => {
 
     switch (docType) {
         case 'laporan_petir':
-            // TAMBAHKAN 'await' di sini karena createLaporanPetir sekarang async
             result = await createLaporanPetir(auditData); 
             break;
-        // case 'bap_petir': ...
+        case 'laporan_elevator': // Tambahkan case baru
+            result = await createLaporanElevator(auditData);
+            break;
         default:
             return Boom.badRequest('Invalid document type requested');
     }
