@@ -73,7 +73,7 @@ module.exports = [
     // [GET] /elevator-eskalator/elevator/laporan/{id}/download
     {
         method: 'GET',
-        path: `${API_PREFIX}/{id}/download`,
+        path: `${API_PREFIX}/download/{id}`,
         handler: handlers.downloadLaporanElevatorHandler,
         options: {
             auth: false, // Download bisa diakses tanpa login (sesuaikan jika perlu)
