@@ -7,7 +7,7 @@ const { laporanElevatorPayload } = require('./schemas/elevator/laporan');
 const API_PREFIX = '/elevatorEskalator/elevator/laporan';
 
 module.exports = [
-    // [POST] /elevator-eskalator/elevator/laporan
+    // [POST]
     {
         method: 'POST',
         path: API_PREFIX,
@@ -19,7 +19,7 @@ module.exports = [
             validate: { payload: laporanElevatorPayload, failAction: (r,h,e) => { throw e; }}
         },
     },
-    // [GET] /elevator-eskalator/elevator/laporan
+    // [GET]
     {
         method: 'GET',
         path: API_PREFIX,
@@ -30,7 +30,7 @@ module.exports = [
             tags: ['api', 'Laporan Elevator'],
         },
     },
-    // [GET] /elevator-eskalator/elevator/laporan/{id}
+    // [GET]
     {
         method: 'GET',
         path: `${API_PREFIX}/{id}`,
@@ -42,7 +42,7 @@ module.exports = [
             validate: { params: Joi.object({ id: Joi.string().required() }) },
         },
     },
-    // [PUT] /elevator-eskalator/elevator/laporan/{id}
+    // [PUT]
     {
         method: 'PUT',
         path: `${API_PREFIX}/{id}`,
@@ -58,7 +58,7 @@ module.exports = [
             },
         },
     },
-    // [DELETE] /elevator-eskalator/elevator/laporan/{id}
+    // [DELETE]
     {
         method: 'DELETE',
         path: `${API_PREFIX}/{id}`,
@@ -70,13 +70,13 @@ module.exports = [
             validate: { params: Joi.object({ id: Joi.string().required() }) },
         },
     },
-    // [GET] /elevator-eskalator/elevator/laporan/{id}/download
+    // [GET]
     {
         method: 'GET',
         path: `${API_PREFIX}/download/{id}`,
         handler: handlers.downloadLaporanElevatorHandler,
         options: {
-            auth: false, // Download bisa diakses tanpa login (sesuaikan jika perlu)
+            auth: 'jwt',
             description: 'Download dokumen laporan elevator berdasarkan ID',
             tags: ['api', 'Laporan Elevator'],
             validate: { params: Joi.object({ id: Joi.string().required() }) },
