@@ -18,9 +18,8 @@ const init = async () => {
   server.app.firestore = firestore;
 
   await server.register([
-    require('./src/plugins/auth'), 
-    require('./src/plugins/audits'),    
-    require('./src/plugins/documents'), 
+    require('./src/plugins/auth'),
+    require('./src/plugins/audits/elevatorEskalator')
   ]);
 
   // Logging sederhana
