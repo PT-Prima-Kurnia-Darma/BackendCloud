@@ -8,42 +8,42 @@ const elevatorServices = {
   /**
    * KUMPULAN FUNGSI UNTUK LAPORAN ELEVATOR
    */
-  Laporan: {
+  laporan: {
     /**
-     * Membuat dokumen Laporan Elevator baru.
+     * Membuat dokumen laporan Elevator baru.
      */
     create: async (payload) => {
-      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Laporan", createdAt: new Date().toISOString() };
+      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "laporan", createdAt: new Date().toISOString() };
       const docRef = await auditCollection.add(dataToSave);
       return { id: docRef.id, ...dataToSave };
     },
 
     /**
-     * Mengambil semua dokumen Laporan Elevator.
+     * Mengambil semua dokumen laporan Elevator.
      */
     getAll: async () => {
-      const snapshot = await auditCollection.where('subInspectionType', '==', 'Elevator').where('documentType', '==', 'Laporan').orderBy('createdAt', 'desc').get();
+      const snapshot = await auditCollection.where('subInspectionType', '==', 'Elevator').where('documentType', '==', 'laporan').orderBy('createdAt', 'desc').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
 
     /**
-     * Mengambil satu dokumen Laporan Elevator berdasarkan ID.
+     * Mengambil satu dokumen laporan Elevator berdasarkan ID.
      */
     getById: async (id) => {
       const doc = await auditCollection.doc(id).get();
-      if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Elevator') {
+      if (!doc.exists || doc.data().documentType !== 'laporan' || doc.data().subInspectionType !== 'Elevator') {
         return null;
       }
       return { id: doc.id, ...doc.data() };
     },
 
     /**
-     * Memperbarui dokumen Laporan Elevator berdasarkan ID.
+     * Memperbarui dokumen laporan Elevator berdasarkan ID.
      */
     updateById: async (id, payload) => {
       const docRef = auditCollection.doc(id);
       const doc = await docRef.get();
-      if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Elevator') {
+      if (!doc.exists || doc.data().documentType !== 'laporan' || doc.data().subInspectionType !== 'Elevator') {
         return null;
       }
       await docRef.update(payload);
@@ -52,12 +52,12 @@ const elevatorServices = {
     },
 
     /**
-     * Menghapus dokumen Laporan Elevator berdasarkan ID.
+     * Menghapus dokumen laporan Elevator berdasarkan ID.
      */
     deleteById: async (id) => {
       const docRef = auditCollection.doc(id);
       const doc = await docRef.get();
-      if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Elevator') {
+      if (!doc.exists || doc.data().documentType !== 'laporan' || doc.data().subInspectionType !== 'Elevator') {
         return null;
       }
       await docRef.delete();
@@ -69,14 +69,14 @@ const elevatorServices = {
    * KUMPULAN FUNGSI UNTUK LAPORAN ELEVATOR
    */
     bap: {
-    getDataForPrefill: async (LaporanId) => {
-      const LaporanDoc = await auditCollection.doc(LaporanId).get();
-      if (!LaporanDoc.exists || LaporanDoc.data().documentType !== 'Laporan') {
+    getDataForPrefill: async (laporanId) => {
+      const laporanDoc = await auditCollection.doc(laporanId).get();
+      if (!laporanDoc.exists || laporanDoc.data().documentType !== 'laporan') {
         return null;
       }
-      const d = LaporanDoc.data();
+      const d = laporanDoc.data();
       return {
-        LaporanId: LaporanId,
+        laporanId: laporanId,
         inspectionDate: d.inspectionDate || "",
         examinationType: d.examinationType || "",
         equipmentType: d.equipmentType || "",

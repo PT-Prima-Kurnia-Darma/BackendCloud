@@ -16,43 +16,43 @@ module.exports = [
     {
         method: 'POST',
         path: LAPORAN_ELEVATOR_PREFIX,
-        handler: elevatorHandlers.Laporan.create, // <-- Pemanggilan yang sudah dibungkus
+        handler: elevatorHandlers.laporan.create, // <-- Pemanggilan yang sudah dibungkus
         options: {
             auth: 'jwt',
             description: 'Membuat data laporan elevator baru',
-            tags: ['api', 'Laporan Elevator'],
+            tags: ['api', 'laporan Elevator'],
             validate: { payload: LaporanElevatorPayload }
         },
     },
     {
         method: 'GET',
         path: LAPORAN_ELEVATOR_PREFIX,
-        handler: elevatorHandlers.Laporan.getAll, // <-- Pemanggilan yang sudah dibungkus
+        handler: elevatorHandlers.laporan.getAll, // <-- Pemanggilan yang sudah dibungkus
         options: {
             auth: 'jwt',
             description: 'Mengambil semua data laporan elevator',
-            tags: ['api', 'Laporan Elevator'],
+            tags: ['api', 'laporan Elevator'],
         },
     },
     {
         method: 'GET',
         path: `${LAPORAN_ELEVATOR_PREFIX}/{id}`,
-        handler: elevatorHandlers.Laporan.getById, // <-- Pemanggilan yang sudah dibungkus
+        handler: elevatorHandlers.laporan.getById, // <-- Pemanggilan yang sudah dibungkus
         options: {
             auth: 'jwt',
             description: 'Mengambil data laporan elevator berdasarkan ID',
-            tags: ['api', 'Laporan Elevator'],
+            tags: ['api', 'laporan Elevator'],
             validate: { params: Joi.object({ id: Joi.string().required() }) },
         },
     },
     {
         method: 'PUT',
         path: `${LAPORAN_ELEVATOR_PREFIX}/{id}`,
-        handler: elevatorHandlers.Laporan.update, // <-- Pemanggilan yang sudah dibungkus
+        handler: elevatorHandlers.laporan.update, // <-- Pemanggilan yang sudah dibungkus
         options: {
             auth: 'jwt',
             description: 'Memperbarui data laporan elevator berdasarkan ID',
-            tags: ['api', 'Laporan Elevator'],
+            tags: ['api', 'laporan Elevator'],
             validate: {
                 params: Joi.object({ id: Joi.string().required() }),
                 payload: LaporanElevatorPayload,
@@ -62,22 +62,22 @@ module.exports = [
     {
         method: 'DELETE',
         path: `${LAPORAN_ELEVATOR_PREFIX}/{id}`,
-        handler: elevatorHandlers.Laporan.delete, // <-- Pemanggilan yang sudah dibungkus
+        handler: elevatorHandlers.laporan.delete, // <-- Pemanggilan yang sudah dibungkus
         options: {
             auth: 'jwt',
             description: 'Menghapus data laporan elevator berdasarkan ID',
-            tags: ['api', 'Laporan Elevator'],
+            tags: ['api', 'laporan Elevator'],
             validate: { params: Joi.object({ id: Joi.string().required() }) },
         },
     },
     {
         method: 'GET',
         path: `${LAPORAN_ELEVATOR_PREFIX}/download/{id}`,
-        handler: elevatorHandlers.Laporan.download, // <-- Pemanggilan yang sudah dibungkus
+        handler: elevatorHandlers.laporan.download, // <-- Pemanggilan yang sudah dibungkus
         options: {
             auth: 'jwt',
             description: 'Download dokumen laporan elevator berdasarkan ID',
-            tags: ['api', 'Laporan Elevator'],
+            tags: ['api', 'laporan Elevator'],
             validate: { params: Joi.object({ id: Joi.string().required() }) },
         },
     },
@@ -87,11 +87,11 @@ module.exports = [
      */
    {
         method: 'GET',
-        path: `${BAP_ELEVATOR_PREFIX}/prefill/{laporanId}`,
+        path: `${BAP_ELEVATOR_PREFIX}/prefill/{LaporanId}`,
         handler: elevatorHandlers.bap.prefill,
         options: {
             auth: 'jwt',
-            description: 'Mengambil data dari Laporan untuk mengisi form BAP',
+            description: 'Mengambil data dari laporan untuk mengisi form BAP',
             tags: ['api', 'BAP Elevator'],
             validate: { params: Joi.object({ LaporanId: Joi.string().required() }) },
         },

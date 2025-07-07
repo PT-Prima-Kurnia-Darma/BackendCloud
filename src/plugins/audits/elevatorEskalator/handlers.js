@@ -9,21 +9,21 @@ const elevatorHandlers = {
   /**
    * HANDLER UNTUK LAPORAN ELEVATOR
    */
-  Laporan: {
+  laporan: {
     create: async (request, h) => {
       try {
-        const newLaporan = await elevatorServices.Laporan.create(request.payload);
-        return h.response({ status: 'success', message: 'Laporan elevator berhasil dibuat', data: { Laporan: newLaporan } }).code(201);
+        const newLaporan = await elevatorServices.laporan.create(request.payload);
+        return h.response({ status: 'success', message: 'laporan elevator berhasil dibuat', data: { laporan: newLaporan } }).code(201);
       } catch (error) {
         console.error('Error in createLaporanElevatorHandler:', error);
-        return Boom.badImplementation('Terjadi kesalahan pada server saat menyimpan Laporan.');
+        return Boom.badImplementation('Terjadi kesalahan pada server saat menyimpan laporan.');
       }
     },
 
     getAll: async (request, h) => {
       try {
-        const allLaporan = await elevatorServices.Laporan.getAll();
-        return { status: 'success', data: { Laporan: allLaporan } };
+        const allLaporan = await elevatorServices.laporan.getAll();
+        return { status: 'success', data: { laporan: allLaporan } };
       } catch (error) {
         console.error('Error in getAllLaporanElevatorHandler:', error);
         if (error.code === 9) {
@@ -36,11 +36,11 @@ const elevatorHandlers = {
     getById: async (request, h) => {
       try {
         const { id } = request.params;
-        const Laporan = await elevatorServices.Laporan.getById(id);
-        if (!Laporan) {
-          return Boom.notFound('Laporan elevator dengan ID tersebut tidak ditemukan.');
+        const laporan = await elevatorServices.laporan.getById(id);
+        if (!laporan) {
+          return Boom.notFound('laporan elevator dengan ID tersebut tidak ditemukan.');
         }
-        return { status: 'success', data: { Laporan } };
+        return { status: 'success', data: { laporan } };
       } catch (error) {
         console.error('Error in getLaporanElevatorByIdHandler:', error);
         return Boom.badImplementation('Terjadi kesalahan pada server saat mengambil laporan.');
@@ -50,11 +50,11 @@ const elevatorHandlers = {
     update: async (request, h) => {
       try {
         const { id } = request.params;
-        const updatedLaporan = await elevatorServices.Laporan.updateById(id, request.payload);
+        const updatedLaporan = await elevatorServices.laporan.updateById(id, request.payload);
         if (!updatedLaporan) {
-          return Boom.notFound('Gagal memperbarui. Laporan elevator dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('Gagal memperbarui. laporan elevator dengan ID tersebut tidak ditemukan.');
         }
-        return h.response({ status: 'success', message: 'Laporan elevator berhasil diperbarui', data: { Laporan: updatedLaporan } });
+        return h.response({ status: 'success', message: 'laporan elevator berhasil diperbarui', data: { laporan: updatedLaporan } });
       } catch (error) {
         console.error('Error in updateLaporanElevatorByIdHandler:', error);
         return Boom.badImplementation('Terjadi kesalahan pada server saat memperbarui laporan.');
@@ -64,11 +64,11 @@ const elevatorHandlers = {
     delete: async (request, h) => {
       try {
         const { id } = request.params;
-        const deletedId = await elevatorServices.Laporan.deleteById(id);
+        const deletedId = await elevatorServices.laporan.deleteById(id);
         if (!deletedId) {
-          return Boom.notFound('Gagal menghapus. Laporan elevator dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('Gagal menghapus. laporan elevator dengan ID tersebut tidak ditemukan.');
         }
-        return { status: 'success', message: 'Laporan elevator berhasil dihapus' };
+        return { status: 'success', message: 'laporan elevator berhasil dihapus' };
       } catch (error) {
         console.error('Error in deleteLaporanElevatorByIdHandler:', error);
         return Boom.badImplementation('Terjadi kesalahan pada server saat menghapus laporan.');
@@ -78,9 +78,9 @@ const elevatorHandlers = {
     download: async (request, h) => {
       try {
         const { id } = request.params;
-        const LaporanData = await elevatorServices.Laporan.getById(id);
+        const LaporanData = await elevatorServices.laporan.getById(id);
         if (!LaporanData) {
-          return Boom.notFound('Gagal membuat dokumen. Laporan dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('Gagal membuat dokumen. laporan dengan ID tersebut tidak ditemukan.');
         }
         const { docxBuffer, fileName } = await generateDoc(LaporanData);
         return h.response(docxBuffer)
@@ -101,7 +101,7 @@ const elevatorHandlers = {
         try {
             const { LaporanId } = request.params;
             const prefilledData = await elevatorServices.bap.getDataForPrefill(LaporanId);
-            if (!prefilledData) return Boom.notFound('Data Laporan dengan ID tersebut tidak ditemukan.');
+            if (!prefilledData) return Boom.notFound('Data laporan dengan ID tersebut tidak ditemukan.');
             return h.response({ status: 'success', data: prefilledData });
         } catch (error) {
             console.error('Error in BAP prefill handler:', error);

@@ -50,9 +50,9 @@ const createBapElevator = async (data) => {
     // Menyiapkan data untuk dirender ke dalam template docx.
     // Penggunaan optional chaining (?.) memastikan kode tidak error jika ada objek atau properti yang hilang.
     const renderData = {
-        examinationType: data?.typeInspection,
+        examinationType: data?.examinationType,
         equipmentType: data?.equipmentType,
-        inspectionDate: data?.day,
+        inspectionDate: data?.inspectionDate,
 
         // Data Umum
         ownerName: data.generalData?.ownerName,
