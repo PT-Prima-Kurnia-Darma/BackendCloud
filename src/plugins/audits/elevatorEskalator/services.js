@@ -1,34 +1,33 @@
 'use strict';
 
 const db = require('../../../utils/firestore');
-// Nama koleksi yang benar sesuai kesepakatan kita
 const auditCollection = db.collection('elevatorEskalator');
+
+// --- Fungsi untuk membuat timestamp format WIB ---
+function getWibTimestamp() {
+  return new Date().toLocaleString('sv-SE', {
+    timeZone: 'Asia/Jakarta',
+  }).replace(' ', 'T'); // Mengganti spasi menjadi 'T' agar mirip format ISO
+}
+// -------------------------------------------
 
 const elevatorServices = {
   /**
    * KUMPULAN FUNGSI UNTUK LAPORAN ELEVATOR
    */
   laporan: {
-    /**
-     * Membuat dokumen laporan Elevator baru.
-     */
     create: async (payload) => {
-      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Laporan", createdAt: new Date().toISOString() };
+      // PERUBAHAN DI SINI
+      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Laporan", createdAt: getWibTimestamp() };
       const docRef = await auditCollection.add(dataToSave);
       return { id: docRef.id, ...dataToSave };
     },
 
-    /**
-     * Mengambil semua dokumen laporan Elevator.
-     */
     getAll: async () => {
       const snapshot = await auditCollection.where('subInspectionType', '==', 'Elevator').where('documentType', '==', 'Laporan').orderBy('createdAt', 'desc').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
 
-    /**
-     * Mengambil satu dokumen laporan Elevator berdasarkan ID.
-     */
     getById: async (id) => {
       const doc = await auditCollection.doc(id).get();
       if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Elevator') {
@@ -37,9 +36,6 @@ const elevatorServices = {
       return { id: doc.id, ...doc.data() };
     },
 
-    /**
-     * Memperbarui dokumen laporan Elevator berdasarkan ID.
-     */
     updateById: async (id, payload) => {
       const docRef = auditCollection.doc(id);
       const doc = await docRef.get();
@@ -51,9 +47,6 @@ const elevatorServices = {
       return { id: updatedDoc.id, ...updatedDoc.data() };
     },
 
-    /**
-     * Menghapus dokumen laporan Elevator berdasarkan ID.
-     */
     deleteById: async (id) => {
       const docRef = auditCollection.doc(id);
       const doc = await docRef.get();
@@ -66,9 +59,9 @@ const elevatorServices = {
   },
 
   /**
-   * KUMPULAN FUNGSI UNTUK LAPORAN ELEVATOR
+   * KUMPULAN FUNGSI UNTUK BAP ELEVATOR
    */
-    bap: {
+  bap: {
     getDataForPrefill: async (laporanId) => {
       const laporanDoc = await auditCollection.doc(laporanId).get();
       if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
@@ -101,7 +94,8 @@ const elevatorServices = {
       };
     },
     create: async (payload) => {
-      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt: new Date().toISOString() };
+      // PERUBAHAN DI SINI
+      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt: getWibTimestamp() };
       const docRef = await auditCollection.add(dataToSave);
       return { id: docRef.id, ...dataToSave };
     },
