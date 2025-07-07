@@ -1740,12 +1740,21 @@ FIRESTORE_PRIVATE_KEY=
   }
   ```
 
-- **Failure Response (500 Server Error)**
+- **Failure Response (404 Server Error)**
 
   ```json
   {
       "status": "error",
       "message": "Laporan elevator dengan ID tersebut tidak ditemukan."
+  }
+  ```
+
+- **Failure Response (500 Server Error)**
+
+  ```json
+  {
+      "status": "error",
+      "message": "Terjadi kesalahan pada server saat mengambil laporan.."
   }
   ```
 
@@ -2906,6 +2915,14 @@ FIRESTORE_PRIVATE_KEY=
   }
   ```
 
+- **Failure Response (500 Server Error)**
+
+  ```json
+  {
+      "status": "error",
+      "message": "Terjadi kesalahan pada server saat mengambil laporan."
+  }
+
 ##### PUT Laporan by Id
 **URL:**
 `/elevatorEskalator/elevator/laporan/{id}`
@@ -3684,10 +3701,19 @@ FIRESTORE_PRIVATE_KEY=
 
   - **Failur Response (404 Not Found)**
 
-  ```json
+   ```json
   {
       "status": "error",
       "message": "Gagal memperbarui. Laporan elevator dengan ID tersebut tidak ditemukan."
+  }
+  ```
+
+  - **Failure Response (500 Server Error)**
+
+   ```json
+  {
+      "status": "error",
+      "message": "Terjadi kesalahan pada server saat memperhabarui laporan."
   }
   ```
 
@@ -3704,6 +3730,15 @@ FIRESTORE_PRIVATE_KEY=
     {
         "status": "succes",
         "message": "Laporan elevator berhasil dihapus"
+    }
+    ```
+
+  - **Failur Response (404 Server Error)**
+
+    ```json
+    {
+        "status": "error",
+        "message": "Terjadi kesalahan pada server saat menghapus laporan."
     }
     ```
 
@@ -3728,6 +3763,15 @@ FIRESTORE_PRIVATE_KEY=
     {
         "status": "error",
         "message": "Gagal membuat dokumen. Laporan dengan ID tersebut tidak ditemukan."
+    }
+    ```
+
+  - **Failur Response (500 Server Error)**
+
+    ```json
+    {
+        "status": "error",
+        "message": "Terjadi kesalahan pada server saat membuat dokumen untuk diunduh."
     }
     ```
 
