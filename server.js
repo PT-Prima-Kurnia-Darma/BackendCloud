@@ -28,25 +28,6 @@ const init = async () => {
     return h.continue;
   });
 
-    // --- PERUBAHAN UTAMA ADA DI SINI ---
-  server.ext('onRequest', (request, h) => {
-    // Membuat timestamp dengan format lokal Indonesia (WIB)
-    const timestamp = new Date().toLocaleString('id-ID', {
-      timeZone: 'Asia/Jakarta',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    });
-
-    console.log(`[${timestamp}] ${request.method.toUpperCase()} ${request.path}`);
-    return h.continue;
-  });
-  // --- BATAS AKHIR PERUBAHAN ---
-
   //  —— Health-check endpoint ——
   server.route({
     method: 'GET',
