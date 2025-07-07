@@ -30,25 +30,25 @@ const bapElevatorPayload = Joi.object({
     }).optional(),
 
     visualInspection: Joi.object({
-        isMachineRoomConditionAcceptable: Joi.string().allow('').optional(),
-        isPanelGoodCondition: Joi.string().allow('').optional(),
-        isAparAvailableInPanelRoom: Joi.string().allow('').optional(),
-        lightingCondition: Joi.string().allow('').optional(),
-        isPitLadderAvailable: Joi.string().allow('').optional(),
+        isMachineRoomConditionAcceptable: Joi.boolean().optional(),
+        isPanelGoodCondition: Joi.boolean().optional(),
+        isAparAvailableInPanelRoom: Joi.boolean().optional(),
+        lightingCondition: Joi.boolean().optional(), // Merepresentasikan kondisi baik/tidak baik
+        isPitLadderAvailable: Joi.boolean().optional(),
     }).optional(),
 
     testing: Joi.object({
-        isNdtThermographPanelOk: Joi.string().allow('').optional(),
-        isArdFunctional: Joi.string().allow('').optional(),
-        isGovernorFunctional: Joi.string().allow('').optional(),
-        isSlingConditionOkByTester: Joi.string().allow('').optional(),
-        limitSwitchTest: Joi.string().allow('').optional(),
-        isDoorSwitchFunctional: Joi.string().allow('').optional(),
-        pitEmergencyStopStatus: Joi.string().allow('').optional(),
-        isIntercomFunctional: Joi.string().allow('').optional(),
-        isFiremanSwitchFunctional: Joi.string().allow('').optional(),
-    }).optional(),
-});
+        isNdtThermographPanelOk: Joi.boolean().optional(),
+        isArdFunctional: Joi.boolean().optional(),
+        isGovernorFunctional: Joi.boolean().optional(),
+        isSlingConditionOkByTester: Joi.boolean().optional(),
+        limitSwitchTest: Joi.boolean().optional(), // Merepresentasikan berfungsi/tidak berfungsi
+        isDoorSwitchFunctional: Joi.boolean().optional(),
+        pitEmergencyStopStatus: Joi.boolean().optional(), // Merepresentasikan tersedia & berfungsi / tidak
+        isIntercomFunctional: Joi.boolean().optional(),
+        isFiremanSwitchFunctional: Joi.boolean().optional(),
+    }).optional()
+}).unknown(false);
 
 module.exports = {
     bapElevatorPayload,

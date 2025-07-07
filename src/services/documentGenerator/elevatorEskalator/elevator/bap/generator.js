@@ -21,13 +21,28 @@ const storage = new Storage({
 
 const bucketName = 'tamplate-audit-riksauji';
 
+// BARU: Helper function untuk mengubah boolean menjadi teks yang sesuai.
+/**
+ * @param {boolean | null | undefined} status Nilai boolean dari database.
+ * @param {string} trueText Teks untuk ditampilkan jika statusnya true.
+ * @param {string} falseText Teks untuk ditampilkan jika statusnya false.
+ * @param {string} defaultText Teks untuk ditampilkan jika statusnya null atau undefined.
+ * @returns {string}
+ */
+const formatBoolean = (status, trueText, falseText, defaultText) => {
+    if (status === true) return trueText;
+    if (status === false) return falseText;
+    return defaultText;
+};
+
+
 /**
  * Membuat dokumen BAP (Berita Acara Pemeriksaan) elevator dari template.
  * @param {object} data - Objek data BAP lengkap dari Firestore.
  * @returns {Promise<{docxBuffer: Buffer, fileName: string}>} Buffer dokumen dan nama filenya.
  */
 const createBapElevator = async (data) => {
-    const templatePathInBucket = 'elevatorEskalator/elevator/bapElevator.docx'; // Sesuaikan dengan path template Anda di GCS
+    const templatePathInBucket = 'elevatorEskalator/elevator/bapElevator.docx';
 
     let content;
     try {
@@ -44,23 +59,19 @@ const createBapElevator = async (data) => {
     const doc = new Docxtemplater(zip, {
         paragraphLoop: true,
         linebreaks: true,
-        nullGetter: () => "", // Ganti tag yang tidak ada datanya dengan string kosong
+        nullGetter: () => "",
     });
 
-    // Menyiapkan data untuk dirender ke dalam template docx.
-    // Penggunaan optional chaining (?.) memastikan kode tidak error jika ada objek atau properti yang hilang.
     const renderData = {
         examinationType: data?.examinationType,
         equipmentType: data?.equipmentType,
         inspectionDate: data?.inspectionDate,
 
-        // Data Umum
         ownerName: data.generalData?.ownerName,
         ownerAddress: data.generalData?.ownerAddress,
         nameUsageLocation: data.generalData?.nameUsageLocation,
         addressUsageLocation: data.generalData?.addressUsageLocation,
 
-        // Data Teknis
         elevatorType: data.technicalData?.elevatorType,
         manufacturerOrInstaller: data.technicalData?.manufacturerOrInstaller,
         brandOrType: data.technicalData?.brandOrType,
@@ -70,23 +81,22 @@ const createBapElevator = async (data) => {
         speed: data.technicalData?.speed,
         floorsServed: data.technicalData?.floorsServed,
 
-        // Pemeriksaan Visual
-        isMachineRoomConditionAcceptable: data.visualInspection?.isMachineRoomConditionAcceptable,
-        isPanelGoodCondition: data.visualInspection?.isPanelGoodCondition,
-        isAparAvailableInPanelRoom: data.visualInspection?.isAparAvailableInPanelRoom,
-        lightingCondition: data.visualInspection?.lightingCondition,
-        isPitLadderAvailable: data.visualInspection?.isPitLadderAvailable,
+        // DIUBAH: Menggunakan helper 'formatBoolean' untuk mengubah boolean ke teks.
+        isMachineRoomConditionAcceptable: formatBoolean(data.visualInspection?.isMachineRoomConditionAcceptable, 'layak', 'tidak layak', 'layak / tidak layak'),
+        isPanelGoodCondition: formatBoolean(data.visualInspection?.isPanelGoodCondition, 'baik', 'tidak baik', 'baik / tidak baik'),
+        isAparAvailableInPanelRoom: formatBoolean(data.visualInspection?.isAparAvailableInPanelRoom, 'Tersedia', 'Tidak tersedia', 'Tersedia / Tidak tersedia'),
+        lightingCondition: formatBoolean(data.visualInspection?.lightingCondition, 'baik', 'tidak baik', 'baik / tidak baik'),
+        isPitLadderAvailable: formatBoolean(data.visualInspection?.isPitLadderAvailable, 'tersedia', 'tidak tersedia', 'tersedia / tidak tersedia'),
 
-        // Pengujian
-        isNdtThermographPanelOk: data.testing?.isNdtThermographPanelOk,
-        isArdFunctional: data.testing?.isArdFunctional,
-        isGovernorFunctional: data.testing?.isGovernorFunctional,
-        isSlingConditionOkByTester: data.testing?.isSlingConditionOkByTester,
-        limitSwitchTest: data.testing?.limitSwitchTest,
-        isDoorSwitchFunctional: data.testing?.isDoorSwitchFunctional,
-        pitEmergencyStopStatus: data.testing?.pitEmergencyStopStatus,
-        isIntercomFunctional: data.testing?.isIntercomFunctional,
-        isFiremanSwitchFunctional: data.testing?.isFiremanSwitchFunctional,
+        isNdtThermographPanelOk: formatBoolean(data.testing?.isNdtThermographPanelOk, 'Baik', 'Tidak Baik', 'Baik / Tidak Baik'),
+        isArdFunctional: formatBoolean(data.testing?.isArdFunctional, 'berfungsi', 'tidak berfungsi', 'berfungsi / tidak berfungsi'),
+        isGovernorFunctional: formatBoolean(data.testing?.isGovernorFunctional, 'berfungsi dengan baik', 'tidak baik', 'berfungsi dengan baik / tidak baik'),
+        isSlingConditionOkByTester: formatBoolean(data.testing?.isSlingConditionOkByTester, 'Kondisi Baik', 'Kondisi Tidak Baik', 'Kondisi Baik / Tidak Baik'),
+        limitSwitchTest: formatBoolean(data.testing?.limitSwitchTest, 'berfungsi', 'tidak berfungsi', 'berfungsi / tidak berfungsi'),
+        isDoorSwitchFunctional: formatBoolean(data.testing?.isDoorSwitchFunctional, 'berfungsi dengan baik', 'tidak baik', 'berfungsi dengan baik / tidak baik'),
+        pitEmergencyStopStatus: formatBoolean(data.testing?.pitEmergencyStopStatus, 'tersedia dan berfungsi dengan baik', 'tidak tersedia / tidak berfungsi', 'tersedia dan berfungsi dengan baik / tidak tersedia atau tidak berfungsi'),
+        isIntercomFunctional: formatBoolean(data.testing?.isIntercomFunctional, 'berfungsi dengan baik', 'tidak baik', 'berfungsi dengan baik / tidak baik'),
+        isFiremanSwitchFunctional: formatBoolean(data.testing?.isFiremanSwitchFunctional, 'berfungsi dengan baik', 'tidak baik', 'berfungsi dengan baik / tidak baik'),
     };
 
     try {
@@ -108,7 +118,6 @@ const createBapElevator = async (data) => {
         compression: 'DEFLATE',
     });
 
-    // Membuat nama file yang aman
     const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
     const fileName = `BAP-Elevator-${ownerName}-${data.id}.docx`;
 

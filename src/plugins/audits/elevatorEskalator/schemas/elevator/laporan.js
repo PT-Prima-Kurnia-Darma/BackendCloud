@@ -198,7 +198,7 @@ const laporanElevatorPayload = Joi.object({
     }).optional(),
     
     conclusion: Joi.string().allow('').optional()
-});
+}).unknown(false);
 
 module.exports = {
     laporanElevatorPayload,
