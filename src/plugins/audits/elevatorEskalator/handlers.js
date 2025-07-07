@@ -9,21 +9,21 @@ const elevatorHandlers = {
   /**
    * HANDLER UNTUK LAPORAN ELEVATOR
    */
-  laporan: {
+  Laporan: {
     create: async (request, h) => {
       try {
-        const newLaporan = await elevatorServices.laporan.create(request.payload);
-        return h.response({ status: 'success', message: 'Laporan elevator berhasil dibuat', data: { laporan: newLaporan } }).code(201);
+        const newLaporan = await elevatorServices.Laporan.create(request.payload);
+        return h.response({ status: 'success', message: 'Laporan elevator berhasil dibuat', data: { Laporan: newLaporan } }).code(201);
       } catch (error) {
         console.error('Error in createLaporanElevatorHandler:', error);
-        return Boom.badImplementation('Terjadi kesalahan pada server saat menyimpan laporan.');
+        return Boom.badImplementation('Terjadi kesalahan pada server saat menyimpan Laporan.');
       }
     },
 
     getAll: async (request, h) => {
       try {
-        const allLaporan = await elevatorServices.laporan.getAll();
-        return { status: 'success', data: { laporan: allLaporan } };
+        const allLaporan = await elevatorServices.Laporan.getAll();
+        return { status: 'success', data: { Laporan: allLaporan } };
       } catch (error) {
         console.error('Error in getAllLaporanElevatorHandler:', error);
         if (error.code === 9) {
@@ -36,11 +36,11 @@ const elevatorHandlers = {
     getById: async (request, h) => {
       try {
         const { id } = request.params;
-        const laporan = await elevatorServices.laporan.getById(id);
-        if (!laporan) {
+        const Laporan = await elevatorServices.Laporan.getById(id);
+        if (!Laporan) {
           return Boom.notFound('Laporan elevator dengan ID tersebut tidak ditemukan.');
         }
-        return { status: 'success', data: { laporan } };
+        return { status: 'success', data: { Laporan } };
       } catch (error) {
         console.error('Error in getLaporanElevatorByIdHandler:', error);
         return Boom.badImplementation('Terjadi kesalahan pada server saat mengambil laporan.');
@@ -50,11 +50,11 @@ const elevatorHandlers = {
     update: async (request, h) => {
       try {
         const { id } = request.params;
-        const updatedLaporan = await elevatorServices.laporan.updateById(id, request.payload);
+        const updatedLaporan = await elevatorServices.Laporan.updateById(id, request.payload);
         if (!updatedLaporan) {
           return Boom.notFound('Gagal memperbarui. Laporan elevator dengan ID tersebut tidak ditemukan.');
         }
-        return h.response({ status: 'success', message: 'Laporan elevator berhasil diperbarui', data: { laporan: updatedLaporan } });
+        return h.response({ status: 'success', message: 'Laporan elevator berhasil diperbarui', data: { Laporan: updatedLaporan } });
       } catch (error) {
         console.error('Error in updateLaporanElevatorByIdHandler:', error);
         return Boom.badImplementation('Terjadi kesalahan pada server saat memperbarui laporan.');
@@ -64,7 +64,7 @@ const elevatorHandlers = {
     delete: async (request, h) => {
       try {
         const { id } = request.params;
-        const deletedId = await elevatorServices.laporan.deleteById(id);
+        const deletedId = await elevatorServices.Laporan.deleteById(id);
         if (!deletedId) {
           return Boom.notFound('Gagal menghapus. Laporan elevator dengan ID tersebut tidak ditemukan.');
         }
@@ -78,11 +78,11 @@ const elevatorHandlers = {
     download: async (request, h) => {
       try {
         const { id } = request.params;
-        const laporanData = await elevatorServices.laporan.getById(id);
-        if (!laporanData) {
+        const LaporanData = await elevatorServices.Laporan.getById(id);
+        if (!LaporanData) {
           return Boom.notFound('Gagal membuat dokumen. Laporan dengan ID tersebut tidak ditemukan.');
         }
-        const { docxBuffer, fileName } = await generateDoc(laporanData);
+        const { docxBuffer, fileName } = await generateDoc(LaporanData);
         return h.response(docxBuffer)
           .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
           .header('Content-Disposition', `attachment; filename="${fileName}"`);
@@ -99,8 +99,8 @@ const elevatorHandlers = {
   bap: {
         prefill: async (request, h) => {
         try {
-            const { laporanId } = request.params;
-            const prefilledData = await elevatorServices.bap.getDataForPrefill(laporanId);
+            const { LaporanId } = request.params;
+            const prefilledData = await elevatorServices.bap.getDataForPrefill(LaporanId);
             if (!prefilledData) return Boom.notFound('Data Laporan dengan ID tersebut tidak ditemukan.');
             return h.response({ status: 'success', data: prefilledData });
         } catch (error) {

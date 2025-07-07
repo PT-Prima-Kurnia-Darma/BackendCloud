@@ -10,7 +10,6 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
 - Delete Pengguna
 - Modifikasi Data Pengguna
 - Validasi JWT
-- test
 
 ## Start Project
 

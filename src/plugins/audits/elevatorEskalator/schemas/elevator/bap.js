@@ -7,9 +7,9 @@ const bapElevatorPayload = Joi.object({
     laporanId: Joi.string().allow('').optional(),
     
     // Field-field utama dari BAP
-    day: Joi.string().allow('').optional(),
-    typeInspection: Joi.string().allow('').optional(),
-    EskOrElevType: Joi.string().allow('').optional(),
+    inspectionDate: Joi.string().allow('').optional(),
+    examinationType: Joi.string().allow('').optional(),
+    equipmentType: Joi.string().allow('').optional(),
 
     generalData: Joi.object({
         ownerName: Joi.string().allow('').optional(),

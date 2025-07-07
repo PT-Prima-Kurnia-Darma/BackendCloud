@@ -69,8 +69,8 @@ const createLaporanElevator = async (data) => {
     // Penggunaan optional chaining (?.) memastikan kode tidak error jika ada objek yang hilang.
     const renderData = {
         // Data Utama
-        typeInspection: data?.typeInspection,
-        EskOrElevType: data?.EskOrElevType,
+        examinationType: data?.examinationType,
+        equipmentType: data?.equipmentType,
         
         // Data Umum & Dokumen Teknis
         ...data?.generalData,

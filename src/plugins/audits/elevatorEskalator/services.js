@@ -8,12 +8,12 @@ const elevatorServices = {
   /**
    * KUMPULAN FUNGSI UNTUK LAPORAN ELEVATOR
    */
-  laporan: {
+  Laporan: {
     /**
      * Membuat dokumen Laporan Elevator baru.
      */
     create: async (payload) => {
-      const dataToSave = { ...payload, subBidang: "elevator", jenisDokumen: "laporan", createdAt: new Date().toISOString() };
+      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Laporan", createdAt: new Date().toISOString() };
       const docRef = await auditCollection.add(dataToSave);
       return { id: docRef.id, ...dataToSave };
     },
@@ -22,7 +22,7 @@ const elevatorServices = {
      * Mengambil semua dokumen Laporan Elevator.
      */
     getAll: async () => {
-      const snapshot = await auditCollection.where('subBidang', '==', 'elevator').where('jenisDokumen', '==', 'laporan').orderBy('createdAt', 'desc').get();
+      const snapshot = await auditCollection.where('subInspectionType', '==', 'Elevator').where('documentType', '==', 'Laporan').orderBy('createdAt', 'desc').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
 
@@ -31,7 +31,7 @@ const elevatorServices = {
      */
     getById: async (id) => {
       const doc = await auditCollection.doc(id).get();
-      if (!doc.exists || doc.data().jenisDokumen !== 'laporan' || doc.data().subBidang !== 'elevator') {
+      if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Elevator') {
         return null;
       }
       return { id: doc.id, ...doc.data() };
@@ -43,7 +43,7 @@ const elevatorServices = {
     updateById: async (id, payload) => {
       const docRef = auditCollection.doc(id);
       const doc = await docRef.get();
-      if (!doc.exists || doc.data().jenisDokumen !== 'laporan' || doc.data().subBidang !== 'elevator') {
+      if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Elevator') {
         return null;
       }
       await docRef.update(payload);
@@ -57,7 +57,7 @@ const elevatorServices = {
     deleteById: async (id) => {
       const docRef = auditCollection.doc(id);
       const doc = await docRef.get();
-      if (!doc.exists || doc.data().jenisDokumen !== 'laporan' || doc.data().subBidang !== 'elevator') {
+      if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Elevator') {
         return null;
       }
       await docRef.delete();
@@ -69,17 +69,17 @@ const elevatorServices = {
    * KUMPULAN FUNGSI UNTUK LAPORAN ELEVATOR
    */
     bap: {
-    getDataForPrefill: async (laporanId) => {
-      const laporanDoc = await auditCollection.doc(laporanId).get();
-      if (!laporanDoc.exists || laporanDoc.data().jenisDokumen !== 'laporan') {
+    getDataForPrefill: async (LaporanId) => {
+      const LaporanDoc = await auditCollection.doc(LaporanId).get();
+      if (!LaporanDoc.exists || LaporanDoc.data().documentType !== 'Laporan') {
         return null;
       }
-      const d = laporanDoc.data();
+      const d = LaporanDoc.data();
       return {
-        laporanId: laporanId,
-        day: new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-        typeInspection: d.typeInspection || "",
-        EskOrElevType: d.EskOrElevType || "",
+        LaporanId: LaporanId,
+        inspectionDate: d.inspectionDate || "",
+        examinationType: d.examinationType || "",
+        equipmentType: d.equipmentType || "",
         generalData: {
           ownerName: d.generalData?.ownerName || "",
           ownerAddress: d.generalData?.ownerAddress || "",
@@ -101,23 +101,23 @@ const elevatorServices = {
       };
     },
     create: async (payload) => {
-      const dataToSave = { ...payload, subBidang: "elevator", jenisDokumen: "bap", createdAt: new Date().toISOString() };
+      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "bap", createdAt: new Date().toISOString() };
       const docRef = await auditCollection.add(dataToSave);
       return { id: docRef.id, ...dataToSave };
     },
     getAll: async () => {
-      const snapshot = await auditCollection.where('subBidang', '==', 'elevator').where('jenisDokumen', '==', 'bap').orderBy('createdAt', 'desc').get();
+      const snapshot = await auditCollection.where('subInspectionType', '==', 'Elevator').where('documentType', '==', 'bap').orderBy('createdAt', 'desc').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
     getById: async (id) => {
       const doc = await auditCollection.doc(id).get();
-      if (!doc.exists || doc.data().jenisDokumen !== 'bap' || doc.data().subBidang !== 'elevator') return null;
+      if (!doc.exists || doc.data().documentType !== 'bap' || doc.data().subInspectionType !== 'Elevator') return null;
       return { id: doc.id, ...doc.data() };
     },
     updateById: async (id, payload) => {
       const docRef = auditCollection.doc(id);
       const doc = await docRef.get();
-      if (!doc.exists || doc.data().jenisDokumen !== 'bap' || doc.data().subBidang !== 'elevator') return null;
+      if (!doc.exists || doc.data().documentType !== 'bap' || doc.data().subInspectionType !== 'Elevator') return null;
       await docRef.update(payload);
       const updatedDoc = await docRef.get();
       return { id: updatedDoc.id, ...updatedDoc.data() };
@@ -125,7 +125,7 @@ const elevatorServices = {
     deleteById: async (id) => {
       const docRef = auditCollection.doc(id);
       const doc = await docRef.get();
-      if (!doc.exists || doc.data().jenisDokumen !== 'bap' || doc.data().subBidang !== 'elevator') return null;
+      if (!doc.exists || doc.data().documentType !== 'bap' || doc.data().subInspectionType !== 'Elevator') return null;
       await docRef.delete();
       return id;
     },
