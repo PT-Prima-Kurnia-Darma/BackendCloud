@@ -583,7 +583,7 @@ FIRESTORE_PRIVATE_KEY=
     "status": "success",
     "message": "Laporan elevator berhasil dibuat",
     "data": {
-        "Laporan": {
+        "laporan": {
             "id": "MQINrcOq7J6H5GfdAk2S",
             "inspectionType": "Elevator dan Eskalator",
             "subInspectionType": "Elevator",
@@ -1175,7 +1175,7 @@ FIRESTORE_PRIVATE_KEY=
     "status": "success",
     "message": "Laporan elevator berhasil dibuat",
     "data": {
-        "Laporan": {
+        "laporan": {
             "id": "MQINrcOq7J6H5GfdAk2S",
             "inspectionType": "Elevator dan Eskalator",
             "subInspectionType": "Elevator",
@@ -1772,7 +1772,7 @@ FIRESTORE_PRIVATE_KEY=
     {
         "status": "success",
         "data": {
-            "Laporan": [
+            "laporan": [
                 {
                     "id": "MQINrcOq7J6H5GfdAk2S",
                     "inspectionType": "Elevator dan Eskalator",
@@ -2910,7 +2910,7 @@ FIRESTORE_PRIVATE_KEY=
   {
       "status": "success",
       "data": {
-          "Laporan": []
+          "laporan": []
       }
   }
   ```
@@ -3130,7 +3130,7 @@ FIRESTORE_PRIVATE_KEY=
         "status": "success",
         "message": "Laporan elevator berhasil diperbarui",
         "data": {
-            "Laporan": {
+            "laporan": {
                 "id": "3IDZ8sZTDW8PIQcXEOfO",
                 "inspectionType": "Elevator dan Eskalator",
                 "subInspectionType": "Elevator",
