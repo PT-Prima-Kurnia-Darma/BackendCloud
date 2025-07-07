@@ -33,6 +33,12 @@ function getOppositeCheckmark(status) {
     return '';
 }
 
+// BARU: Helper function untuk mengubah boolean menjadi status kelayakan.
+function getSyaratStatus(status) {
+    if (status === true) return 'Memenuhi Syarat';
+    if (status === false) return 'Tidak Memenuhi Syarat';
+    return ''; // Kembalikan string kosong jika data tidak ada (null/undefined)
+}
 
 /**
  * Membuat dokumen laporan elevator dari template di GCS.
@@ -72,9 +78,17 @@ const createLaporanElevator = async (data) => {
         examinationType: data?.examinationType,
         equipmentType: data?.equipmentType,
         
-        // Data Umum & Dokumen Teknis
+        // Data Umum
         ...data?.generalData,
-        ...data?.technicalDocumentInspection,
+        
+         // Dokumen Teknis (Menggunakan helper baru)
+        designDrawing: getSyaratStatus(data?.technicalDocumentInspection?.designDrawing),
+        technicalCalculation: getSyaratStatus(data?.technicalDocumentInspection?.technicalCalculation),
+        materialCertificate: getSyaratStatus(data?.technicalDocumentInspection?.materialCertificate),
+        controlPanelDiagram: getSyaratStatus(data?.technicalDocumentInspection?.controlPanelDiagram),
+        asBuiltDrawing: getSyaratStatus(data?.technicalDocumentInspection?.asBuiltDrawing),
+        componentCertificates: getSyaratStatus(data?.technicalDocumentInspection?.componentCertificates),
+        safeWorkProcedure: getSyaratStatus(data?.technicalDocumentInspection?.safeWorkProcedure),
 
         // --- machineRoomAndMachinery ---
         machineMountingresult: i.machineRoomAndMachinery?.machineMounting?.result,

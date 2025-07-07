@@ -33,13 +33,13 @@ const laporanElevatorPayload = Joi.object({
     }).optional(),
 
     technicalDocumentInspection: Joi.object({
-        designDrawing: Joi.string().allow('').optional(),
-        technicalCalculation: Joi.string().allow('').optional(),
-        materialCertificate: Joi.string().allow('').optional(),
-        controlPanelDiagram: Joi.string().allow('').optional(),
-        asBuiltDrawing: Joi.string().allow('').optional(),
-        componentCertificates: Joi.string().allow('').optional(),
-        safeWorkProcedure: Joi.string().allow('').optional()
+        designDrawing: Joi.boolean().optional(),
+        technicalCalculation: Joi.boolean().optional(),
+        materialCertificate: Joi.boolean().optional(),
+        controlPanelDiagram: Joi.boolean().optional(),
+        asBuiltDrawing: Joi.boolean().optional(),
+        componentCertificates: Joi.boolean().optional(),
+        safeWorkProcedure: Joi.boolean().optional()
     }).optional(),
 
     inspectionAndTesting: Joi.object({
