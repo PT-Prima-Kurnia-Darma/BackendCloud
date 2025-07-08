@@ -79,7 +79,7 @@ const elevatorServices = {
       const d = laporanDoc.data();
       return {
         laporanId: laporanId,
-        inspectionDate: d.inspectionDate || "",
+        inspectionDate: d.generalData?.inspectionDate || "",
         examinationType: d.examinationType || "",
         equipmentType: d.equipmentType || "",
         generalData: {
