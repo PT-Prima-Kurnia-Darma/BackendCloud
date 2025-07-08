@@ -23,7 +23,7 @@ const elevatorHandlers = {
     getAll: async (request, h) => {
       try {
         const allLaporan = await elevatorServices.laporan.getAll();
-        return { status: 'success', data: { laporan: allLaporan } };
+        return { status: 'success', message:'Data laporan berhasil didapatkan', data: { laporan: allLaporan } };
       } catch (error) {
         console.error('Error in getAllLaporanElevatorHandler:', error);
         if (error.code === 9) {
@@ -40,7 +40,7 @@ const elevatorHandlers = {
         if (!laporan) {
           return Boom.notFound('laporan elevator dengan ID tersebut tidak ditemukan.');
         }
-        return { status: 'success', data: { laporan } };
+        return { status: 'success',message: 'Data Laporan berhasil didapatkan', data: { laporan } };
       } catch (error) {
         console.error('Error in getLaporanElevatorByIdHandler:', error);
         return Boom.badImplementation('Terjadi kesalahan pada server saat mengambil laporan.');
@@ -83,9 +83,13 @@ const elevatorHandlers = {
           return Boom.notFound('Gagal membuat dokumen. laporan dengan ID tersebut tidak ditemukan.');
         }
         const { docxBuffer, fileName } = await generateDoc(LaporanData);
+
+        // DIUBAH: Menambahkan custom header untuk status download
         return h.response(docxBuffer)
           .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-          .header('Content-Disposition', `attachment; filename="${fileName}"`);
+          .header('Content-Disposition', `attachment; filename="${fileName}"`)
+          .header('message', 'Laporan berhasil diunduh'); // <-- Pesan status di sini
+
       } catch (error) {
         console.error('Error in downloadLaporanElevatorHandler:', error);
         return Boom.badImplementation('Terjadi kesalahan pada server saat membuat dokumen untuk diunduh.');
