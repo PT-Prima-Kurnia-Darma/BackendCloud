@@ -112,15 +112,27 @@ const elevatorHandlers = {
             return Boom.badImplementation('Gagal mengambil data untuk BAP.');
         }
         },
+
         create: async (request, h) => {
         try {
             const newBap = await elevatorServices.bap.create(request.payload);
             return h.response({ status: 'success', message: 'BAP elevator berhasil dibuat', data: { bap: newBap } }).code(201);
         } catch (error) {
-            console.error('Error in create BAP handler:', error);
-            return Boom.badImplementation('Gagal menyimpan BAP elevator.');
+          // DIUBAH: Kembalikan objek galat dari Boom secara langsung
+          // Hapi akan secara otomatis mengubahnya menjadi respons galat yang sesuai
+          if (error.isBoom) {
+            return error;
+          }
+
+          // Untuk galat tak terduga lainnya, catat dan kirim galat 500
+          console.error('Error in create BAP handler:', error);
+          return h.response({
+            status: 'error',
+            message: 'An internal server error occurred',
+          }).code(500);
         }
         },
+
         getAll: async (request, h) => {
         try {
             const allBap = await elevatorServices.bap.getAll();
@@ -130,6 +142,7 @@ const elevatorHandlers = {
             return Boom.badImplementation('Gagal mengambil semua BAP elevator.');
         }
         },
+
         getById: async (request, h) => {
         try {
             const bap = await elevatorServices.bap.getById(request.params.id);
@@ -140,6 +153,7 @@ const elevatorHandlers = {
             return Boom.badImplementation('Gagal mengambil BAP elevator.');
         }
         },
+
         update: async (request, h) => {
         try {
             const updatedBap = await elevatorServices.bap.updateById(request.params.id, request.payload);
@@ -150,6 +164,7 @@ const elevatorHandlers = {
             return Boom.badImplementation('Gagal memperbarui BAP elevator.');
         }
         },
+
         delete: async (request, h) => {
         try {
             const deletedId = await elevatorServices.bap.deleteById(request.params.id);
@@ -160,6 +175,7 @@ const elevatorHandlers = {
             return Boom.badImplementation('Gagal menghapus BAP elevator.');
         }
         },
+
         download: async (request, h) => {
         try {
             const bapData = await elevatorServices.bap.getById(request.params.id);

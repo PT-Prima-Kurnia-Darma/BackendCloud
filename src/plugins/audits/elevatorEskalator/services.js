@@ -1,7 +1,7 @@
 'use strict';
 
 const db = require('../../../utils/firestore');
-// Nama koleksi yang benar sesuai kesepakatan kita
+const Boom = require('@hapi/boom');
 const auditCollection = db.collection('elevatorEskalator');
 
 const elevatorServices = {
@@ -102,22 +102,48 @@ const elevatorServices = {
         testing: {}
       };
     },
+
     create: async (payload) => {
-      // ✅ Diubah ke WIB dengan format 'Z'
+      const { laporanId } = payload;
+      // 1. Validasi LaporanId
+      const laporanDocRef = auditCollection.doc(laporanId);
+      const laporanDoc = await laporanDocRef.get();
+
+      if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
+        throw Boom.notFound('Laporan dengan ID yang diberikan tidak ditemukan.');
+      }
+      // 2. Update data laporan jika ada perubahan dari prefill
+      const laporanData = laporanDoc.data();
+      const updatedLaporanData = {
+        ...laporanData,
+        generalData: {
+          ...laporanData.generalData,
+          ...payload.generalData,
+        },
+        technicalData: {
+            ...laporanData.technicalData,
+            ...payload.technicalData,
+        }
+      };
+      await laporanDocRef.update(updatedLaporanData);
+      // 3. Buat BAP baru
       const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
       const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
       const docRef = await auditCollection.add(dataToSave);
       return { id: docRef.id, ...dataToSave };
     },
+
     getAll: async () => {
       const snapshot = await auditCollection.where('subInspectionType', '==', 'Elevator').where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian').orderBy('createdAt', 'desc').get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
+
     getById: async (id) => {
       const doc = await auditCollection.doc(id).get();
       if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Elevator') return null;
       return { id: doc.id, ...doc.data() };
     },
+
     updateById: async (id, payload) => {
       const docRef = auditCollection.doc(id);
       const doc = await docRef.get();
@@ -126,6 +152,7 @@ const elevatorServices = {
       const updatedDoc = await docRef.get();
       return { id: updatedDoc.id, ...updatedDoc.data() };
     },
+
     deleteById: async (id) => {
       const docRef = auditCollection.doc(id);
       const doc = await docRef.get();

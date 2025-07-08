@@ -4,7 +4,7 @@ const Joi = require('joi');
 
 const bapElevatorPayload = Joi.object({
     // Menyimpan ID laporan asal untuk keterhubungan data
-    laporanId: Joi.string().allow('').optional(),
+    laporanId: Joi.string().allow('').required(),
     
     // Field-field utama dari BAP
     inspectionDate: Joi.string().allow('').optional(),
