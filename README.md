@@ -38,4 +38,4 @@ FIRESTORE_PRIVATE_KEY=
 ```
 
 ## API EndPoint
-[![Dokumentasi API](https://img.shields.io/badge/Dokumentasi-API-blue.svg)](https://graceful-panda-jxsc.apidocumentation.com)
+[![Dokumentasi API](https://img.shields.io/badge/Dokumentasi-API-blue.svg)](https://graceful-panda-jjxsc.apidocumentation.com/)
