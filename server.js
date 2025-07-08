@@ -24,7 +24,9 @@ const init = async () => {
 
   // Logging sederhana
   server.ext('onRequest', (request, h) => {
-    console.log(`[${new Date().toISOString()}] ${request.method.toUpperCase()} ${request.path}`);
+    // ✅ Diubah ke WIB dengan format 'Z'
+    const timestamp = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+    console.log(`[${timestamp}] ${request.method.toUpperCase()} ${request.path}`);
     return h.continue;
   });
 

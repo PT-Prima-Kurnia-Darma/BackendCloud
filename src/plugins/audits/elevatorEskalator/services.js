@@ -13,7 +13,9 @@ const elevatorServices = {
      * Membuat dokumen laporan Elevator baru.
      */
     create: async (payload) => {
-      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Laporan", createdAt: new Date().toISOString() };
+      // ✅ Diubah ke WIB dengan format 'Z'
+      const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Laporan", createdAt };
       const docRef = await auditCollection.add(dataToSave);
       return { id: docRef.id, ...dataToSave };
     },
@@ -101,7 +103,9 @@ const elevatorServices = {
       };
     },
     create: async (payload) => {
-      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt: new Date().toISOString() };
+      // ✅ Diubah ke WIB dengan format 'Z'
+      const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+      const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
       const docRef = await auditCollection.add(dataToSave);
       return { id: docRef.id, ...dataToSave };
     },
