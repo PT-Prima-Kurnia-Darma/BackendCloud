@@ -5,7 +5,7 @@ const Docxtemplater = require('docxtemplater');
 const { Storage } = require('@google-cloud/storage');
 const config = require('../../../../../config');
 
-// Inisialisasi koneksi ke Google Cloud Storage (sama seperti generator elevator)
+// Inisialisasi koneksi ke Google Cloud Storage
 let privateKey = config.FIRESTORE_PRIVATE_KEY;
 if (privateKey && privateKey.includes('\\n')) {
   privateKey = privateKey.replace(/\\n/g, '\n');
@@ -19,40 +19,31 @@ const storage = new Storage({
     },
 });
 
-const BUCKET_NAME = 'tamplate-audit-riksauji'; // Pastikan nama bucket ini benar
+const BUCKET_NAME = 'tamplate-audit-riksauji'; // Nama bucket yang benar
 
 // =================================================================================
-// FUNGSI BANTUAN (Sama seperti generator elevator)
+// FUNGSI BANTUAN
 // =================================================================================
 
 /**
- * Mengubah boolean menjadi teks 'Memenuhi Syarat' atau 'Tidak Memenuhi Syarat'.
- * @param {boolean} status - Nilai status dari item inspeksi.
- * @returns {string}
+ * Membuat simbol centang (✓) jika statusnya true.
+ * @param {boolean} status
+ * @returns {string} '✓' atau string kosong
  */
-function getSyaratStatus(status) {
-    if (status === true) return 'Memenuhi Syarat';
-    if (status === false) return 'Tidak Memenuhi Syarat';
-    return ''; // Kembalikan string kosong jika data tidak ada
+function getCheckmark(status) {
+    if (status === true) return '✓';
+    return '';
 }
 
 /**
- * Memformat objek inspeksi tunggal menjadi format yang siap dirender.
- * Di dalam template .docx, Anda akan menggunakan {placeholder.res} dan {placeholder.stat}.
- * @param {object} item - Objek inspeksi dengan properti 'result' dan 'status'.
- * @returns {{res: string, stat: string}}
+ * Membuat simbol centang (✓) jika statusnya false.
+ * @param {boolean} status
+ * @returns {string} '✓' atau string kosong
  */
-function formatItem(item) {
-    // Jika item tidak ada, kembalikan objek dengan nilai default kosong
-    if (!item) {
-        return { res: '', stat: '' };
-    }
-    return {
-        res: item.result || '',
-        stat: getSyaratStatus(item.status),
-    };
+function getOppositeCheckmark(status) {
+    if (status === false) return '✓';
+    return '';
 }
-
 
 // =================================================================================
 // FUNGSI GENERATOR UTAMA
@@ -64,7 +55,6 @@ function formatItem(item) {
  * @returns {Promise<{docxBuffer: Buffer, fileName: string}>} Buffer dokumen dan nama filenya.
  */
 const createLaporanEskalator = async (data) => {
-    // Path menuju template laporan eskalator di dalam bucket
     const templatePathInBucket = 'elevatorEskalator/eskalator/laporanEskalator.docx';
 
     let content;
@@ -82,127 +72,343 @@ const createLaporanEskalator = async (data) => {
     const doc = new Docxtemplater(zip, {
         paragraphLoop: true,
         linebreaks: true,
-        // Jika tag tidak ditemukan, diganti string kosong agar tidak error
-        nullGetter: () => "",
+        nullGetter: () => "", // Ganti tag yang tidak ada datanya dengan string kosong
     });
 
-    // Siapkan data untuk dirender.
-    // Penggunaan optional chaining (?.) sangat penting untuk mencegah error
-    // jika ada bagian data yang tidak lengkap di Firestore.
+    // =================================================================================
+    // PERSIAPAN DATA UNTUK RENDER
+    // =================================================================================
+
+    // Membuat alias untuk objek 'inspectionAndTesting' agar lebih ringkas dan aman
+    const i = data.inspectionAndTesting || {};
+
+    // Siapkan data untuk dirender ke dalam template.
+    // Nama key di sini HARUS SAMA PERSIS dengan placeholder di file .docx Anda.
     const renderData = {
-        // Data Umum
-        ownerName: data?.ownerName,
-        nameUsageLocation: data?.nameUsageLocation,
-        permitNumber: data?.permitNumber,
-        inspectionDate: data?.inspectionDate,
-        equipmentType: data?.equipmentType,
-        safetyObjectTypeAndNumber: data?.safetyObjectTypeAndNumber,
-        examinationType: data?.examinationType,
-        intendedUse: data?.intendedUse,
-
-        // Data Teknis
-        ...data?.technicalData,
-
-        // Frame and Machine Room
-        fmr_frame: formatItem(data.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoomframeresult),
-        fmr_support_beams: formatItem(data.inspectionAndTestingframeAndMachineRoom?.['inspectionAndTestingframeAndMachineRoomsupportBeams iresults']),
-        fmr_room_condition: formatItem(data.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomConditionresult),
-        fmr_room_clearance: formatItem(data.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomClearanceresult),
-        fmr_room_lighting: formatItem(data.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomLightingresult),
-        fmr_cover_plate: formatItem(data.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineCoverPlateresult),
-        fmr_pit_condition: formatItem(data.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitConditionresult),
-        fmr_pit_clearance: formatItem(data.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitClearanceresult),
-        fmr_pit_step_cover: formatItem(data.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitStepCoverPlateresult),
+        // Data Umum (diambil dari objek 'generalData')
+        ...data.generalData,
+        equipmentType: data.equipmentType,
+        inspectionType: data.inspectionType,
         
-        // Drive Equipment
-        de_drive_machine: formatItem(data.driveEquipment?.driveEquipmentdriveMachineresult),
-        de_speed_under_30: formatItem(data.driveEquipment?.driveEquipmentspeedUnder30Degreesresult),
-        de_speed_30_35: formatItem(data.driveEquipment?.driveEquipmentspeed30to35Degreesresult),
-        de_travelator_speed: formatItem(data.driveEquipment?.driveEquipmenttravelatorSpeedresult),
-        de_stop_dist_05: formatItem(data.driveEquipment?.driveEquipmentstoppingDistance0_5result),
-        de_stop_dist_075: formatItem(data.driveEquipment?.driveEquipmentstoppingDistance0_75result),
-        de_stop_dist_090: formatItem(data.driveEquipment?.driveEquipmentstoppingDistance0_90result),
-        de_drive_chain: formatItem(data.driveEquipment?.driveEquipmentdriveChainresult),
-        de_chain_strength: formatItem(data.driveEquipment?.driveEquipmentchainBreakingStrengthresult),
+        // Data Teknis (tetap sama)
+        ...data.technicalData,
 
-        // Steps or Pallets
-        sp_step_material: formatItem(data.stepsOrPallets?.stepsOrPalletsstepMaterialresult),
-        sp_step_dims: formatItem(data.stepsOrPallets?.stepsOrPalletsstepDimensionsresult),
-        sp_pallet_dims: formatItem(data.stepsOrPallets?.stepsOrPalletspalletDimensionsresult),
-        sp_step_surface: formatItem(data.stepsOrPallets?.stepsOrPalletsstepSurfaceresult),
-        sp_step_levelness: formatItem(data.stepsOrPallets?.stepsOrPalletsstepLevelnessresult),
-        sp_skirt_brush: formatItem(data.stepsOrPallets?.stepsOrPalletsskirtBrushresult),
-        sp_step_wheels: formatItem(data.stepsOrPallets?.stepsOrPalletsstepWheelsresult),
+        // --- PEMERIKSAAN DAN PENGUJIAN ---
         
-        // Landing Area
-        la_landing_plates: formatItem(data.landingArea?.landingArealandingPlatesresult),
-        la_comb_teeth: formatItem(data.landingArea?.landingAreacombTeethresult),
-        la_comb_condition: formatItem(data.landingArea?.landingAreacombConditionresult),
-        la_landing_cover: formatItem(data.landingArea?.landingArealandingCoverresult),
-        la_access_area: formatItem(data.landingArea?.landingArealandingAccessArearesult),
-
-        // Balustrade
-        b_panel_material: formatItem(data.balustrade?.balustradebalustradePanelmaterialresult),
-        b_panel_height: formatItem(data.balustrade?.balustradebalustradePanelheightresult),
-        b_side_pressure: formatItem(data.balustrade?.balustradebalustradePanelsidePressureresult),
-        b_vertical_pressure: formatItem(data.balustrade?.balustradebalustradePanelverticalPressureresult),
-        b_skirt_panel: formatItem(data.balustrade?.balustradeskirtPanelresult),
-        b_skirt_flex: formatItem(data.balustrade?.balustradeskirtPanelFlexibilityresult),
-        b_step_skirt_clearance: formatItem(data.balustrade?.balustradestepToSkirtClearanceresult),
-
-        // Handrail
-        h_condition: formatItem(data.handrail?.handrailhandrailConditionresult),
-        h_speed_sync: formatItem(data.handrail?.handrailhandrailSpeedSynchronizationresult),
-        h_width: formatItem(data.handrail?.handrailhandrailWidthresult),
+        // A. KERANGKA, RUANG MESIN & PIT
+        inspectionAndTestingframeAndMachineRoomframeresult: i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoomframeresult?.result,
+        inspectionAndTestingframeAndMachineRoomframeMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoomframeresult?.status),
+        inspectionAndTestingframeAndMachineRoomframeTidakMemenuhi: getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoomframeresult?.status),
         
-        // Runway
-        r_beam_strength: formatItem(data.runway?.runwaybeamStrengthAndPositionresult),
-        r_pit_wall: formatItem(data.runway?.runwaypitWallConditionresult),
-        r_frame_enclosure: formatItem(data.runway?.runwayescalatorFrameEnclosureresult),
-        r_lighting: formatItem(data.runway?.runwaylightingresult),
-        r_headroom: formatItem(data.runway?.runwayheadroomClearanceresult),
-        r_balustrade_clearance: formatItem(data.runway?.runwaybalustradeToObjectClearanceresult),
-        r_anti_climb: formatItem(data.runway?.runwayantiClimbDeviceHeightresult),
-        r_ornament: formatItem(data.runway?.runwayornamentPlacementresult),
-        r_outdoor_clearance: formatItem(data.runway?.runwayoutdoorClearanceresult),
+        'inspectionAndTestingframeAndMachineRoomsupportBeams iresults': i.inspectionAndTestingframeAndMachineRoom?.['inspectionAndTestingframeAndMachineRoomsupportBeams iresults']?.result,
+        'inspectionAndTestingframeAndMachineRoomsupportBeamsMemenuhi': getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.['inspectionAndTestingframeAndMachineRoomsupportBeams iresults']?.status),
+        'inspectionAndTestingframeAndMachineRoomsupportBeamsTidakMemenuhi': getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.['inspectionAndTestingframeAndMachineRoomsupportBeams iresults']?.status),
 
-        // Safety Equipment
-        se_op_key: formatItem(data.safetyEquipment?.safetyEquipmentoperationControlKeyresult),
-        se_emergency_stop: formatItem(data.safetyEquipment?.safetyEquipmentemergencyStopSwitchresult),
-        se_step_chain: formatItem(data.safetyEquipment?.safetyEquipmentstepChainSafetyDeviceresult),
-        se_drive_chain: formatItem(data.safetyEquipment?.safetyEquipmentdriveChainSafetyDeviceresult),
-        se_step_safety: formatItem(data.safetyEquipment?.safetyEquipmentstepSafetyDeviceresult),
-        se_handrail_safety: formatItem(data.safetyEquipment?.safetyEquipmenthandrailSafetyDeviceresult),
-        se_reversal_stop: formatItem(data.safetyEquipment?.safetyEquipmentreversalStopDeviceresult),
-        se_handrail_entry: formatItem(data.safetyEquipment?.safetyEquipmenthandrailEntryGuardresult),
-        se_comb_plate: formatItem(data.safetyEquipment?.safetyEquipmentcombPlateSafetyDeviceresult),
-        se_decking_brush: formatItem(data.safetyEquipment?.safetyEquipmentinnerDeckingBrushresult),
-        se_stop_buttons: formatItem(data.safetyEquipment?.safetyEquipmentstopButtonsresult),
+        inspectionAndTestingframeAndMachineRoommachineRoomConditionresult: i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomConditionresult?.result,
+        inspectionAndTestingframeAndMachineRoommachineRoomConditionMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomConditionresult?.status),
+        inspectionAndTestingframeAndMachineRoommachineRoomConditionTidakMemenuhi: getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomConditionresult?.status),
+        
+        inspectionAndTestingframeAndMachineRoommachineRoomClearanceresult: i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomClearanceresult?.result,
+        inspectionAndTestingframeAndMachineRoommachineRoomClearanceMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomClearanceresult?.status),
+        inspectionAndTestingframeAndMachineRoommachineRoomClearanceTidakMemenuhi: getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomClearanceresult?.status),
+        
+        inspectionAndTestingframeAndMachineRoommachineRoomLightingresult: i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomLightingresult?.result,
+        inspectionAndTestingframeAndMachineRoommachineRoomLightingMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomLightingresult?.status),
+        inspectionAndTestingframeAndMachineRoommachineRoomLightingTidakMemenuhi: getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomLightingresult?.status),
+        
+        inspectionAndTestingframeAndMachineRoommachineCoverPlateresult: i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineCoverPlateresult?.result,
+        inspectionAndTestingframeAndMachineRoommachineCoverPlateMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineCoverPlateresult?.status),
+        inspectionAndTestingframeAndMachineRoommachineCoverPlateTidakMemenuhi: getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineCoverPlateresult?.status),
+        
+        inspectionAndTestingframeAndMachineRoompitConditionresult: i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitConditionresult?.result,
+        inspectionAndTestingframeAndMachineRoompitConditionMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitConditionresult?.status),
+        inspectionAndTestingframeAndMachineRoompitConditionTidakMemenuhi: getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitConditionresult?.status),
+        
+        inspectionAndTestingframeAndMachineRoompitClearanceresult: i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitClearanceresult?.result,
+        inspectionAndTestingframeAndMachineRoompitClearanceMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitClearanceresult?.status),
+        inspectionAndTestingframeAndMachineRoompitClearanceTidakMemenuhi: getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitClearanceresult?.status),
 
-        // Electrical Installation
-        ei_install_std: formatItem(data.electricalInstallation?.electricalInstallationinstallationStandardresult),
-        ei_panel: formatItem(data.electricalInstallation?.electricalInstallationelectricalPanelresult),
-        ei_grounding: formatItem(data.electricalInstallation?.electricalInstallationgroundingCableresult),
-        ei_fire_alarm: formatItem(data.electricalInstallation?.electricalInstallationfireAlarmConnectionresult),
+        inspectionAndTestingframeAndMachineRoompitStepCoverPlateresult: i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitStepCoverPlateresult?.result,
+        inspectionAndTestingframeAndMachineRoompitStepCoverPlateMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitStepCoverPlateresult?.status),
+        inspectionAndTestingframeAndMachineRoompitStepCoverPlateTidakMemenuhi: getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoompitStepCoverPlateresult?.status),
 
-        // Outdoor Specifics
-        os_water_pump: formatItem(data.outdoorSpecifics?.outdoorSpecificspitWaterPumpresult),
-        os_weatherproof: formatItem(data.outdoorSpecifics?.outdoorSpecificsweatherproofComponentsresult),
+        // B. PERLENGKAPAN PENGGERAK
+        driveEquipmentdriveMachineresult: i.driveEquipment?.driveEquipmentdriveMachineresult?.result,
+        driveEquipmentdriveMachineMemenuhi: getCheckmark(i.driveEquipment?.driveEquipmentdriveMachineresult?.status),
+        driveEquipmentdriveMachineTidakMemenuhi: getOppositeCheckmark(i.driveEquipment?.driveEquipmentdriveMachineresult?.status),
 
-        // User Safety
-        us_no_bulky: formatItem(data.userSafety?.userSafetySignagenoBulkyItemsresult),
-        us_no_jump: formatItem(data.userSafety?.userSafetySignagenoJumpingresult),
-        us_unattended: formatItem(data.userSafety?.userSafetySignageunattendedChildrenresult),
-        us_no_trolley: formatItem(data.userSafety?.userSafetySignagenoTrolleysOrStrollersresult),
-        us_no_lean: formatItem(data.userSafety?.userSafetySignagenoLeaningresult),
-        us_no_step_skirt: formatItem(data.userSafety?.userSafetySignagenoSteppingOnSkirtresult),
-        us_soft_sole: formatItem(data.userSafety?.userSafetySignagesoftSoleFootwearWarningresult),
-        us_no_sit: formatItem(data.userSafety?.userSafetySignagenoSittingOnStepsresult),
-        us_hold_handrail: formatItem(data.userSafety?.userSafetySignageholdHandrailresult),
+        driveEquipmentspeedUnder30Degreesresult: i.driveEquipment?.driveEquipmentspeedUnder30Degreesresult?.result,
+        driveEquipmentspeedUnder30DegreesMemenuhi: getCheckmark(i.driveEquipment?.driveEquipmentspeedUnder30Degreesresult?.status),
+        driveEquipmentspeedUnder30DegreesTidakMemenuhi: getOppositeCheckmark(i.driveEquipment?.driveEquipmentspeedUnder30Degreesresult?.status),
+        
+        driveEquipmentspeed30to35Degreesresult: i.driveEquipment?.driveEquipmentspeed30to35Degreesresult?.result,
+        driveEquipmentspeed30to35DegreesMemenuhi: getCheckmark(i.driveEquipment?.driveEquipmentspeed30to35Degreesresult?.status),
+        driveEquipmentspeed30to35DegreesTidakMemenuhi: getOppositeCheckmark(i.driveEquipment?.driveEquipmentspeed30to35Degreesresult?.status),
+
+        driveEquipmenttravelatorSpeedresult: i.driveEquipment?.driveEquipmenttravelatorSpeedresult?.result,
+        driveEquipmenttravelatorSpeedMemenuhi: getCheckmark(i.driveEquipment?.driveEquipmenttravelatorSpeedresult?.status),
+        driveEquipmenttravelatorSpeedTidakMemenuhi: getOppositeCheckmark(i.driveEquipment?.driveEquipmenttravelatorSpeedresult?.status),
+
+        driveEquipmentstoppingDistance0_5result: i.driveEquipment?.driveEquipmentstoppingDistance0_5result?.result,
+        driveEquipmentstoppingDistance0_5Memenuhi: getCheckmark(i.driveEquipment?.driveEquipmentstoppingDistance0_5result?.status),
+        driveEquipmentstoppingDistance0_5TidakMemenuhi: getOppositeCheckmark(i.driveEquipment?.driveEquipmentstoppingDistance0_5result?.status),
+
+        driveEquipmentstoppingDistance0_75result: i.driveEquipment?.driveEquipmentstoppingDistance0_75result?.result,
+        driveEquipmentstoppingDistance0_75Memenuhi: getCheckmark(i.driveEquipment?.driveEquipmentstoppingDistance0_75result?.status),
+        driveEquipmentstoppingDistance0_75TidakMemenuhi: getOppositeCheckmark(i.driveEquipment?.driveEquipmentstoppingDistance0_75result?.status),
+
+        driveEquipmentstoppingDistance0_90result: i.driveEquipment?.driveEquipmentstoppingDistance0_90result?.result,
+        driveEquipmentstoppingDistance0_90Memenuhi: getCheckmark(i.driveEquipment?.driveEquipmentstoppingDistance0_90result?.status),
+        driveEquipmentstoppingDistance0_90TidakMemenuhi: getOppositeCheckmark(i.driveEquipment?.driveEquipmentstoppingDistance0_90result?.status),
+
+        driveEquipmentdriveChainresult: i.driveEquipment?.driveEquipmentdriveChainresult?.result,
+        driveEquipmentdriveChainMemenuhi: getCheckmark(i.driveEquipment?.driveEquipmentdriveChainresult?.status),
+        driveEquipmentdriveChainTidakMemenuhi: getOppositeCheckmark(i.driveEquipment?.driveEquipmentdriveChainresult?.status),
+
+        driveEquipmentchainBreakingStrengthresult: i.driveEquipment?.driveEquipmentchainBreakingStrengthresult?.result,
+        driveEquipmentchainBreakingStrengthMemenuhi: getCheckmark(i.driveEquipment?.driveEquipmentchainBreakingStrengthresult?.status),
+        driveEquipmentchainBreakingStrengthTidakMemenuhi: getOppositeCheckmark(i.driveEquipment?.driveEquipmentchainBreakingStrengthresult?.status),
+
+        // C. ANAK TANGGA / PALLET
+        stepsOrPalletsstepMaterialresult: i.stepsOrPallets?.stepsOrPalletsstepMaterialresult?.result,
+        stepsOrPalletsstepMaterialMemenuhi: getCheckmark(i.stepsOrPallets?.stepsOrPalletsstepMaterialresult?.status),
+        stepsOrPalletsstepMaterialTidakMemenuhi: getOppositeCheckmark(i.stepsOrPallets?.stepsOrPalletsstepMaterialresult?.status),
+
+        stepsOrPalletsstepDimensionsresult: i.stepsOrPallets?.stepsOrPalletsstepDimensionsresult?.result,
+        stepsOrPalletsstepDimensionsMemenuhi: getCheckmark(i.stepsOrPallets?.stepsOrPalletsstepDimensionsresult?.status),
+        stepsOrPalletsstepDimensionsTidakMemenuhi: getOppositeCheckmark(i.stepsOrPallets?.stepsOrPalletsstepDimensionsresult?.status),
+
+        stepsOrPalletspalletDimensionsresult: i.stepsOrPallets?.stepsOrPalletspalletDimensionsresult?.result,
+        stepsOrPalletspalletDimensionsMemenuhi: getCheckmark(i.stepsOrPallets?.stepsOrPalletspalletDimensionsresult?.status),
+        stepsOrPalletspalletDimensionsTidakMemenuhi: getOppositeCheckmark(i.stepsOrPallets?.stepsOrPalletspalletDimensionsresult?.status),
+
+        stepsOrPalletsstepSurfaceresult: i.stepsOrPallets?.stepsOrPalletsstepSurfaceresult?.result,
+        stepsOrPalletsstepSurfaceMemenuhi: getCheckmark(i.stepsOrPallets?.stepsOrPalletsstepSurfaceresult?.status),
+        stepsOrPalletsstepSurfaceTidakMemenuhi: getOppositeCheckmark(i.stepsOrPallets?.stepsOrPalletsstepSurfaceresult?.status),
+
+        stepsOrPalletsstepLevelnessresult: i.stepsOrPallets?.stepsOrPalletsstepLevelnessresult?.result,
+        stepsOrPalletsstepLevelnessMemenuhi: getCheckmark(i.stepsOrPallets?.stepsOrPalletsstepLevelnessresult?.status),
+        stepsOrPalletsstepLevelnessTidakMemenuhi: getOppositeCheckmark(i.stepsOrPallets?.stepsOrPalletsstepLevelnessresult?.status),
+
+        stepsOrPalletsskirtBrushresult: i.stepsOrPallets?.stepsOrPalletsskirtBrushresult?.result,
+        stepsOrPalletsskirtBrushMemenuhi: getCheckmark(i.stepsOrPallets?.stepsOrPalletsskirtBrushresult?.status),
+        stepsOrPalletsskirtBrushTidakMemenuhi: getOppositeCheckmark(i.stepsOrPallets?.stepsOrPalletsskirtBrushresult?.status),
+
+        stepsOrPalletsstepWheelsresult: i.stepsOrPallets?.stepsOrPalletsstepWheelsresult?.result,
+        stepsOrPalletsstepWheelsMemenuhi: getCheckmark(i.stepsOrPallets?.stepsOrPalletsstepWheelsresult?.status),
+        stepsOrPalletsstepWheelsTidakMemenuhi: getOppositeCheckmark(i.stepsOrPallets?.stepsOrPalletsstepWheelsresult?.status),
+        
+        // D. DAERAH PENDARATAN
+        landingArealandingPlatesresult: i.landingArea?.landingArealandingPlatesresult?.result,
+        landingArealandingPlatesMemenuhi: getCheckmark(i.landingArea?.landingArealandingPlatesresult?.status),
+        landingArealandingPlatesTidakMemenuhi: getOppositeCheckmark(i.landingArea?.landingArealandingPlatesresult?.status),
+
+        landingAreacombTeethresult: i.landingArea?.landingAreacombTeethresult?.result,
+        landingAreacombTeethMemenuhi: getCheckmark(i.landingArea?.landingAreacombTeethresult?.status),
+        landingAreacombTeethTidakMemenuhi: getOppositeCheckmark(i.landingArea?.landingAreacombTeethresult?.status),
+
+        landingAreacombConditionresult: i.landingArea?.landingAreacombConditionresult?.result,
+        landingAreacombConditionMemenuhi: getCheckmark(i.landingArea?.landingAreacombConditionresult?.status),
+        landingAreacombConditionTidakMemenuhi: getOppositeCheckmark(i.landingArea?.landingAreacombConditionresult?.status),
+
+        landingArealandingCoverresult: i.landingArea?.landingArealandingCoverresult?.result,
+        landingArealandingCoverMemenuhi: getCheckmark(i.landingArea?.landingArealandingCoverresult?.status),
+        landingArealandingCoverTidakMemenuhi: getOppositeCheckmark(i.landingArea?.landingArealandingCoverresult?.status),
+        
+        landingArealandingAccessArearesult: i.landingArea?.landingArealandingAccessArearesult?.result,
+        landingArealandingAccessAreaMemenuhi: getCheckmark(i.landingArea?.landingArealandingAccessArearesult?.status),
+        landingArealandingAccessAreaTidakMemenuhi: getOppositeCheckmark(i.landingArea?.landingArealandingAccessArearesult?.status),
+
+        // E. BALUSTRADE
+        balustradebalustradePanelmaterialresult: i.balustrade?.balustradebalustradePanelmaterialresult?.result,
+        balustradebalustradePanelmaterialMemenuhi: getCheckmark(i.balustrade?.balustradebalustradePanelmaterialresult?.status),
+        balustradebalustradePanelmaterialTidakMemenuhi: getOppositeCheckmark(i.balustrade?.balustradebalustradePanelmaterialresult?.status),
+
+        balustradebalustradePanelheightresult: i.balustrade?.balustradebalustradePanelheightresult?.result,
+        balustradebalustradePanelheightMemenuhi: getCheckmark(i.balustrade?.balustradebalustradePanelheightresult?.status),
+        balustradebalustradePanelheightTidakMemenuhi: getOppositeCheckmark(i.balustrade?.balustradebalustradePanelheightresult?.status),
+
+        balustradebalustradePanelsidePressureresult: i.balustrade?.balustradebalustradePanelsidePressureresult?.result,
+        balustradebalustradePanelsidePressureMemenuhi: getCheckmark(i.balustrade?.balustradebalustradePanelsidePressureresult?.status),
+        balustradebalustradePanelsidePressureTidakMemenuhi: getOppositeCheckmark(i.balustrade?.balustradebalustradePanelsidePressureresult?.status),
+
+        balustradebalustradePanelverticalPressureresult: i.balustrade?.balustradebalustradePanelverticalPressureresult?.result,
+        balustradebalustradePanelverticalPressureMemenuhi: getCheckmark(i.balustrade?.balustradebalustradePanelverticalPressureresult?.status),
+        balustradebalustradePanelverticalPressureTidakMemenuhi: getOppositeCheckmark(i.balustrade?.balustradebalustradePanelverticalPressureresult?.status),
+
+        balustradeskirtPanelresult: i.balustrade?.balustradeskirtPanelresult?.result,
+        balustradeskirtPanelMemenuhi: getCheckmark(i.balustrade?.balustradeskirtPanelresult?.status),
+        balustradeskirtPanelTidakMemenuhi: getOppositeCheckmark(i.balustrade?.balustradeskirtPanelresult?.status),
+
+        balustradeskirtPanelFlexibilityresult: i.balustrade?.balustradeskirtPanelFlexibilityresult?.result,
+        balustradeskirtPanelFlexibilityMemenuhi: getCheckmark(i.balustrade?.balustradeskirtPanelFlexibilityresult?.status),
+        balustradeskirtPanelFlexibilityTidakMemenuhi: getOppositeCheckmark(i.balustrade?.balustradeskirtPanelFlexibilityresult?.status),
+        
+        balustradestepToSkirtClearanceresult: i.balustrade?.balustradestepToSkirtClearanceresult?.result,
+        balustradestepToSkirtClearanceMemenuhi: getCheckmark(i.balustrade?.balustradestepToSkirtClearanceresult?.status),
+        balustradestepToSkirtClearanceTidakMemenuhi: getOppositeCheckmark(i.balustrade?.balustradestepToSkirtClearanceresult?.status),
+
+        // F. BAN PEGANGAN (HANDRAIL)
+        handrailhandrailConditionresult: i.handrail?.handrailhandrailConditionresult?.result,
+        handrailhandrailConditionMemenuhi: getCheckmark(i.handrail?.handrailhandrailConditionresult?.status),
+        handrailhandrailConditionTidakMemenuhi: getOppositeCheckmark(i.handrail?.handrailhandrailConditionresult?.status),
+        
+        handrailhandrailSpeedSynchronizationresult: i.handrail?.handrailhandrailSpeedSynchronizationresult?.result,
+        handrailhandrailSpeedSynchronizationMemenuhi: getCheckmark(i.handrail?.handrailhandrailSpeedSynchronizationresult?.status),
+        handrailhandrailSpeedSynchronizationTidakMemenuhi: getOppositeCheckmark(i.handrail?.handrailhandrailSpeedSynchronizationresult?.status),
+        
+        handrailhandrailWidthresult: i.handrail?.handrailhandrailWidthresult?.result,
+        handrailhandrailWidthMemenuhi: getCheckmark(i.handrail?.handrailhandrailWidthresult?.status),
+        handrailhandrailWidthTidakMemenuhi: getOppositeCheckmark(i.handrail?.handrailhandrailWidthresult?.status),
+
+        // G. LINTASAN
+        runwaybeamStrengthAndPositionresult: i.runway?.runwaybeamStrengthAndPositionresult?.result,
+        runwaybeamStrengthAndPositionMemenuhi: getCheckmark(i.runway?.runwaybeamStrengthAndPositionresult?.status),
+        runwaybeamStrengthAndPositionTidakMemenuhi: getOppositeCheckmark(i.runway?.runwaybeamStrengthAndPositionresult?.status),
+        
+        runwaypitWallConditionresult: i.runway?.runwaypitWallConditionresult?.result,
+        runwaypitWallConditionMemenuhi: getCheckmark(i.runway?.runwaypitWallConditionresult?.status),
+        runwaypitWallConditionTidakMemenuhi: getOppositeCheckmark(i.runway?.runwaypitWallConditionresult?.status),
+        
+        runwayescalatorFrameEnclosureresult: i.runway?.runwayescalatorFrameEnclosureresult?.result,
+        runwayescalatorFrameEnclosureMemenuhi: getCheckmark(i.runway?.runwayescalatorFrameEnclosureresult?.status),
+        runwayescalatorFrameEnclosureTidakMemenuhi: getOppositeCheckmark(i.runway?.runwayescalatorFrameEnclosureresult?.status),
+        
+        runwaylightingresult: i.runway?.runwaylightingresult?.result,
+        runwaylightingMemenuhi: getCheckmark(i.runway?.runwaylightingresult?.status),
+        runwaylightingTidakMemenuhi: getOppositeCheckmark(i.runway?.runwaylightingresult?.status),
+        
+        runwayheadroomClearanceresult: i.runway?.runwayheadroomClearanceresult?.result,
+        runwayheadroomClearanceMemenuhi: getCheckmark(i.runway?.runwayheadroomClearanceresult?.status),
+        runwayheadroomClearanceTidakMemenuhi: getOppositeCheckmark(i.runway?.runwayheadroomClearanceresult?.status),
+        
+        runwaybalustradeToObjectClearanceresult: i.runway?.runwaybalustradeToObjectClearanceresult?.result,
+        runwaybalustradeToObjectClearanceMemenuhi: getCheckmark(i.runway?.runwaybalustradeToObjectClearanceresult?.status),
+        runwaybalustradeToObjectClearanceTidakMemenuhi: getOppositeCheckmark(i.runway?.runwaybalustradeToObjectClearanceresult?.status),
+
+        runwayantiClimbDeviceHeightresult: i.runway?.runwayantiClimbDeviceHeightresult?.result,
+        runwayantiClimbDeviceHeightMemenuhi: getCheckmark(i.runway?.runwayantiClimbDeviceHeightresult?.status),
+        runwayantiClimbDeviceHeightTidakMemenuhi: getOppositeCheckmark(i.runway?.runwayantiClimbDeviceHeightresult?.status),
+
+        runwayornamentPlacementresult: i.runway?.runwayornamentPlacementresult?.result,
+        runwayornamentPlacementMemenuhi: getCheckmark(i.runway?.runwayornamentPlacementresult?.status),
+        runwayornamentPlacementTidakMemenuhi: getOppositeCheckmark(i.runway?.runwayornamentPlacementresult?.status),
+        
+        runwayoutdoorClearanceresult: i.runway?.runwayoutdoorClearanceresult?.result,
+        runwayoutdoorClearanceMemenuhi: getCheckmark(i.runway?.runwayoutdoorClearanceresult?.status),
+        runwayoutdoorClearanceTidakMemenuhi: getOppositeCheckmark(i.runway?.runwayoutdoorClearanceresult?.status),
+
+        // H. PERLENGKAPAN PENGAMAN
+        safetyEquipmentoperationControlKeyresult: i.safetyEquipment?.safetyEquipmentoperationControlKeyresult?.result,
+        safetyEquipmentoperationControlKeyMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmentoperationControlKeyresult?.status),
+        safetyEquipmentoperationControlKeyTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmentoperationControlKeyresult?.status),
+        
+        safetyEquipmentemergencyStopSwitchresult: i.safetyEquipment?.safetyEquipmentemergencyStopSwitchresult?.result,
+        safetyEquipmentemergencyStopSwitchMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmentemergencyStopSwitchresult?.status),
+        safetyEquipmentemergencyStopSwitchTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmentemergencyStopSwitchresult?.status),
+        
+        safetyEquipmentstepChainSafetyDeviceresult: i.safetyEquipment?.safetyEquipmentstepChainSafetyDeviceresult?.result,
+        safetyEquipmentstepChainSafetyDeviceMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmentstepChainSafetyDeviceresult?.status),
+        safetyEquipmentstepChainSafetyDeviceTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmentstepChainSafetyDeviceresult?.status),
+        
+        safetyEquipmentdriveChainSafetyDeviceresult: i.safetyEquipment?.safetyEquipmentdriveChainSafetyDeviceresult?.result,
+        safetyEquipmentdriveChainSafetyDeviceMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmentdriveChainSafetyDeviceresult?.status),
+        safetyEquipmentdriveChainSafetyDeviceTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmentdriveChainSafetyDeviceresult?.status),
+        
+        safetyEquipmentstepSafetyDeviceresult: i.safetyEquipment?.safetyEquipmentstepSafetyDeviceresult?.result,
+        safetyEquipmentstepSafetyDeviceMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmentstepSafetyDeviceresult?.status),
+        safetyEquipmentstepSafetyDeviceTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmentstepSafetyDeviceresult?.status),
+        
+        safetyEquipmenthandrailSafetyDeviceresult: i.safetyEquipment?.safetyEquipmenthandrailSafetyDeviceresult?.result,
+        safetyEquipmenthandrailSafetyDeviceMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmenthandrailSafetyDeviceresult?.status),
+        safetyEquipmenthandrailSafetyDeviceTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmenthandrailSafetyDeviceresult?.status),
+        
+        safetyEquipmentreversalStopDeviceresult: i.safetyEquipment?.safetyEquipmentreversalStopDeviceresult?.result,
+        safetyEquipmentreversalStopDeviceMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmentreversalStopDeviceresult?.status),
+        safetyEquipmentreversalStopDeviceTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmentreversalStopDeviceresult?.status),
+        
+        safetyEquipmenthandrailEntryGuardresult: i.safetyEquipment?.safetyEquipmenthandrailEntryGuardresult?.result,
+        safetyEquipmenthandrailEntryGuardMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmenthandrailEntryGuardresult?.status),
+        safetyEquipmenthandrailEntryGuardTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmenthandrailEntryGuardresult?.status),
+        
+        safetyEquipmentcombPlateSafetyDeviceresult: i.safetyEquipment?.safetyEquipmentcombPlateSafetyDeviceresult?.result,
+        safetyEquipmentcombPlateSafetyDeviceMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmentcombPlateSafetyDeviceresult?.status),
+        safetyEquipmentcombPlateSafetyDeviceTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmentcombPlateSafetyDeviceresult?.status),
+
+        safetyEquipmentinnerDeckingBrushresult: i.safetyEquipment?.safetyEquipmentinnerDeckingBrushresult?.result,
+        safetyEquipmentinnerDeckingBrushMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmentinnerDeckingBrushresult?.status),
+        safetyEquipmentinnerDeckingBrushTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmentinnerDeckingBrushresult?.status),
+        
+        safetyEquipmentstopButtonsresult: i.safetyEquipment?.safetyEquipmentstopButtonsresult?.result,
+        safetyEquipmentstopButtonsMemenuhi: getCheckmark(i.safetyEquipment?.safetyEquipmentstopButtonsresult?.status),
+        safetyEquipmentstopButtonsTidakMemenuhi: getOppositeCheckmark(i.safetyEquipment?.safetyEquipmentstopButtonsresult?.status),
+
+        // I. INSTALASI LISTRIK
+        electricalInstallationinstallationStandardresult: i.electricalInstallation?.electricalInstallationinstallationStandardresult?.result,
+        electricalInstallationinstallationStandardMemenuhi: getCheckmark(i.electricalInstallation?.electricalInstallationinstallationStandardresult?.status),
+        electricalInstallationinstallationStandardTidakMemenuhi: getOppositeCheckmark(i.electricalInstallation?.electricalInstallationinstallationStandardresult?.status),
+        
+        electricalInstallationelectricalPanelresult: i.electricalInstallation?.electricalInstallationelectricalPanelresult?.result,
+        electricalInstallationelectricalPanelMemenuhi: getCheckmark(i.electricalInstallation?.electricalInstallationelectricalPanelresult?.status),
+        electricalInstallationelectricalPanelTidakMemenuhi: getOppositeCheckmark(i.electricalInstallation?.electricalInstallationelectricalPanelresult?.status),
+        
+        electricalInstallationgroundingCableresult: i.electricalInstallation?.electricalInstallationgroundingCableresult?.result,
+        electricalInstallationgroundingCableMemenuhi: getCheckmark(i.electricalInstallation?.electricalInstallationgroundingCableresult?.status),
+        electricalInstallationgroundingCableTidakMemenuhi: getOppositeCheckmark(i.electricalInstallation?.electricalInstallationgroundingCableresult?.status),
+
+        electricalInstallationfireAlarmConnectionresult: i.electricalInstallation?.electricalInstallationfireAlarmConnectionresult?.result,
+        electricalInstallationfireAlarmConnectionMemenuhi: getCheckmark(i.electricalInstallation?.electricalInstallationfireAlarmConnectionresult?.status),
+        electricalInstallationfireAlarmConnectionTidakMemenuhi: getOppositeCheckmark(i.electricalInstallation?.electricalInstallationfireAlarmConnectionresult?.status),
+        
+        // J. KHUSUS UNTUK PEMASANGAN DI LUAR GEDUNG
+        outdoorSpecificspitWaterPumpresult: i.outdoorSpecifics?.outdoorSpecificspitWaterPumpresult?.result,
+        outdoorSpecificspitWaterPumpMemenuhi: getCheckmark(i.outdoorSpecifics?.outdoorSpecificspitWaterPumpresult?.status),
+        outdoorSpecificspitWaterPumpTidakMemenuhi: getOppositeCheckmark(i.outdoorSpecifics?.outdoorSpecificspitWaterPumpresult?.status),
+
+        outdoorSpecificsweatherproofComponentsresult: i.outdoorSpecifics?.outdoorSpecificsweatherproofComponentsresult?.result,
+        outdoorSpecificsweatherproofComponentsMemenuhi: getCheckmark(i.outdoorSpecifics?.outdoorSpecificsweatherproofComponentsresult?.status),
+        outdoorSpecificsweatherproofComponentsTidakMemenuhi: getOppositeCheckmark(i.outdoorSpecifics?.outdoorSpecificsweatherproofComponentsresult?.status),
+        
+        // K. PENGAMAN PENGGUNA
+        userSafetySignagenoBulkyItemsresult: i.userSafety?.userSafetySignagenoBulkyItemsresult?.result,
+        userSafetySignagenoBulkyItemsMemenuhi: getCheckmark(i.userSafety?.userSafetySignagenoBulkyItemsresult?.status),
+        userSafetySignagenoBulkyItemsTidakMemenuhi: getOppositeCheckmark(i.userSafety?.userSafetySignagenoBulkyItemsresult?.status),
+
+        userSafetySignagenoJumpingresult: i.userSafety?.userSafetySignagenoJumpingresult?.result,
+        userSafetySignagenoJumpingMemenuhi: getCheckmark(i.userSafety?.userSafetySignagenoJumpingresult?.status),
+        userSafetySignagenoJumpingTidakMemenuhi: getOppositeCheckmark(i.userSafety?.userSafetySignagenoJumpingresult?.status),
+        
+        userSafetySignageunattendedChildrenresult: i.userSafety?.userSafetySignageunattendedChildrenresult?.result,
+        userSafetySignageunattendedChildrenMemenuhi: getCheckmark(i.userSafety?.userSafetySignageunattendedChildrenresult?.status),
+        userSafetySignageunattendedChildrenTidakMemenuhi: getOppositeCheckmark(i.userSafety?.userSafetySignageunattendedChildrenresult?.status),
+        
+        userSafetySignagenoTrolleysOrStrollersresult: i.userSafety?.userSafetySignagenoTrolleysOrStrollersresult?.result,
+        userSafetySignagenoTrolleysOrStrollersMemenuhi: getCheckmark(i.userSafety?.userSafetySignagenoTrolleysOrStrollersresult?.status),
+        userSafetySignagenoTrolleysOrStrollersTidakMemenuhi: getOppositeCheckmark(i.userSafety?.userSafetySignagenoTrolleysOrStrollersresult?.status),
+        
+        userSafetySignagenoLeaningresult: i.userSafety?.userSafetySignagenoLeaningresult?.result,
+        userSafetySignagenoLeaningMemenuhi: getCheckmark(i.userSafety?.userSafetySignagenoLeaningresult?.status),
+        userSafetySignagenoLeaningTidakMemenuhi: getOppositeCheckmark(i.userSafety?.userSafetySignagenoLeaningresult?.status),
+        
+        userSafetySignagenoSteppingOnSkirtresult: i.userSafety?.userSafetySignagenoSteppingOnSkirtresult?.result,
+        userSafetySignagenoSteppingOnSkirtMemenuhi: getCheckmark(i.userSafety?.userSafetySignagenoSteppingOnSkirtresult?.status),
+        userSafetySignagenoSteppingOnSkirtTidakMemenuhi: getOppositeCheckmark(i.userSafety?.userSafetySignagenoSteppingOnSkirtresult?.status),
+
+        userSafetySignagesoftSoleFootwearWarningresult: i.userSafety?.userSafetySignagesoftSoleFootwearWarningresult?.result,
+        userSafetySignagesoftSoleFootwearWarningMemenuhi: getCheckmark(i.userSafety?.userSafetySignagesoftSoleFootwearWarningresult?.status),
+        userSafetySignagesoftSoleFootwearWarningTidakMemenuhi: getOppositeCheckmark(i.userSafety?.userSafetySignagesoftSoleFootwearWarningresult?.status),
+
+        userSafetySignagenoSittingOnStepsresult: i.userSafety?.userSafetySignagenoSittingOnStepsresult?.result,
+        userSafetySignagenoSittingOnStepsMemenuhi: getCheckmark(i.userSafety?.userSafetySignagenoSittingOnStepsresult?.status),
+        userSafetySignagenoSittingOnStepsTidakMemenuhi: getOppositeCheckmark(i.userSafety?.userSafetySignagenoSittingOnStepsresult?.status),
+
+        userSafetySignageholdHandrailresult: i.userSafety?.userSafetySignageholdHandrailresult?.result,
+        userSafetySignageholdHandrailMemenuhi: getCheckmark(i.userSafety?.userSafetySignageholdHandrailresult?.status),
+        userSafetySignageholdHandrailTidakMemenuhi: getOppositeCheckmark(i.userSafety?.userSafetySignageholdHandrailresult?.status),
 
         // Kesimpulan
-        testingEscalator: data?.testingEscalator,
-        conclusion: data?.conclusion,
+        testingEscalator: data.testingEscalator,
+        conclusion: data.conclusion,
     };
 
     try {
@@ -225,7 +431,7 @@ const createLaporanEskalator = async (data) => {
     });
 
     // Membuat nama file yang dinamis dan aman
-    const ownerName = data.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
+    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
     const fileName = `Laporan-Eskalator-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
