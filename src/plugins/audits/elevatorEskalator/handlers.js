@@ -1,9 +1,10 @@
 'use strict';
 
 const Boom = require('@hapi/boom');
-const { elevatorServices } = require('./services');
-const { createLaporanElevator: generateDoc } = require('../../../services/documentGenerator/elevatorEskalator/elevator/laporan/generator');
-const { createBapElevator: generateBapDoc } = require('../../../services/documentGenerator/elevatorEskalator/elevator/bap/generator')
+const { elevatorServices, eskalatorServices } = require('./services');
+const { createLaporanElevator: generateLaporanElevatorDoc } = require('../../../services/documentGenerator/elevatorEskalator/elevator/laporan/generator');
+const { createBapElevator: generateBapElevatorDoc } = require('../../../services/documentGenerator/elevatorEskalator/elevator/bap/generator')
+const { createLaporanEskalator: generateLaporanEskalatorDoc} = require('../../../services/documentGenerator/elevatorEskalator/eskalator/laporan/generator')
 
 const elevatorHandlers = {
   /**
@@ -82,7 +83,7 @@ const elevatorHandlers = {
         if (!LaporanData) {
           return Boom.notFound('Gagal membuat dokumen. laporan dengan ID tersebut tidak ditemukan.');
         }
-        const { docxBuffer, fileName } = await generateDoc(LaporanData);
+        const { docxBuffer, fileName } = await generateLaporanElevatorDoc(LaporanData);
 
         // DIUBAH: Menambahkan custom header untuk status download
         return h.response(docxBuffer)
@@ -178,7 +179,7 @@ const elevatorHandlers = {
         try {
             const bapData = await elevatorServices.bap.getById(request.params.id);
             if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP tidak ditemukan.');
-            const { docxBuffer, fileName } = await generateBapDoc(bapData);
+            const { docxBuffer, fileName } = await generateBapElevatorDoc(bapData);
             return h.response(docxBuffer)
             .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
             .header('Content-Disposition', `attachment; filename="${fileName}"`)
@@ -191,6 +192,106 @@ const elevatorHandlers = {
     }
 };
 
+const eskalatorHandlers = {
+  /**
+   * HANDLER UNTUK LAPORAN ESKALATOR
+   */
+  laporan: {
+    create: async (request, h) => {
+      try {
+        const newLaporan = await eskalatorServices.laporan.create(request.payload);
+        return h.response({ status: 'success', message: 'Laporan eskalator berhasil dibuat', data: { laporan: newLaporan } }).code(201);
+      } catch (error) {
+        console.error('Error in createLaporanEskalatorHandler:', error);
+        return Boom.badImplementation('Terjadi kesalahan pada server saat menyimpan laporan eskalator.');
+      }
+    },
+
+    getAll: async (request, h) => {
+      try {
+        const allLaporan = await eskalatorServices.laporan.getAll();
+        return { status: 'success', message:'Data laporan eskalator berhasil didapatkan', data: { laporan: allLaporan } };
+      } catch (error) {
+        console.error('Error in getAllLaporanEskalatorHandler:', error);
+        return Boom.badImplementation('Terjadi kesalahan pada server saat mengambil daftar laporan eskalator.');
+      }
+    },
+
+    getById: async (request, h) => {
+      try {
+        const { id } = request.params;
+        const laporan = await eskalatorServices.laporan.getById(id);
+        if (!laporan) {
+          return Boom.notFound('Laporan eskalator dengan ID tersebut tidak ditemukan.');
+        }
+        return { status: 'success',message: 'Data Laporan eskalator berhasil didapatkan', data: { laporan } };
+      } catch (error) {
+        console.error('Error in getLaporanEskalatorByIdHandler:', error);
+        return Boom.badImplementation('Terjadi kesalahan pada server saat mengambil laporan eskalator.');
+      }
+    },
+
+    update: async (request, h) => {
+      try {
+        const { id } = request.params;
+        const updatedLaporan = await eskalatorServices.laporan.updateById(id, request.payload);
+        if (!updatedLaporan) {
+          return Boom.notFound('Gagal memperbarui. Laporan eskalator dengan ID tersebut tidak ditemukan.');
+        }
+        return h.response({ status: 'success', message: 'Laporan eskalator berhasil diperbarui', data: { laporan: updatedLaporan } });
+      } catch (error) {
+        console.error('Error in updateLaporanEskalatorByIdHandler:', error);
+        return Boom.badImplementation('Terjadi kesalahan pada server saat memperbarui laporan eskalator.');
+      }
+    },
+
+    delete: async (request, h) => {
+      try {
+        const { id } = request.params;
+        const deletedId = await eskalatorServices.laporan.deleteById(id);
+        if (!deletedId) {
+          return Boom.notFound('Gagal menghapus. Laporan eskalator dengan ID tersebut tidak ditemukan.');
+        }
+        return { status: 'success', message: 'Laporan eskalator berhasil dihapus' };
+      } catch (error) {
+        console.error('Error in deleteLaporanEskalatorByIdHandler:', error);
+        return Boom.badImplementation('Terjadi kesalahan pada server saat menghapus laporan eskalator.');
+      }
+    },
+
+    download: async (request, h) => {
+      try {
+        const { id } = request.params;
+        const laporanData = await eskalatorServices.laporan.getById(id);
+
+        if (!laporanData) {
+          return Boom.notFound('Gagal membuat dokumen. Laporan dengan ID tersebut tidak ditemukan.');
+        }
+
+        // Panggil fungsi generator dengan data dari Firestore
+        const { docxBuffer, fileName } = await generateLaporanEskalatorDoc(laporanData);
+
+        // Kirim buffer sebagai file download
+        return h.response(docxBuffer)
+          .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+          .header('Content-Disposition', `attachment; filename="${fileName}"`)
+          .header('message', 'Laporan berhasil diunduh');
+
+      } catch (error) {
+        console.error('Error in downloadLaporanEskalatorHandler:', error);
+        // Cek apakah error berasal dari generator atau error server lain
+        if (error.message.includes('Gagal membuat dokumen')) {
+            return Boom.badImplementation(error.message);
+        }
+        return Boom.badImplementation('Terjadi kesalahan pada server saat memproses dokumen.');
+      }
+    },
+  },
+  // Nanti, object 'bap' akan ditambahkan di sini
+};
+  
+
 module.exports = {
   elevatorHandlers,
+  eskalatorHandlers
 };

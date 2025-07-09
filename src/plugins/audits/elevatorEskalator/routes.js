@@ -2,14 +2,17 @@
 
 const Joi = require('joi');
 const { elevatorHandlers } = require('./handlers'); 
+const { eskalatorHandlers } = require('./handlers')
 
 // DIUBAH: Nama variabel disesuaikan dengan nama yang diekspor (laporanElevatorPayload)
 const { laporanElevatorPayload } = require('./schemas/elevator/laporan'); 
 const { bapElevatorPayload } = require('./schemas/elevator/bap');
+const { laporanEskalatorPayload } = require('./schemas/eskalator/laporan');
 
-// Definisikan semua prefix API agar rapi
+// Definisikan semua prefix API
 const LAPORAN_ELEVATOR_PREFIX = '/elevatorEskalator/elevator/laporan';
 const BAP_ELEVATOR_PREFIX = '/elevatorEskalator/elevator/bap';
+const LAPORAN_ESKALATOR_PREFIX = '/elevatorEskalator/eskalator/laporan'
 
 module.exports = [
     /**
@@ -164,4 +167,81 @@ module.exports = [
             validate: { params: Joi.object({ id: Joi.string().required() }) } 
         },
     },
+
+    /**
+     * ENDPOINTS UNTUK LAPORAN ESKALATOR
+     */
+    {
+        method: 'POST',
+        path: LAPORAN_ESKALATOR_PREFIX,
+        handler: eskalatorHandlers.laporan.create,
+        options: {
+            auth: 'jwt',
+            description: 'Membuat data laporan eskalator baru',
+            tags: ['api', 'laporan Eskalator'],
+            validate: { payload: laporanEskalatorPayload }
+        },
+    },
+    {
+        method: 'GET',
+        path: LAPORAN_ESKALATOR_PREFIX,
+        handler: eskalatorHandlers.laporan.getAll,
+        options: {
+            auth: 'jwt',
+            description: 'Mengambil semua data laporan eskalator',
+            tags: ['api', 'laporan Eskalator'],
+        },
+    },
+    {
+        method: 'GET',
+        path: `${LAPORAN_ESKALATOR_PREFIX}/{id}`,
+        handler: eskalatorHandlers.laporan.getById,
+        options: {
+            auth: 'jwt',
+            description: 'Mengambil data laporan eskalator berdasarkan ID',
+            tags: ['api', 'laporan Eskalator'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) },
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${LAPORAN_ESKALATOR_PREFIX}/{id}`,
+        handler: eskalatorHandlers.laporan.update,
+        options: {
+            auth: 'jwt',
+            description: 'Memperbarui data laporan eskalator berdasarkan ID',
+            tags: ['api', 'laporan Eskalator'],
+            validate: {
+                params: Joi.object({ id: Joi.string().required() }),
+                payload: laporanEskalatorPayload,
+            },
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${LAPORAN_ESKALATOR_PREFIX}/{id}`,
+        handler: eskalatorHandlers.laporan.delete,
+        options: {
+            auth: 'jwt',
+            description: 'Menghapus data laporan eskalator berdasarkan ID',
+            tags: ['api', 'laporan Eskalator'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) },
+        },
+    },
+    {
+        method: 'GET',
+        path: `${LAPORAN_ESKALATOR_PREFIX}/download/{id}`,
+        handler: eskalatorHandlers.laporan.download,
+        options: {
+            auth: 'jwt',
+            description: 'Download dokumen laporan eskalator berdasarkan ID',
+            tags: ['api', 'laporan Eskalator'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) },
+        },
+    },
+    
+    /**
+     * ENDPOINTS UNTUK BAP ELEVATOR
+     */
+    // ... (routing BAP elevator yang sudah ada)
 ];
