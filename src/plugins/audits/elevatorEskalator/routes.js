@@ -8,11 +8,14 @@ const { eskalatorHandlers } = require('./handlers')
 const { laporanElevatorPayload } = require('./schemas/elevator/laporan'); 
 const { bapElevatorPayload } = require('./schemas/elevator/bap');
 const { laporanEskalatorPayload } = require('./schemas/eskalator/laporan');
+const { bapEskalatorPayload } = require('./schemas/eskalator/bap');
+
 
 // Definisikan semua prefix API
 const LAPORAN_ELEVATOR_PREFIX = '/elevatorEskalator/elevator/laporan';
 const BAP_ELEVATOR_PREFIX = '/elevatorEskalator/elevator/bap';
 const LAPORAN_ESKALATOR_PREFIX = '/elevatorEskalator/eskalator/laporan'
+const BAP_ESKALATOR_PREFIX = '/elevatorEskalator/eskalator/bap';
 
 module.exports = [
     /**
@@ -241,7 +244,81 @@ module.exports = [
     },
     
     /**
-     * ENDPOINTS UNTUK BAP ELEVATOR
+     * ENDPOINTS UNTUK BAP ESKALATOR
      */
-    // ... (routing BAP elevator yang sudah ada)
+    {
+        method: 'GET',
+        path: `${BAP_ESKALATOR_PREFIX}/prefill/{LaporanId}`,
+        handler: eskalatorHandlers.bap.prefill,
+        options: {
+            auth: 'jwt',
+            description: 'Mengambil data dari laporan eskalator untuk mengisi form BAP',
+            tags: ['api', 'BAP Eskalator'],
+            validate: { params: Joi.object({ LaporanId: Joi.string().required() }) },
+        },
+    },
+    {
+        method: 'POST',
+        path: BAP_ESKALATOR_PREFIX,
+        handler: eskalatorHandlers.bap.create,
+        options: { 
+            auth: 'jwt', 
+            description: 'Membuat BAP eskalator baru', 
+            tags: ['api', 'BAP Eskalator'], 
+            validate: { payload: bapEskalatorPayload } 
+        },
+    },
+    {
+        method: 'GET',
+        path: BAP_ESKALATOR_PREFIX,
+        handler: eskalatorHandlers.bap.getAll,
+        options: { auth: 'jwt', description: 'Mengambil semua data BAP eskalator', tags: ['api', 'BAP Eskalator'] },
+    },
+    {
+        method: 'GET',
+        path: `${BAP_ESKALATOR_PREFIX}/{id}`,
+        handler: eskalatorHandlers.bap.getById,
+        options: { 
+            auth: 'jwt', 
+            description: 'Mengambil data BAP eskalator berdasarkan ID', 
+            tags: ['api', 'BAP Eskalator'], 
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${BAP_ESKALATOR_PREFIX}/{id}`,
+        handler: eskalatorHandlers.bap.update,
+        options: { 
+            auth: 'jwt', 
+            description: 'Memperbarui data BAP eskalator berdasarkan ID', 
+            tags: ['api', 'BAP Eskalator'], 
+            validate: { 
+                params: Joi.object({ id: Joi.string().required() }), 
+                payload: bapEskalatorPayload 
+            } 
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${BAP_ESKALATOR_PREFIX}/{id}`,
+        handler: eskalatorHandlers.bap.delete,
+        options: { 
+            auth: 'jwt', 
+            description: 'Menghapus data BAP eskalator berdasarkan ID', 
+            tags: ['api', 'BAP Eskalator'], 
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+    {
+        method: 'GET',
+        path: `${BAP_ESKALATOR_PREFIX}/download/{id}`,
+        handler: eskalatorHandlers.bap.download,
+        options: { 
+            auth: 'jwt', 
+            description: 'Download dokumen BAP eskalator berdasarkan ID', 
+            tags: ['api', 'BAP Eskalator'], 
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
 ];

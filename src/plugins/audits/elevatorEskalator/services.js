@@ -254,7 +254,106 @@ const eskalatorServices = {
             return id;
         },
     },
-    // Nanti, object 'bap' untuk eskalator akan ditambahkan di sini
+    
+      /**
+   * KUMPULAN FUNGSI UNTUK BAP ESKALATOR
+   */
+    bap: {
+        /**
+         * Mengambil data dari Laporan Eskalator untuk prefill form BAP.
+         */
+        getDataForPrefill: async (laporanId) => {
+        const laporanDoc = await auditCollection.doc(laporanId).get();
+        if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Eskalator') {
+            return null;
+        }
+        const d = laporanDoc.data();
+        return {
+            laporanId,
+            examinationType: d.generalData?.examinationType || "",
+            inspectionType: d.inspectionType || "",
+            inspectionDate: d.generalData?.inspectionDate || "",
+            generalData: d.generalData || {},
+            technicalData: d.technicalData || {},
+            visualInspection: {}, // Dikosongkan untuk diisi
+            testing: {} // Dikosongkan untuk diisi
+        };
+        },
+
+        /**
+         * Membuat BAP Eskalator baru dan menyinkronkan data kembali ke Laporan.
+         */
+        create: async (payload) => {
+        const { laporanId } = payload;
+        const laporanDocRef = auditCollection.doc(laporanId);
+        const laporanDoc = await laporanDocRef.get();
+
+        if (!laporanDoc.exists) throw Boom.notFound('Laporan Eskalator dengan ID tersebut tidak ditemukan.');
+        
+        // Update data yang sama di Laporan
+        const dataToSync = {
+            'generalData.examinationType': payload.examinationType,
+            'generalData.inspectionDate': payload.inspectionDate,
+        };
+        await laporanDocRef.update(dataToSync);
+        
+        const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+        const dataToSave = { ...payload, subInspectionType: "Eskalator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
+        const docRef = await auditCollection.add(dataToSave);
+        
+        return { id: docRef.id, ...dataToSave };
+        },
+        
+        /**
+         * Mengambil semua dokumen BAP Eskalator.
+         */
+        getAll: async () => {
+        const snapshot = await auditCollection.where('subInspectionType', '==', 'Eskalator').where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian').orderBy('createdAt', 'desc').get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+
+        /**
+         * Mengambil satu dokumen BAP Eskalator berdasarkan ID.
+         */
+        getById: async (id) => {
+        const doc = await auditCollection.doc(id).get();
+        if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Eskalator') return null;
+        return { id: doc.id, ...doc.data() };
+        },
+
+        /**
+         * Memperbarui dokumen BAP Eskalator berdasarkan ID dan sinkronisasi ke Laporan.
+         */
+        updateById: async (id, payload) => {
+        const docRef = auditCollection.doc(id);
+        const doc = await docRef.get();
+        if (!doc.exists) return null;
+        
+        await docRef.update(payload);
+
+        // Sinkronisasi kembali ke Laporan jika ada
+        if (payload.laporanId) {
+            const dataToSync = {
+                'generalData.examinationType': payload.examinationType,
+                'generalData.inspectionDate': payload.inspectionDate,
+            };
+            await auditCollection.doc(payload.laporanId).update(dataToSync);
+        }
+        
+        const updatedDoc = await docRef.get();
+        return { id: updatedDoc.id, ...updatedDoc.data() };
+        },
+
+        /**
+         * Menghapus dokumen BAP Eskalator berdasarkan ID.
+         */
+        deleteById: async (id) => {
+        const docRef = auditCollection.doc(id);
+        if (!(await docRef.get()).exists) return null;
+        await docRef.delete();
+        return id;
+        },
+    }
 };
 
 

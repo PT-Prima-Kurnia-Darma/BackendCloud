@@ -5,6 +5,7 @@ const { elevatorServices, eskalatorServices } = require('./services');
 const { createLaporanElevator: generateLaporanElevatorDoc } = require('../../../services/documentGenerator/elevatorEskalator/elevator/laporan/generator');
 const { createBapElevator: generateBapElevatorDoc } = require('../../../services/documentGenerator/elevatorEskalator/elevator/bap/generator')
 const { createLaporanEskalator: generateLaporanEskalatorDoc} = require('../../../services/documentGenerator/elevatorEskalator/eskalator/laporan/generator')
+const { createBapEskalator: generateBapEskalatorDoc } = require('../../../services/documentGenerator/elevatorEskalator/eskalator/bap/generator');
 
 const elevatorHandlers = {
   /**
@@ -287,7 +288,94 @@ const eskalatorHandlers = {
       }
     },
   },
-  // Nanti, object 'bap' akan ditambahkan di sini
+ 
+    /**
+   * HANDLER UNTUK BAP ESKALATOR
+   */
+  bap: {
+    prefill: async (request, h) => {
+        try {
+            const { LaporanId } = request.params;
+            const prefilledData = await eskalatorServices.bap.getDataForPrefill(LaporanId);
+            if (!prefilledData) return Boom.notFound('Data laporan eskalator dengan ID tersebut tidak ditemukan untuk prefill.');
+            return h.response({ status: 'success', message: 'Data BAP berhasil didapatkan', data: prefilledData });
+        } catch (error) {
+            console.error('Error in BAP eskalator prefill handler:', error);
+            return Boom.badImplementation('Gagal mengambil data untuk BAP eskalator.');
+        }
+    },
+
+    create: async (request, h) => {
+      try {
+        const newBap = await eskalatorServices.bap.create(request.payload);
+        return h.response({ status: 'success', message: 'BAP eskalator berhasil dibuat', data: { bap: newBap } }).code(201);
+      } catch (error) {
+        if (error.isBoom) return error;
+        console.error('Error in create BAP eskalator handler:', error);
+        return Boom.badImplementation('Terjadi kesalahan pada server saat membuat BAP eskalator.');
+      }
+    },
+
+    getAll: async (request, h) => {
+        try {
+            const allBap = await eskalatorServices.bap.getAll();
+            return { status: 'success', message: 'Semua data BAP eskalator berhasil didapatkan', data: { bap: allBap } };
+        } catch (error) {
+            console.error('Error in getAll BAP eskalator handler:', error);
+            return Boom.badImplementation('Gagal mengambil semua BAP eskalator.');
+        }
+    },
+
+    getById: async (request, h) => {
+        try {
+            const bap = await eskalatorServices.bap.getById(request.params.id);
+            if (!bap) return Boom.notFound('BAP eskalator dengan ID tersebut tidak ditemukan.');
+            return { status: 'success', message: 'Data BAP eskalator berhasil didapatkan', data: { bap } };
+        } catch (error) {
+            console.error('Error in get BAP eskalator by ID handler:', error);
+            return Boom.badImplementation('Gagal mengambil BAP eskalator.');
+        }
+    },
+
+    update: async (request, h) => {
+        try {
+            const updatedBap = await eskalatorServices.bap.updateById(request.params.id, request.payload);
+            if (!updatedBap) return Boom.notFound('Gagal memperbarui, BAP eskalator tidak ditemukan.');
+            return { status: 'success', message: 'BAP eskalator berhasil diperbarui', data: { bap: updatedBap } };
+        } catch (error) {
+            console.error('Error in update BAP eskalator handler:', error);
+            return Boom.badImplementation('Gagal memperbarui BAP eskalator.');
+        }
+    },
+
+    delete: async (request, h) => {
+        try {
+            const deletedId = await eskalatorServices.bap.deleteById(request.params.id);
+            if (!deletedId) return Boom.notFound('Gagal menghapus, BAP eskalator tidak ditemukan.');
+            return { status: 'success', message: 'BAP eskalator berhasil dihapus' };
+        } catch (error) {
+            console.error('Error in delete BAP eskalator handler:', error);
+            return Boom.badImplementation('Gagal menghapus BAP eskalator.');
+        }
+    },
+
+    download: async (request, h) => {
+      try {
+          const bapData = await eskalatorServices.bap.getById(request.params.id);
+          if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP eskalator tidak ditemukan.');
+          
+          const { docxBuffer, fileName } = await generateBapEskalatorDoc(bapData);
+
+          return h.response(docxBuffer)
+          .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+          .header('Content-Disposition', `attachment; filename="${fileName}"`)
+          .header('message', 'BAP Eskalator berhasil diunduh');
+      } catch (error) {
+          console.error('Error in download BAP eskalator handler:', error);
+          return Boom.badImplementation('Gagal membuat dokumen BAP eskalator untuk diunduh.');
+      }
+    },
+  }
 };
   
 
