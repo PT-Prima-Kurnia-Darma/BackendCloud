@@ -52,15 +52,22 @@ const createBapEskalator = async (data) => {
     const v = data.visualInspection || {};
     const t = data.testing || {};
     
-    const renderData = {
+const renderData = {
         // Data Utama & Umum
         ...data.generalData,
         examinationType: data.examinationType,
         inspectionType: data.inspectionType,
         inspectionDate: data.inspectionDate,
 
-        // Data Teknis
-        ...data.technicalData,
+        // Data Teknis (Ditulis secara eksplisit untuk kejelasan)
+        equipmentType: data.technicalData?.equipmentType,
+        technicalDatamanufacturer: data.technicalData?.technicalDatamanufacturer,
+        technicalDatabrand: data.technicalData?.technicalDatabrand,
+        technicalDatacountryAndYear: data.technicalData?.technicalDatacountryAndYear,
+        technicalDataserialNumber: data.technicalData?.technicalDataserialNumber,
+        technicalDatacapacity: data.technicalData?.technicalDatacapacity,
+        technicalDataspeed: data.technicalData?.technicalDataspeed,
+        technicalDatatransports: data.technicalData?.technicalDatatransports,
 
         // Pemeriksaan Visual
         isMachineRoomConditionAcceptable: formatBooleanToText(v.isMachineRoomConditionAcceptable, 'layak', 'tidak layak'),
