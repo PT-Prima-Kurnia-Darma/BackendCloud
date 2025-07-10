@@ -19,7 +19,8 @@ const init = async () => {
 
   await server.register([
     require('./src/plugins/auth'),
-    require('./src/plugins/audits/elevatorEskalator')
+    require('./src/plugins/audits/elevatorEskalator'),
+    require('./src/plugins/audits/paa')
   ]);
 
   // Logging sederhana
