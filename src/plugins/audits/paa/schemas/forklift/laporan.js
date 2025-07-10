@@ -2,13 +2,13 @@
 
 const Joi = require('joi');
 
-// Skema kecil untuk item pemeriksaan
-const inspectionCheckSchema = Joi.object({
-    status: Joi.boolean().allow(null, ''),
+// Skema untuk setiap item inspeksi (result dan status boolean)
+const inspectionItemSchema = Joi.object({
+    status: Joi.boolean().allow(null),
     result: Joi.string().allow('', null).optional()
-}).unknown(true); // Allow other properties if needed
+});
 
-// Skema untuk baris data tabel
+// Skema untuk setiap baris pada tabel inspeksi rantai
 const chainInspectionItemSchema = Joi.object({
     inspectedPart: Joi.string().allow('').optional(),
     constructionType: Joi.string().allow('').optional(),
@@ -16,16 +16,19 @@ const chainInspectionItemSchema = Joi.object({
     measuredPitch: Joi.string().allow('').optional(),
     standardPin: Joi.string().allow('').optional(),
     measuredPin: Joi.string().allow('').optional(),
-    inspectResult: Joi.string().allow('').optional()
-}).unknown(true);
+    result: Joi.string().allow('').optional()
+});
 
+// Skema untuk setiap baris pada tabel NDT
 const nonDestructiveTestItemSchema = Joi.object({
     inspectedPart: Joi.string().allow('').optional(),
     location: Joi.string().allow('').optional(),
-    defect: Joi.boolean().allow(null),
+    defectFound: Joi.string().allow('').optional(),
+    defectNotFound: Joi.string().allow('').optional(),
     result: Joi.string().allow('').optional()
-}).unknown(true);
+});
 
+// Skema untuk setiap baris pada tabel uji beban
 const loadTestItemSchema = Joi.object({
     liftingHeight: Joi.string().allow('').optional(),
     testLoad: Joi.string().allow('').optional(),
@@ -33,15 +36,16 @@ const loadTestItemSchema = Joi.object({
     movement: Joi.string().allow('').optional(),
     remarks: Joi.string().allow('').optional(),
     result: Joi.string().allow('').optional()
-}).unknown(true);
+});
 
-// Skema Utama untuk Laporan Forklift (STRUKTUR FINAL & EKSPLISIT)
+// Skema Utama Laporan Forklift (Struktur Final)
 const laporanForkliftPayload = Joi.object({
-    examinationType: Joi.string().allow('').optional(),
-    subInspectionType: Joi.string().allow('').optional(),
-    
+    inspectionType: Joi.string().allow('').optional(),
+    equipmentType: Joi.string().allow('').optional(), // Diganti dari subInspectionType
+    inspectionDate: Joi.string().allow('').optional(), // inspectionDate dipindah ke root
+
     generalData: Joi.object({
-        ownerName: Joi.string().allow('').optional(), // Typo diperbaiki
+        ownerNamwe: Joi.string().allow('').optional(), // Typo 'ownerNamwe' dipertahankan sesuai template
         ownerAddress: Joi.string().allow('').optional(),
         userInCharge: Joi.string().allow('').optional(),
         subcontractorPersonInCharge: Joi.string().allow('').optional(),
@@ -55,286 +59,218 @@ const laporanForkliftPayload = Joi.object({
         capacityWorkingLoad: Joi.string().allow('').optional(),
         intendedUse: Joi.string().allow('').optional(),
         certificateNumber: Joi.string().allow('').optional(),
-        equipmentHistory: Joi.string().allow('').optional(),
-        inspectionDate: Joi.string().allow('').optional()
+        equipmentHistory: Joi.string().allow('').optional()
     }).optional(),
 
     technicalData: Joi.object({
-        specification: Joi.object({
-            serialNumber: Joi.string().allow('').optional(),
-            capacity: Joi.string().allow('').optional(),
-            attachment: Joi.string().allow('').optional(),
-            forkDimensions: Joi.string().allow('').optional()
-        }).optional(),
-        speed: Joi.object({
-            lifting: Joi.string().allow('').optional(),
-            lowering: Joi.string().allow('').optional(),
-            travelling: Joi.string().allow('').optional()
-        }).optional(),
-        primeMover: Joi.object({
-            brandType: Joi.string().allow('').optional(),
-            serialNumber: Joi.string().allow('').optional(),
-            yearOfManufacture: Joi.string().allow('').optional(),
-            revolution: Joi.string().allow('').optional(),
-            power: Joi.string().allow('').optional(),
-            numberOfCylinders: Joi.string().allow('').optional()
-        }).optional(),
-        dimension: Joi.object({
-            length: Joi.string().allow('').optional(),
-            width: Joi.string().allow('').optional(),
-            height: Joi.string().allow('').optional(),
-            forkLiftingHeight: Joi.string().allow('').optional()
-        }).optional(),
-        tirePressure: Joi.object({
-            driveWheel: Joi.string().allow('').optional(),
-            steeringWheel: Joi.string().allow('').optional()
-        }).optional(),
-        driveWheel: Joi.object({
-            size: Joi.string().allow('').optional(),
-            type: Joi.string().allow('').optional()
-        }).optional(),
-        steeringWheel: Joi.object({
-            size: Joi.string().allow('').optional(),
-            type: Joi.string().allow('').optional()
-        }).optional(),
-        travellingBrake: Joi.object({
-            size: Joi.string().allow('').optional(),
-            type: Joi.string().allow('').optional()
-        }).optional(),
-        hydraulicPump: Joi.object({
-            pressure: Joi.string().allow('').optional(),
-            type: Joi.string().allow('').optional(),
-            reliefValve: Joi.string().allow('').optional()
-        }).optional()
+        specificationSerialNumber: Joi.string().allow('').optional(),
+        specificationCapacity: Joi.string().allow('').optional(),
+        specificationAttachment: Joi.string().allow('').optional(),
+        specificationForkDimensions: Joi.string().allow('').optional(),
+        specificationSpeedLifting: Joi.string().allow('').optional(),
+        specificationSpeedLowering: Joi.string().allow('').optional(),
+        specificationSpeedTravelling: Joi.string().allow('').optional(),
+        primeMoverBrandType: Joi.string().allow('').optional(),
+        primeMoverSerialNumber: Joi.string().allow('').optional(),
+        primeMoverYearOfManufacture: Joi.string().allow('').optional(),
+        primeMoverRevolution: Joi.string().allow('').optional(),
+        primeMoverPower: Joi.string().allow('').optional(),
+        primeMoverNumberOfCylinders: Joi.string().allow('').optional(),
+        dimensionLength: Joi.string().allow('').optional(),
+        dimensionWidth: Joi.string().allow('').optional(),
+        dimensionHeight: Joi.string().allow('').optional(),
+        dimensionForkLiftingHeight: Joi.string().allow('').optional(),
+        tirePressureDriveWheel: Joi.string().allow('').optional(),
+        tirePressureSteeringWheel: Joi.string().allow('').optional(),
+        driveWheelSize: Joi.string().allow('').optional(),
+        driveWheelType: Joi.string().allow('').optional(),
+        steeringWheelSize: Joi.string().allow('').optional(),
+        steeringWheelType: Joi.string().allow('').optional(),
+        travellingBrakeSize: Joi.string().allow('').optional(),
+        travellingBrakeType: Joi.string().allow('').optional(),
+        hydraulicPumpPressure: Joi.string().allow('').optional(),
+        hydraulicPumpType: Joi.string().allow('').optional(),
+        hydraulicPumpReliefValve: Joi.string().allow('').optional()
     }).optional(),
 
-    visualAndFunctionCheck: Joi.object({
-        mainFrameChassis: Joi.object({
-            reinforcingFrame: Joi.object({
-                corrosion: inspectionCheckSchema,
-                cracks: inspectionCheckSchema,
-                deformation: inspectionCheckSchema
-            }).optional()
-        }).optional(),
-        counterweight: Joi.object({
-            corrosion: inspectionCheckSchema,
-            condition: inspectionCheckSchema
-        }).optional(),
-        otherEquipment: Joi.object({
-            floorDeck: inspectionCheckSchema,
-            stairsSteps: inspectionCheckSchema,
-            fasteningBolts: inspectionCheckSchema,
-            operatorSeat: inspectionCheckSchema
+    inspectionAndTesting: Joi.object({
+        mainFrameAndChassis: Joi.object({
+            reinforcingFrameCorrosionResult: inspectionItemSchema,
+            reinforcingFrameCracksResult: inspectionItemSchema,
+            reinforcingFrameDeformationResult: inspectionItemSchema,
+            counterweightCorrosionResult: inspectionItemSchema,
+            counterweightConditionResult: inspectionItemSchema,
+            otherEquipmentFloorDeckResult: inspectionItemSchema,
+            otherEquipmentStairsStepsResult: inspectionItemSchema,
+            otherEquipmentFasteningBoltsResult: inspectionItemSchema,
+            otherEquipmentOperatorSeatResult: inspectionItemSchema
         }).optional(),
         primeMover: Joi.object({
-            system: Joi.object({
-                cooling: inspectionCheckSchema,
-                lubrication: inspectionCheckSchema,
-                fuel: inspectionCheckSchema,
-                airIntake: inspectionCheckSchema,
-                exhaustGas: inspectionCheckSchema,
-                starter: inspectionCheckSchema
-            }).optional(),
-            electrical: Joi.object({
-                battery: inspectionCheckSchema,
-                startingDynamo: inspectionCheckSchema,
-                alternator: inspectionCheckSchema,
-                batteryCable: inspectionCheckSchema,
-                installationCable: inspectionCheckSchema,
-                lightingLamps: inspectionCheckSchema,
-                safetySignalLamps: inspectionCheckSchema,
-                horn: inspectionCheckSchema,
-                fuse: inspectionCheckSchema
-            }).optional()
+            systemCoolingResult: inspectionItemSchema,
+            systemLubricationResult: inspectionItemSchema,
+            systemFuelResult: inspectionItemSchema,
+            systemAirIntakeResult: inspectionItemSchema,
+            systemExhaustGasResult: inspectionItemSchema,
+            systemStarterResult: inspectionItemSchema,
+            electricalBatteryResult: inspectionItemSchema,
+            electricalStartingDynamoResult: inspectionItemSchema,
+            electricalAlternatorResult: inspectionItemSchema,
+            electricalBatteryCableResult: inspectionItemSchema,
+            electricalInstallationCableResult: inspectionItemSchema,
+            electricalLightingLampsResult: inspectionItemSchema,
+            electricalSafetyLampsResult: inspectionItemSchema,
+            electricalHornResult: inspectionItemSchema,
+            electricalFuseResult: inspectionItemSchema
         }).optional(),
         dashboard: Joi.object({
-            temperatureIndicator: inspectionCheckSchema,
-            engineOilPressure: inspectionCheckSchema,
-            hydraulicPressure: inspectionCheckSchema,
-            hourMeter: inspectionCheckSchema,
-            glowPlug: inspectionCheckSchema,
-            fuelIndicator: inspectionCheckSchema,
-            loadIndicator: inspectionCheckSchema,
-            loadChart: inspectionCheckSchema
+            tempIndicatorResult: inspectionItemSchema,
+            oilPressureResult: inspectionItemSchema,
+            hydraulicPressureResult: inspectionItemSchema,
+            hourMeterResult: inspectionItemSchema,
+            glowPlugResult: inspectionItemSchema,
+            fuelIndicatorResult: inspectionItemSchema,
+            loadIndicatorResult: inspectionItemSchema,
+            loadChartResult: inspectionItemSchema
         }).optional(),
         powerTrain: Joi.object({
-            steeringSystem: Joi.object({
-                starterDynamo: inspectionCheckSchema,
-                wheelSteering: inspectionCheckSchema,
-                steeringRod: inspectionCheckSchema,
-                gearBox: inspectionCheckSchema,
-                pitmanArm: inspectionCheckSchema,
-                dragLink: inspectionCheckSchema,
-                tieRod: inspectionCheckSchema,
-                lubrication: inspectionCheckSchema
-            }).optional(),
-            wheels: Joi.object({
-                frontDriveWheel: inspectionCheckSchema,
-                rearSteeringWheel: inspectionCheckSchema,
-                fasteningBolts: inspectionCheckSchema,
-                drumHub: inspectionCheckSchema,
-                lubrication: inspectionCheckSchema,
-                mechanicalParts: inspectionCheckSchema
-            }).optional(),
-            clutch: Joi.object({
-                clutchHousing: inspectionCheckSchema,
-                clutchCondition: inspectionCheckSchema,
-                transmissionOil: inspectionCheckSchema,
-                transmissionLeakage: inspectionCheckSchema,
-                connectingShaft: inspectionCheckSchema,
-                mechanicalParts: inspectionCheckSchema
-            }).optional(),
-            differential: Joi.object({
-                differentialHousing: inspectionCheckSchema,
-                differentialCondition: inspectionCheckSchema,
-                differentialOil: inspectionCheckSchema,
-                differentialLeakage: inspectionCheckSchema,
-                connectingShaft: inspectionCheckSchema
-            }).optional(),
-            brakes: Joi.object({
-                mainBrake: inspectionCheckSchema,
-                handBrake: inspectionCheckSchema,
-                emergencyBrake: inspectionCheckSchema,
-                leakage: inspectionCheckSchema,
-                mechanicalComponents: inspectionCheckSchema
-            }).optional(),
-            transmission: Joi.object({
-                transmissionHousing: inspectionCheckSchema,
-                transmissionOil: inspectionCheckSchema,
-                transmissionLeakage: inspectionCheckSchema,
-                mechanicalParts: inspectionCheckSchema
-            }).optional()
+            starterDynamoResult: inspectionItemSchema,
+            steeringWheelResult: inspectionItemSchema,
+            steeringRodResult: inspectionItemSchema,
+            steeringGearBoxResult: inspectionItemSchema,
+            steeringPitmanResult: inspectionItemSchema,
+            steeringDragLinkResult: inspectionItemSchema,
+            steeringTieRodResult: inspectionItemSchema,
+            steeringLubeResult: inspectionItemSchema,
+            wheelsFrontResult: inspectionItemSchema,
+            wheelsRearResult: inspectionItemSchema,
+            wheelsBoltsResult: inspectionItemSchema,
+            wheelsDrumResult: inspectionItemSchema,
+            wheelsLubeResult: inspectionItemSchema,
+            wheelsMechanicalResult: inspectionItemSchema,
+            clutchHousingResult: inspectionItemSchema,
+            clutchConditionResult: inspectionItemSchema,
+            clutchTransOilResult: inspectionItemSchema,
+            clutchTransLeakResult: inspectionItemSchema,
+            clutchShaftResult: inspectionItemSchema,
+            clutchMechanicalResult: inspectionItemSchema,
+            diffHousingResult: inspectionItemSchema,
+            diffConditionResult: inspectionItemSchema,
+            diffOilResult: inspectionItemSchema,
+            diffLeakResult: inspectionItemSchema,
+            diffShaftResult: inspectionItemSchema,
+            brakesMainResult: inspectionItemSchema,
+            brakesHandResult: inspectionItemSchema,
+            brakesEmergencyResult: inspectionItemSchema,
+            brakesLeakResult: inspectionItemSchema,
+            brakesMechanicalResult: inspectionItemSchema,
+            transHousingResult: inspectionItemSchema,
+            transOilResult: inspectionItemSchema,
+            transLeakResult: inspectionItemSchema,
+            transMechanicalResult: inspectionItemSchema
+        }).optional(),
+        attachments: Joi.object({
+            mastWearResult: inspectionItemSchema,
+            mastCracksResult: inspectionItemSchema,
+            mastDeformationResult: inspectionItemSchema,
+            mastLubeResult: inspectionItemSchema,
+            mastShaftBearingResult: inspectionItemSchema,
+            liftChainConditionResult: inspectionItemSchema,
+            liftChainDeformationResult: inspectionItemSchema,
+            liftChainLubeResult: inspectionItemSchema
+        }).optional(),
+        personalBasketAndHandrail: Joi.object({
+            basketFloorCorrosionResult: inspectionItemSchema,
+            basketFloorCracksResult: inspectionItemSchema,
+            basketFloorDeformationResult: inspectionItemSchema,
+            basketFloorFasteningResult: inspectionItemSchema,
+            basketFrameCorrosionResult: inspectionItemSchema,
+            basketFrameCracksResult: inspectionItemSchema,
+            basketFrameDeformationResult: inspectionItemSchema,
+            basketFrameCrossBracingResult: inspectionItemSchema,
+            basketFrameDiagonalBracingResult: inspectionItemSchema,
+            basketBoltsCorrosionResult: inspectionItemSchema,
+            basketBoltsCracksResult: inspectionItemSchema,
+            basketBoltsDeformationResult: inspectionItemSchema,
+            basketBoltsFasteningResult: inspectionItemSchema,
+            basketDoorCorrosionResult: inspectionItemSchema,
+            basketDoorCracksResult: inspectionItemSchema,
+            basketDoorDeformationResult: inspectionItemSchema,
+            basketDoorFasteningResult: inspectionItemSchema,
+            handrailCracksResult: inspectionItemSchema,
+            handrailWearResult: inspectionItemSchema,
+            handrailCracks2Result: inspectionItemSchema,
+            handrailRailStraightnessResult: inspectionItemSchema,
+            handrailRailJointsResult: inspectionItemSchema,
+            handrailInterRailStraightnessResult: inspectionItemSchema,
+            handrailRailJointGapResult: inspectionItemSchema,
+            handrailRailFastenersResult: inspectionItemSchema,
+            handrailRailStopperResult: inspectionItemSchema
+        }).optional(),
+        hydraulicComponents: Joi.object({
+            tankLeakageResult: inspectionItemSchema,
+            tankOilLevelResult: inspectionItemSchema,
+            tankOilConditionResult: inspectionItemSchema,
+            tankSuctionLineResult: inspectionItemSchema,
+            tankReturnLineResult: inspectionItemSchema,
+            pumpLeakageResult: inspectionItemSchema,
+            pumpSuctionLineResult: inspectionItemSchema,
+            pumpPressureLineResult: inspectionItemSchema,
+            pumpFunctionResult: inspectionItemSchema,
+            pumpNoiseResult: inspectionItemSchema,
+            valveLeakageResult: inspectionItemSchema,
+            valveLineConditionResult: inspectionItemSchema,
+            valveReliefFunctionResult: inspectionItemSchema,
+            valveNoiseResult: inspectionItemSchema,
+            valveLiftCylinderResult: inspectionItemSchema,
+            valveTiltCylinderResult: inspectionItemSchema,
+            valveSteeringCylinderResult: inspectionItemSchema,
+            actuatorLeakageResult: inspectionItemSchema,
+            actuatorLineConditionResult: inspectionItemSchema,
+            actuatorNoiseResult: inspectionItemSchema
+        }).optional(),
+        engineOnChecks: Joi.object({
+            starterDynamoResult: inspectionItemSchema,
+            instrumentResult: inspectionItemSchema,
+            electricalResult: inspectionItemSchema,
+            leakageEngineOilResult: inspectionItemSchema,
+            leakageFuelResult: inspectionItemSchema,
+            leakageCoolantResult: inspectionItemSchema,
+            leakageHydraulicOilResult: inspectionItemSchema,
+            leakageTransmissionOilResult: inspectionItemSchema,
+            leakageFinalDriveOilResult: inspectionItemSchema,
+            leakageBrakeFluidResult: inspectionItemSchema,
+            clutchResult: inspectionItemSchema,
+            transmissionResult: inspectionItemSchema,
+            brakeResult: inspectionItemSchema,
+            hornAlarmResult: inspectionItemSchema,
+            lampsResult: inspectionItemSchema,
+            hydraulicMotorResult: inspectionItemSchema,
+            steeringCylinderResult: inspectionItemSchema,
+            liftingCylinderResult: inspectionItemSchema,
+            tiltingCylinderResult: inspectionItemSchema,
+            exhaustGasResult: inspectionItemSchema,
+            controlLeversResult: inspectionItemSchema,
+            noiseEngineResult: inspectionItemSchema,
+            noiseTurbochargerResult: inspectionItemSchema,
+            noiseTransmissionResult: inspectionItemSchema,
+            noiseHydraulicPumpResult: inspectionItemSchema,
+            noiseProtectiveCoverResult: inspectionItemSchema
         }).optional()
     }).optional(),
 
-    attachments: Joi.object({
-        mast: Joi.object({
-            wear: inspectionCheckSchema,
-            cracks: inspectionCheckSchema,
-            deformation: inspectionCheckSchema,
-            lubrication: inspectionCheckSchema,
-            shaftAndBearings: inspectionCheckSchema
+    testingForklift: Joi.object({
+        liftingChainInspection: Joi.array().items(chainInspectionItemSchema).optional(),
+        nonDestructiveTesting: Joi.object({
+            ndtType: Joi.string().allow('').optional(),
+            results: Joi.array().items(nonDestructiveTestItemSchema).optional()
         }).optional(),
-        liftChain: Joi.object({
-            chainCondition: inspectionCheckSchema,
-            deformation: inspectionCheckSchema,
-            chainLubrication: inspectionCheckSchema
-        }).optional(),
-        personalBasket: Joi.object({
-            workingFloor: Joi.object({
-                corrosion: inspectionCheckSchema,
-                cracks: inspectionCheckSchema,
-                deformation: inspectionCheckSchema,
-                fastening: inspectionCheckSchema
-            }).optional(),
-            basketFrame: Joi.object({
-                corrosion: inspectionCheckSchema,
-                cracks: inspectionCheckSchema,
-                deformation: inspectionCheckSchema,
-                crossBracing: inspectionCheckSchema,
-                diagonalBracing: inspectionCheckSchema
-            }).optional(),
-            fasteningBolts: Joi.object({
-                corrosion: inspectionCheckSchema,
-                cracks: inspectionCheckSchema,
-                deformation: inspectionCheckSchema,
-                fastening: inspectionCheckSchema
-            }).optional(),
-            door: Joi.object({
-                corrosion: inspectionCheckSchema,
-                cracks: inspectionCheckSchema,
-                deformation: inspectionCheckSchema,
-                fastening: inspectionCheckSchema
-            }).optional()
-        }).optional(),
-        handRail: Joi.object({
-            cracks: inspectionCheckSchema,
-            wear: inspectionCheckSchema,
-            cracks2: inspectionCheckSchema,
-            railStraightness: inspectionCheckSchema,
-            railJoints: inspectionCheckSchema,
-            interRailStraightness: inspectionCheckSchema,
-            railJointGap: inspectionCheckSchema,
-            railFasteners: inspectionCheckSchema,
-            railStopper: inspectionCheckSchema
-        }).optional()
+        loadTesting: Joi.array().items(loadTestItemSchema).optional()
     }).optional(),
-
-    hydraulicComponents: Joi.object({
-        tank: Joi.object({
-            leakage: inspectionCheckSchema,
-            oilLevel: inspectionCheckSchema,
-            oilCondition: inspectionCheckSchema,
-            suctionLineCondition: inspectionCheckSchema,
-            returnLineCondition: inspectionCheckSchema
-        }).optional(),
-        pump: Joi.object({
-            leakage: inspectionCheckSchema,
-            suctionLineCondition: inspectionCheckSchema,
-            pressureLineCondition: inspectionCheckSchema,
-            function: inspectionCheckSchema,
-            abnormalNoise: inspectionCheckSchema
-        }).optional(),
-        controlValve: Joi.object({
-            leakage: inspectionCheckSchema,
-            lineCondition: inspectionCheckSchema,
-            reliefValveFunction: inspectionCheckSchema,
-            abnormalNoise: inspectionCheckSchema,
-            liftCylinderValveFunction: inspectionCheckSchema,
-            tiltCylinderValveFunction: inspectionCheckSchema,
-            steeringCylinderValveFunction: inspectionCheckSchema
-        }).optional(),
-        actuator: Joi.object({
-            leakage: inspectionCheckSchema,
-            lineCondition: inspectionCheckSchema,
-            abnormalNoise: inspectionCheckSchema
-        }).optional()
-    }).optional(),
-
-    engineOnCheck: Joi.object({
-        starterDynamo: inspectionCheckSchema,
-        instrumentFunction: inspectionCheckSchema,
-        electricalFunction: inspectionCheckSchema,
-        leakage: Joi.object({
-            engineOil: inspectionCheckSchema,
-            fuel: inspectionCheckSchema,
-            coolant: inspectionCheckSchema,
-            hydraulicOil: inspectionCheckSchema,
-            transmissionOil: inspectionCheckSchema,
-            finalDriveOil: inspectionCheckSchema,
-            brakeFluid: inspectionCheckSchema
-        }).optional(),
-        clutchFunction: inspectionCheckSchema,
-        transmissionFunction: inspectionCheckSchema,
-        brakeFunction: inspectionCheckSchema,
-        hornAndAlarmFunction: inspectionCheckSchema,
-        lampsFunction: inspectionCheckSchema,
-        hydraulicMotorFunction: inspectionCheckSchema,
-        steeringCylinderFunction: inspectionCheckSchema,
-        liftingCylinderFunction: inspectionCheckSchema,
-        tiltingCylinderFunction: inspectionCheckSchema,
-        exhaustGasCondition: inspectionCheckSchema,
-        controlLeversFunction: inspectionCheckSchema,
-        abnormalNoise: Joi.object({
-            fromEngine: inspectionCheckSchema,
-            fromTurbocharger: inspectionCheckSchema,
-            fromTransmission: inspectionCheckSchema,
-            fromHydraulicPump: inspectionCheckSchema,
-            fromProtectiveCover: inspectionCheckSchema
-        }).optional()
-    }).optional(),
-
-    chainInspection: Joi.array().items(chainInspectionItemSchema).optional(),
-    nonDestructiveTest: Joi.object({
-        ndtType: Joi.string().allow('').optional(),
-        inspectedParts: Joi.array().items(nonDestructiveTestItemSchema).optional()
-    }).optional(),
-    loadTest: Joi.array().items(loadTestItemSchema).optional(),
     
     conclusion: Joi.string().allow('').optional(),
-    recommendations: Joi.string().allow('').optional(),
+    recommendation: Joi.string().allow('').optional()
     
-}).min(1).unknown(true); // .unknown(true) untuk sementara mengizinkan field lain
+}).min(1).unknown(true);
 
 module.exports = {
     laporanForkliftPayload,
