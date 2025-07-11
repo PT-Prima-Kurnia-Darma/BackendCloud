@@ -4,7 +4,9 @@ const Boom = require('@hapi/boom');
 const { forkliftServices } = require('./services');
 const { createLaporanForklift: generateLaporanDoc } = require('../../../services/documentGenerator/paa/forklift/laporan/generator');
 const { createBapForklift: generateBapDoc } = require('../../../services/documentGenerator/paa/forklift/bap/generator');
+const { createLaporanMobileCrane: generateMobileCraneDoc } = require('../../../services/documentGenerator/paa/mobileCrane/laporan/generator');
 
+// ---FORKLIFT ---
 const forkliftHandlers = {
     laporan: {
         create: async (request, h) => {
@@ -143,6 +145,71 @@ const forkliftHandlers = {
     }
 };
 
+// ---MOBILE CRANE ---
+const mobileCraneHandlers = {
+    laporan: {
+        create: async (request, h) => {
+            try {
+                const newLaporan = await mobileCraneServices.laporan.create(request.payload);
+                return h.response({ status: 'success', message: 'Laporan Mobile Crane berhasil dibuat', data: { laporan: newLaporan } }).code(201);
+            } catch (error) {
+                return Boom.badImplementation('Gagal membuat Laporan Mobile Crane.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allLaporan = await mobileCraneServices.laporan.getAll();
+                return { status: 'success', data: { laporan: allLaporan } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil daftar Laporan Mobile Crane.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const laporan = await mobileCraneServices.laporan.getById(request.params.id);
+                if (!laporan) return Boom.notFound('Laporan Mobile Crane tidak ditemukan.');
+                return { status: 'success', data: { laporan } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil Laporan Mobile Crane.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await mobileCraneServices.laporan.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, Laporan Mobile Crane tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Mobile Crane berhasil diperbarui', data: { laporan: updated } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal memperbarui Laporan Mobile Crane.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await mobileCraneServices.laporan.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, Laporan Mobile Crane tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Mobile Crane berhasil dihapus' };
+            } catch (error) {
+                return Boom.badImplementation('Gagal menghapus Laporan Mobile Crane.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const laporanData = await mobileCraneServices.laporan.getById(request.params.id);
+                if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan Mobile Crane tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateMobileCraneDoc(laporanData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`);
+            } catch (error) {
+                console.error("Download Error:", error);
+                return Boom.badImplementation('Gagal memproses dokumen Laporan Mobile Crane.');
+            }
+        },
+    },
+};
+
 module.exports = {
     forkliftHandlers,
+    mobileCraneHandlers
 };

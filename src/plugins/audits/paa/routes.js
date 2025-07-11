@@ -4,10 +4,12 @@ const Joi = require('joi');
 const { forkliftHandlers } = require('./handlers');
 const { laporanForkliftPayload } = require('./schemas/forklift/laporan');
 const { bapForkliftPayload } = require('./schemas/forklift/bap');
+const { laporanMobileCranePayload } = require('./schemas/mobileCrane/laporan');
 
 // forlift
 const FORKLIFT_LAPORAN_PREFIX = '/paa/forklift/laporan';
 const FORKLIFT_BAP_PREFIX = '/paa/forklift/bap';
+const MOBILE_CRANE_LAPORAN_PREFIX = '/paa/mobileCrane/laporan';
 
 module.exports = [
     // --- FORKLIFT LAPORAN ROUTES ---
@@ -140,6 +142,67 @@ module.exports = [
             auth: 'jwt', 
             tags: ['api', 'PAA - Forklift BAP'],
             validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+
+      // --- RUTE BARU UNTUK MOBILE CRANE ---
+    {
+        method: 'POST',
+        path: MOBILE_CRANE_LAPORAN_PREFIX,
+        handler: mobileCraneHandlers.laporan.create,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Mobile Crane Laporan'],
+            validate: { payload: laporanMobileCranePayload }
+        },
+    },
+    {
+        method: 'GET',
+        path: MOBILE_CRANE_LAPORAN_PREFIX,
+        handler: mobileCraneHandlers.laporan.getAll,
+        options: { auth: 'jwt', tags: ['api', 'PAA - Mobile Crane Laporan'] },
+    },
+    {
+        method: 'GET',
+        path: `${MOBILE_CRANE_LAPORAN_PREFIX}/{id}`,
+        handler: mobileCraneHandlers.laporan.getById,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Mobile Crane Laporan'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${MOBILE_CRANE_LAPORAN_PREFIX}/{id}`,
+        handler: mobileCraneHandlers.laporan.update,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Mobile Crane Laporan'],
+            validate: {
+                params: Joi.object({ id: Joi.string().required() }),
+                payload: laporanMobileCranePayload
+            }
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${MOBILE_CRANE_LAPORAN_PREFIX}/{id}`,
+        handler: mobileCraneHandlers.laporan.delete,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Mobile Crane Laporan'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'GET',
+        path: `${MOBILE_CRANE_LAPORAN_PREFIX}/download/{id}`,
+        handler: mobileCraneHandlers.laporan.download,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Mobile Crane Laporan'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
         },
     },
 ];
