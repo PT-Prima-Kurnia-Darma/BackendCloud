@@ -1,10 +1,10 @@
 'use strict';
 
 const Boom = require('@hapi/boom');
-const { forkliftServices } = require('./services');
+const { forkliftServices, mobileCraneServices } = require('./services');
 const { createLaporanForklift: generateLaporanDoc } = require('../../../services/documentGenerator/paa/forklift/laporan/generator');
 const { createBapForklift: generateBapDoc } = require('../../../services/documentGenerator/paa/forklift/bap/generator');
-const { createLaporanMobileCrane: generateMobileCraneDoc } = require('../../../services/documentGenerator/paa/mobileCrane/laporan/generator');
+const { createLaporanMobileCrane: generateMobileCraneLaporanDoc } = require('../../../services/documentGenerator/paa/mobileCrane/laporan/generator')
 
 // ---FORKLIFT ---
 const forkliftHandlers = {
@@ -153,6 +153,7 @@ const mobileCraneHandlers = {
                 const newLaporan = await mobileCraneServices.laporan.create(request.payload);
                 return h.response({ status: 'success', message: 'Laporan Mobile Crane berhasil dibuat', data: { laporan: newLaporan } }).code(201);
             } catch (error) {
+                console.error("Create Error:", error);
                 return Boom.badImplementation('Gagal membuat Laporan Mobile Crane.');
             }
         },
@@ -196,7 +197,8 @@ const mobileCraneHandlers = {
                 const laporanData = await mobileCraneServices.laporan.getById(request.params.id);
                 if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan Mobile Crane tidak ditemukan.');
                 
-                const { docxBuffer, fileName } = await generateMobileCraneDoc(laporanData);
+                // Gunakan generator yang benar
+                const { docxBuffer, fileName } = await generateMobileCraneLaporanDoc(laporanData);
 
                 return h.response(docxBuffer)
                     .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
@@ -208,7 +210,6 @@ const mobileCraneHandlers = {
         },
     },
 };
-
 module.exports = {
     forkliftHandlers,
     mobileCraneHandlers

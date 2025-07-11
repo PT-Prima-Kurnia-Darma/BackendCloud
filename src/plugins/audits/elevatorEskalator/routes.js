@@ -1,8 +1,7 @@
 'use strict';
 
 const Joi = require('joi');
-const { elevatorHandlers } = require('./handlers'); 
-const { eskalatorHandlers } = require('./handlers')
+const { elevatorHandlers, eskalatorHandlers } = require('./handlers'); 
 
 // DIUBAH: Nama variabel disesuaikan dengan nama yang diekspor (laporanElevatorPayload)
 const { laporanElevatorPayload } = require('./schemas/elevator/laporan'); 

@@ -1,7 +1,7 @@
 'use strict';
 
 const Joi = require('joi');
-const { forkliftHandlers } = require('./handlers');
+const { forkliftHandlers, mobileCraneHandlers } = require('./handlers');
 const { laporanForkliftPayload } = require('./schemas/forklift/laporan');
 const { bapForkliftPayload } = require('./schemas/forklift/bap');
 const { laporanMobileCranePayload } = require('./schemas/mobileCrane/laporan');
@@ -153,7 +153,7 @@ module.exports = [
         options: {
             auth: 'jwt',
             tags: ['api', 'PAA - Mobile Crane Laporan'],
-            validate: { payload: laporanMobileCranePayload }
+            validate: { payload: laporanMobileCranePayload } // Menggunakan skema yang baru dibuat
         },
     },
     {
