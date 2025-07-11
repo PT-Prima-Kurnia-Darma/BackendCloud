@@ -13,7 +13,7 @@ const forkliftHandlers = {
                 return h.response({ status: 'success', message: 'Laporan Forklift berhasil dibuat', data: { laporan: newLaporan } }).code(201);
             } catch (error) {
                 return Boom.badImplementation('Gagal membuat Laporan Forklift.');
-            }
+            }   
         },
         getAll: async (request, h) => {
             try {
