@@ -41,11 +41,11 @@ const loadTestItemSchema = Joi.object({
 // Skema Utama Laporan Forklift (Struktur Final)
 const laporanForkliftPayload = Joi.object({
     inspectionType: Joi.string().allow('').optional(),
-    equipmentType: Joi.string().allow('').optional(), // Diganti dari subInspectionType
-    inspectionDate: Joi.string().allow('').optional(), // inspectionDate dipindah ke root
+    equipmentType: Joi.string().allow('').optional(), 
+    inspectionDate: Joi.string().allow('').optional(),
 
     generalData: Joi.object({
-        ownerNamwe: Joi.string().allow('').optional(), // Typo 'ownerNamwe' dipertahankan sesuai template
+        ownerName: Joi.string().allow('').optional(), 
         ownerAddress: Joi.string().allow('').optional(),
         userInCharge: Joi.string().allow('').optional(),
         subcontractorPersonInCharge: Joi.string().allow('').optional(),

@@ -59,7 +59,7 @@ const createLaporanForklift = async (data) => {
         serialNumberUnitNumber: data.serialNumberUnitNumber,
 
         // General Data
-        ownerNamwe: g.ownerNamwe,
+        ownerName: g.ownerName,
         ownerAddress: g.ownerAddress,
         userInCharge: g.userInCharge,
         subcontractorPersonInCharge: g.subcontractorPersonInCharge,
@@ -621,7 +621,7 @@ const createLaporanForklift = async (data) => {
     }
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
-    const ownerName = g.ownerNamwe?.replace(/\s+/g, '-') || 'UnknownOwner';
+    const ownerName = g.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
     const fileName = `Laporan-Forklift-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
