@@ -12,7 +12,8 @@ const forkliftServices = {
         create: async (payload) => {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
             const dataToSave = { 
-                ...payload, 
+                ...payload,
+                subInspectionType: "Forklift",
                 documentType: "Laporan", 
                 createdAt 
             };
@@ -147,7 +148,8 @@ const forkliftServices = {
             }
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
             const dataToSave = { 
-                ...payload, 
+                ...payload,
+                subInspectionType: "Forklift",
                 documentType: "Berita Acara Pemeriksaan", 
                 createdAt 
             };
