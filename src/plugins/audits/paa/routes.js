@@ -5,11 +5,14 @@ const { forkliftHandlers, mobileCraneHandlers } = require('./handlers');
 const { laporanForkliftPayload } = require('./schemas/forklift/laporan');
 const { bapForkliftPayload } = require('./schemas/forklift/bap');
 const { laporanMobileCranePayload } = require('./schemas/mobileCrane/laporan');
+const { bapMobileCranePayload } = require('./schemas/mobileCrane/bap');
 
 // forlift
 const FORKLIFT_LAPORAN_PREFIX = '/paa/forklift/laporan';
 const FORKLIFT_BAP_PREFIX = '/paa/forklift/bap';
 const MOBILE_CRANE_LAPORAN_PREFIX = '/paa/mobileCrane/laporan';
+const MOBILE_CRANE_BAP_PREFIX = '/paa/mobileCrane/bap';
+
 
 module.exports = [
     // --- FORKLIFT LAPORAN ROUTES ---
@@ -48,7 +51,7 @@ module.exports = [
             tags: ['api', 'PAA - Forklift Laporan'],
             validate: { 
                 params: Joi.object({ id: Joi.string().required() }), 
-                payload: laporanForkliftPayload 
+                payload: laporanForkliftPayload
             } 
         },
     },
@@ -203,6 +206,77 @@ module.exports = [
             auth: 'jwt',
             tags: ['api', 'PAA - Mobile Crane Laporan'],
             validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+
+    //--- RUTE UNTUK BAP MOBILE CRANE ---
+    {
+        method: 'GET',
+        path: `${MOBILE_CRANE_BAP_PREFIX}/prefill/{laporanId}`,
+        handler: mobileCraneHandlers.bap.prefill,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Mobile Crane BAP'],
+            validate: { params: Joi.object({ laporanId: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'POST',
+        path: MOBILE_CRANE_BAP_PREFIX,
+        handler: mobileCraneHandlers.bap.create,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Mobile Crane BAP'],
+            validate: { payload: bapMobileCranePayload }
+        },
+    },
+    {
+        method: 'GET',
+        path: MOBILE_CRANE_BAP_PREFIX,
+        handler: mobileCraneHandlers.bap.getAll,
+        options: { auth: 'jwt', tags: ['api', 'PAA - Mobile Crane BAP'] },
+    },
+    {
+        method: 'GET',
+        path: `${MOBILE_CRANE_BAP_PREFIX}/{id}`,
+        handler: mobileCraneHandlers.bap.getById,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Mobile Crane BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${MOBILE_CRANE_BAP_PREFIX}/{id}`,
+        handler: mobileCraneHandlers.bap.update,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Mobile Crane BAP'],
+            validate: { 
+                params: Joi.object({ id: Joi.string().required() }), 
+                payload: bapMobileCranePayload 
+            } 
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${MOBILE_CRANE_BAP_PREFIX}/{id}`,
+        handler: mobileCraneHandlers.bap.delete,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Mobile Crane BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+    {
+        method: 'GET',
+        path: `${MOBILE_CRANE_BAP_PREFIX}/download/{id}`,
+        handler: mobileCraneHandlers.bap.download,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Mobile Crane BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
         },
     },
 ];

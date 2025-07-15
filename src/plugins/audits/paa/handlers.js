@@ -5,6 +5,7 @@ const { forkliftServices, mobileCraneServices } = require('./services');
 const { createLaporanForklift: generateLaporanDoc } = require('../../../services/documentGenerator/paa/forklift/laporan/generator');
 const { createBapForklift: generateBapDoc } = require('../../../services/documentGenerator/paa/forklift/bap/generator');
 const { createLaporanMobileCrane: generateMobileCraneLaporanDoc } = require('../../../services/documentGenerator/paa/mobileCrane/laporan/generator')
+const { createBapMobileCrane: generateMobileCraneBapDoc } = require('../../../services/documentGenerator/paa/mobileCrane/bap/generator');
 
 // ---FORKLIFT ---
 const forkliftHandlers = {
@@ -83,6 +84,7 @@ const forkliftHandlers = {
                 return Boom.badImplementation('Gagal mengambil data untuk BAP.');
             }
         },
+
         create: async (request, h) => {
             try {
                 const newBap = await forkliftServices.bap.create(request.payload);
@@ -92,6 +94,7 @@ const forkliftHandlers = {
                 return Boom.badImplementation('Gagal membuat BAP Forklift.');
             }
         },
+
         getAll: async (request, h) => {
             try {
                 const allBap = await forkliftServices.bap.getAll();
@@ -100,6 +103,7 @@ const forkliftHandlers = {
                 return Boom.badImplementation('Gagal mengambil daftar BAP Forklift.');
             }
         },
+
         getById: async (request, h) => {
             try {
                 const bap = await forkliftServices.bap.getById(request.params.id);
@@ -109,6 +113,7 @@ const forkliftHandlers = {
                 return Boom.badImplementation('Gagal mengambil BAP Forklift.');
             }
         },
+
         update: async (request, h) => {
             try {
                 const updated = await forkliftServices.bap.updateById(request.params.id, request.payload);
@@ -118,6 +123,7 @@ const forkliftHandlers = {
                 return Boom.badImplementation('Gagal memperbarui BAP Forklift.');
             }
         },
+
         delete: async (request, h) => {
             try {
                 const deletedId = await forkliftServices.bap.deleteById(request.params.id);
@@ -127,6 +133,7 @@ const forkliftHandlers = {
                 return Boom.badImplementation('Gagal menghapus BAP Forklift.');
             }
         },
+        
         download: async (request, h) => {
             try {
                 const bapData = await forkliftServices.bap.getById(request.params.id);
@@ -211,7 +218,85 @@ const mobileCraneHandlers = {
             }
         },
     },
+
+    bap: {
+        prefill: async (request, h) => {
+            try {
+                const { laporanId } = request.params;
+                const prefilledData = await mobileCraneServices.bap.getDataForPrefill(laporanId);
+                if (!prefilledData) {
+                    return Boom.notFound('Data Laporan Mobile Crane dengan ID tersebut tidak ditemukan.');
+                }
+                return h.response({ status: 'success', message: 'BAP Mobile Crane berhasil dibuat', data: prefilledData });
+            } catch (error) {
+                console.error('Error in BAP prefill handler:', error);
+                return Boom.badImplementation('Gagal mengambil data untuk BAP.');
+            }
+        },
+        create: async (request, h) => {
+            try {
+                const newBap = await mobileCraneServices.bap.create(request.payload);
+                return h.response({ status: 'success', message: 'BAP Mobile Crane berhasil dibuat', data: { bap: newBap } }).code(201);
+            } catch (error) {
+                if(error.isBoom) return error;
+                return Boom.badImplementation('Gagal membuat BAP Mobile Crane.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allBap = await mobileCraneServices.bap.getAll();
+                return { status: 'success', message: 'BAP Mobile Crane berhasil didapatkan ', data: { bap: allBap } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil daftar BAP Mobile Crane.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const bap = await mobileCraneServices.bap.getById(request.params.id);
+                if (!bap) return Boom.notFound('BAP Mobile Crane tidak ditemukan.');
+                return { status: 'success', message: 'BAP Mobile Crane berhasil didapatkan ', data: { bap } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil BAP Mobile Crane.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await mobileCraneServices.bap.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, BAP Mobile Crane tidak ditemukan.');
+                return { status: 'success', message: 'BAP Mobile Crane berhasil diperbarui', data: { bap: updated } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal memperbarui BAP Mobile Crane.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await mobileCraneServices.bap.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Mobile Crane tidak ditemukan.');
+                return { status: 'success', message: 'BAP Mobile Crane berhasil dihapus' };
+            } catch (error) {
+                return Boom.badImplementation('Gagal menghapus BAP Mobile Crane.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const bapData = await mobileCraneServices.bap.getById(request.params.id);
+                if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Mobile Crane tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateMobileCraneBapDoc(bapData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'BAP Mobile Crane berhasil diunduh');
+            } catch (error) {
+                console.error('Error in BAP download handler:', error);
+                return Boom.badImplementation('Gagal memproses dokumen BAP Mobile Crane.');
+            }
+        },
+    }
 };
+
+
 module.exports = {
     forkliftHandlers,
     mobileCraneHandlers

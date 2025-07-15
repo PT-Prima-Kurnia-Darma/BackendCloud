@@ -6,7 +6,6 @@ const auditCollection = db.collection('paa');
 
 const forkliftServices = {
     laporan: {
-        // Fungsi create, getAll, getById tidak berubah...
 
         create: async (payload) => {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
@@ -263,14 +262,26 @@ const mobileCraneServices = {
         },
 
         updateById: async (id, payload) => {
-            const docRef = auditCollection.doc(id);
-            const doc = await docRef.get();
-            if (!doc.exists || doc.data().subInspectionType !== 'Mobile Crane' || doc.data().documentType !== 'Laporan') {
+            const laporanRef = auditCollection.doc(id);
+            const doc = await laporanRef.get();
+            if (!doc.exists || doc.data().documentType !== 'Laporan') {
                 return null;
             }
             
-            await docRef.update(payload);
-            const updatedDoc = await docRef.get();
+            // 1. Update Laporan
+            await laporanRef.update(payload);
+
+            // 2.SINKRONISASI KE BAP
+            const bapQuery = await auditCollection.where('laporanId', '==', id).limit(1).get();
+            if (!bapQuery.empty) {
+                const bapRef = bapQuery.docs[0].ref;
+                const dataToSync = getSharedMobileCraneData(payload);
+                if (Object.keys(dataToSync).length > 0) {
+                    await bapRef.update(dataToSync);
+                }
+            }
+
+            const updatedDoc = await laporanRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
@@ -284,6 +295,97 @@ const mobileCraneServices = {
             return id;
         },
     },
+
+    bap: {
+        getDataForPrefill: async (laporanId) => {
+            const laporanDoc = await auditCollection.doc(laporanId).get();
+            if (!laporanDoc.exists) return null;
+            const d = laporanDoc.data();
+            
+            return {
+                laporanId,
+                examinationType: d.examinationType || "",
+                subInspectionType: d.subInspectionType || "",
+                inspectionDate: d.generalData?.generalDataInspectionDate || "",
+                generalData: {
+                    ownerName: d.generalData?.generalDataOwnerName || "",
+                    ownerAddress: d.generalData?.generalDataOwnerAddress || "",
+                    userAddress: d.generalData?.generalDataUserAddress || "",
+                },
+                technicalData: {
+                    manufacturer: d.generalData?.generalDataManufacturer || "",
+                    locationAndYearOfManufacture: d.generalData?.generalDataLocationAndYearOfManufacture || "",
+                    serialNumberUnitNumber: d.generalData?.generalDataSerialNumberUnitNumber || "",
+                    capacityWorkingLoad: d.generalData?.generalDataCapacityWorkingLoad || "",
+                    maxLiftingHeight: d.technicalData?.technicalDataMaxLiftingHeight || "",
+                    materialCertificateNumber: "",
+                    liftingSpeedMpm: "",
+                },
+                inspectionResult: { visualCheck: {}, functionalTest: { loadTest: {}, ndtTest: {} } },
+                signature: { companyName: d.generalData?.generalDataOwnerName || "" },
+            };
+        },
+
+        create: async (payload) => {
+            const { laporanId } = payload;
+            const laporanDoc = await auditCollection.doc(laporanId).get();
+            if (!laporanDoc.exists) {
+                throw Boom.notFound('Laporan Mobile Crane dengan ID tersebut tidak ditemukan.');
+            }
+            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const dataToSave = { 
+                ...payload,
+                subInspectionType: "Mobile Crane", 
+                documentType: "Berita Acara Pemeriksaan", 
+                createdAt 
+            };
+            const docRef = await auditCollection.add(dataToSave);
+            return { id: docRef.id, ...dataToSave };
+        },
+
+        getAll: async () => {
+            const snapshot = await auditCollection
+                .where('subInspectionType', '==', 'Mobile Crane')
+                .where('documentType', '==', 'Berita Acara Pemeriksaan')
+                .orderBy('createdAt', 'desc').get();
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+        
+        getById: async (id) => {
+            const doc = await auditCollection.doc(id).get();
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara Pemeriksaan') return null;
+            return { id: doc.id, ...doc.data() };
+        },
+        
+        updateById: async (id, payload) => {
+            const bapRef = auditCollection.doc(id);
+            const bapDoc = await bapRef.get();
+            if (!bapDoc.exists) return null;
+            
+            // 1. Update BAP
+            await bapRef.update(payload);
+
+            // 2. SINKRONISASI KE LAPORAN
+            const { laporanId } = bapDoc.data();
+            if (laporanId) {
+                const laporanRef = auditCollection.doc(laporanId);
+                const dataToSync = getSharedMobileCraneData(payload);
+                 if (Object.keys(dataToSync).length > 0) {
+                    await laporanRef.update(dataToSync);
+                }
+            }
+            
+            const updatedDoc = await bapRef.get();
+            return { id: updatedDoc.id, ...updatedDoc.data() };
+        },
+
+        deleteById: async (id) => {
+             const docRef = auditCollection.doc(id);
+            if (!(await docRef.get()).exists) return null;
+            await docRef.delete();
+            return id;
+        }
+    }
 };
 
 
