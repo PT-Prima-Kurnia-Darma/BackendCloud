@@ -11,6 +11,7 @@ const bapEskalatorPayload = Joi.object({
     inspectionType: Joi.string().allow('').optional(),
     inspectionDate: Joi.string().allow('').optional(),
     createdAt: Joi.string().allow('').optional(),
+    extraId: Joi.number().allow('').optional(),
 
     // Data Umum
     generalData: Joi.object({

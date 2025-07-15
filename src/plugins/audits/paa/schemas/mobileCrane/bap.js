@@ -8,6 +8,7 @@ const bapMobileCranePayload = Joi.object({
     subInspectionType: Joi.string().allow('').optional(),
     inspectionDate: Joi.string().allow('').optional(),
     createdAt: Joi.string().allow('').optional(),
+    extraId: Joi.number().allow('').optional(),
 
     generalData: Joi.object({
         ownerName: Joi.string().allow('').optional(),

@@ -32,6 +32,7 @@ const laporanMobileCranePayload = Joi.object({
     examinationType: Joi.string().required(),
     subInspectionType: Joi.string().allow('').optional(),
     createdAt: Joi.date().optional(),
+    extraId: Joi.number().allow('').optional(),
 
     generalData: Joi.object({
         generalDataOwnerName: Joi.string().required(),
