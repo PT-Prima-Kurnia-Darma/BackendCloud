@@ -4,6 +4,8 @@ const db = require('../../../utils/firestore');
 const Boom = require('@hapi/boom');
 const auditCollection = db.collection('paa');
 
+
+
 const forkliftServices = {
     laporan: {
 
@@ -258,15 +260,21 @@ const mobileCraneServices = {
 
                 if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
                 if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
-                if (p.generalData?.generalDataInspectionDate !== undefined) dataToSync.inspectionDate = p.generalData.generalDataInspectionDate;
-                if (p.generalData?.generalDataOwnerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.generalDataOwnerName;
-                if (p.generalData?.generalDataOwnerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.generalDataOwnerAddress;
-                if (p.generalData?.generalDataUserAddress !== undefined) dataToSync['generalData.userAddress'] = p.generalData.generalDataUserAddress;
-                if (p.generalData?.generalDataManufacturer !== undefined) dataToSync['technicalData.manufacturer'] = p.generalData.generalDataManufacturer;
-                if (p.generalData?.generalDataLocationAndYearOfManufacture !== undefined) dataToSync['technicalData.locationAndYearOfManufacture'] = p.generalData.generalDataLocationAndYearOfManufacture;
-                if (p.generalData?.generalDataSerialNumberUnitNumber !== undefined) dataToSync['technicalData.serialNumberUnitNumber'] = p.generalData.generalDataSerialNumberUnitNumber;
-                if (p.generalData?.generalDataCapacityWorkingLoad !== undefined) dataToSync['technicalData.capacityWorkingLoad'] = p.generalData.generalDataCapacityWorkingLoad;
-                if (p.technicalData?.technicalDataMaxLiftingHeight !== undefined) dataToSync['technicalData.maxLiftingHeight'] = p.technicalData.technicalDataMaxLiftingHeight;
+                
+                if (p.generalData) {
+                    if (p.generalData.generalDataInspectionDate !== undefined) dataToSync.inspectionDate = p.generalData.generalDataInspectionDate;
+                    if (p.generalData.generalDataOwnerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.generalDataOwnerName;
+                    if (p.generalData.generalDataOwnerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.generalDataOwnerAddress;
+                    if (p.generalData.generalDataUserAddress !== undefined) dataToSync['generalData.userAddress'] = p.generalData.generalDataUserAddress;
+                    if (p.generalData.generalDataManufacturer !== undefined) dataToSync['technicalData.manufacturer'] = p.generalData.generalDataManufacturer;
+                    if (p.generalData.generalDataLocationAndYearOfManufacture !== undefined) dataToSync['technicalData.locationAndYearOfManufacture'] = p.generalData.generalDataLocationAndYearOfManufacture;
+                    if (p.generalData.generalDataSerialNumberUnitNumber !== undefined) dataToSync['technicalData.serialNumberUnitNumber'] = p.generalData.generalDataSerialNumberUnitNumber;
+                    if (p.generalData.generalDataCapacityWorkingLoad !== undefined) dataToSync['technicalData.capacityWorkingLoad'] = p.generalData.generalDataCapacityWorkingLoad;
+                }
+                
+                if (p.technicalData) {
+                    if (p.technicalData.technicalDataMaxLiftingHeight !== undefined) dataToSync['technicalData.maxLiftingHeight'] = p.technicalData.technicalDataMaxLiftingHeight;
+                }
                 
                 if (Object.keys(dataToSync).length > 0) {
                     await bapRef.update(dataToSync);
@@ -274,7 +282,13 @@ const mobileCraneServices = {
             }
 
             const updatedDoc = await laporanRef.get();
-            return { id: updatedDoc.id, ...updatedDoc.data() };
+            const data = updatedDoc.data();
+
+            if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+                data.createdAt = data.createdAt.toDate().toISOString();
+            }
+
+            return { id: updatedDoc.id, ...data };
         },
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
@@ -327,26 +341,30 @@ const mobileCraneServices = {
                 throw Boom.notFound('Laporan Mobile Crane dengan ID tersebut tidak ditemukan.');
             }
 
-            // Sync data from BAP payload back to the original Laporan
             const p = payload;
             const dataToSync = {};
             if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
             if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
             if (p.inspectionDate !== undefined) dataToSync['generalData.generalDataInspectionDate'] = p.inspectionDate;
-            if (p.generalData?.ownerName !== undefined) dataToSync['generalData.generalDataOwnerName'] = p.generalData.ownerName;
-            if (p.generalData?.ownerAddress !== undefined) dataToSync['generalData.generalDataOwnerAddress'] = p.generalData.ownerAddress;
-            if (p.generalData?.userAddress !== undefined) dataToSync['generalData.generalDataUserAddress'] = p.generalData.userAddress;
-            if (p.technicalData?.manufacturer !== undefined) dataToSync['generalData.generalDataManufacturer'] = p.technicalData.manufacturer;
-            if (p.technicalData?.locationAndYearOfManufacture !== undefined) dataToSync['generalData.generalDataLocationAndYearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
-            if (p.technicalData?.serialNumberUnitNumber !== undefined) dataToSync['generalData.generalDataSerialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
-            if (p.technicalData?.capacityWorkingLoad !== undefined) dataToSync['generalData.generalDataCapacityWorkingLoad'] = p.technicalData.capacityWorkingLoad;
-            if (p.technicalData?.maxLiftingHeight !== undefined) dataToSync['technicalData.technicalDataMaxLiftingHeight'] = p.technicalData.maxLiftingHeight;
+            
+            if (p.generalData) {
+                if (p.generalData.ownerName !== undefined) dataToSync['generalData.generalDataOwnerName'] = p.generalData.ownerName;
+                if (p.generalData.ownerAddress !== undefined) dataToSync['generalData.generalDataOwnerAddress'] = p.generalData.ownerAddress;
+                if (p.generalData.userAddress !== undefined) dataToSync['generalData.generalDataUserAddress'] = p.generalData.userAddress;
+            }
+
+            if (p.technicalData) {
+                if (p.technicalData.manufacturer !== undefined) dataToSync['generalData.generalDataManufacturer'] = p.technicalData.manufacturer;
+                if (p.technicalData.locationAndYearOfManufacture !== undefined) dataToSync['generalData.generalDataLocationAndYearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
+                if (p.technicalData.serialNumberUnitNumber !== undefined) dataToSync['generalData.generalDataSerialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
+                if (p.technicalData.capacityWorkingLoad !== undefined) dataToSync['generalData.generalDataCapacityWorkingLoad'] = p.technicalData.capacityWorkingLoad;
+                if (p.technicalData.maxLiftingHeight !== undefined) dataToSync['technicalData.technicalDataMaxLiftingHeight'] = p.technicalData.maxLiftingHeight;
+            }
 
             if (Object.keys(dataToSync).length > 0) {
                 await laporanRef.update(dataToSync);
             }
             
-            // Create the BAP document
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
             const dataToSave = { ...payload, subInspectionType: "Mobile Crane", documentType: "Berita Acara Pemeriksaan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
@@ -377,21 +395,33 @@ const mobileCraneServices = {
                 if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
                 if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
                 if (p.inspectionDate !== undefined) dataToSync['generalData.generalDataInspectionDate'] = p.inspectionDate;
-                if (p.generalData?.ownerName !== undefined) dataToSync['generalData.generalDataOwnerName'] = p.generalData.ownerName;
-                if (p.generalData?.ownerAddress !== undefined) dataToSync['generalData.generalDataOwnerAddress'] = p.generalData.ownerAddress;
-                if (p.generalData?.userAddress !== undefined) dataToSync['generalData.generalDataUserAddress'] = p.generalData.userAddress;
-                if (p.technicalData?.manufacturer !== undefined) dataToSync['generalData.generalDataManufacturer'] = p.technicalData.manufacturer;
-                if (p.technicalData?.locationAndYearOfManufacture !== undefined) dataToSync['generalData.generalDataLocationAndYearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
-                if (p.technicalData?.serialNumberUnitNumber !== undefined) dataToSync['generalData.generalDataSerialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
-                if (p.technicalData?.capacityWorkingLoad !== undefined) dataToSync['generalData.generalDataCapacityWorkingLoad'] = p.technicalData.capacityWorkingLoad;
-                if (p.technicalData?.maxLiftingHeight !== undefined) dataToSync['technicalData.technicalDataMaxLiftingHeight'] = p.technicalData.maxLiftingHeight;
+                
+                if (p.generalData) {
+                    if (p.generalData.ownerName !== undefined) dataToSync['generalData.generalDataOwnerName'] = p.generalData.ownerName;
+                    if (p.generalData.ownerAddress !== undefined) dataToSync['generalData.generalDataOwnerAddress'] = p.generalData.ownerAddress;
+                    if (p.generalData.userAddress !== undefined) dataToSync['generalData.generalDataUserAddress'] = p.generalData.userAddress;
+                }
+
+                if (p.technicalData) {
+                    if (p.technicalData.manufacturer !== undefined) dataToSync['generalData.generalDataManufacturer'] = p.technicalData.manufacturer;
+                    if (p.technicalData.locationAndYearOfManufacture !== undefined) dataToSync['generalData.generalDataLocationAndYearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
+                    if (p.technicalData.serialNumberUnitNumber !== undefined) dataToSync['generalData.generalDataSerialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
+                    if (p.technicalData.capacityWorkingLoad !== undefined) dataToSync['generalData.generalDataCapacityWorkingLoad'] = p.technicalData.capacityWorkingLoad;
+                    if (p.technicalData.maxLiftingHeight !== undefined) dataToSync['technicalData.technicalDataMaxLiftingHeight'] = p.technicalData.maxLiftingHeight;
+                }
 
                 if (Object.keys(dataToSync).length > 0) {
                     await laporanRef.update(dataToSync);
                 }
             }
             const updatedDoc = await bapRef.get();
-            return { id: updatedDoc.id, ...updatedDoc.data() };
+            const data = updatedDoc.data();
+
+            if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+                data.createdAt = data.createdAt.toDate().toISOString();
+            }
+
+            return { id: updatedDoc.id, ...data };
         },
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
