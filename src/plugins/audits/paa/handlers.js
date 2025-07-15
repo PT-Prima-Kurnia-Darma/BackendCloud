@@ -168,7 +168,7 @@ const mobileCraneHandlers = {
         getAll: async (request, h) => {
             try {
                 const allLaporan = await mobileCraneServices.laporan.getAll();
-                return { status: 'success', data: { laporan: allLaporan } };
+                return { status: 'success', message: 'Laporan Mobile Crane berhasil didapat', data: { laporan: allLaporan } };
             } catch (error) {
                 return Boom.badImplementation('Gagal mengambil daftar Laporan Mobile Crane.');
             }
@@ -177,7 +177,7 @@ const mobileCraneHandlers = {
             try {
                 const laporan = await mobileCraneServices.laporan.getById(request.params.id);
                 if (!laporan) return Boom.notFound('Laporan Mobile Crane tidak ditemukan.');
-                return { status: 'success', data: { laporan } };
+                return { status: 'success', message: 'Laporan Mobile Crane berhasil didapat', data: { laporan } };
             } catch (error) {
                 return Boom.badImplementation('Gagal mengambil Laporan Mobile Crane.');
             }
