@@ -45,6 +45,7 @@ const laporanForkliftPayload = Joi.object({
     inspectionDate: Joi.string().allow('').optional(),
     createdAt: Joi.string().allow('').optional(),
     extraId: Joi.number().allow('').optional(),
+    examinationType: Joi.string().allow('').optional(),
 
     generalData: Joi.object({
         ownerName: Joi.string().allow('').optional(), 
@@ -272,7 +273,7 @@ const laporanForkliftPayload = Joi.object({
     conclusion: Joi.string().allow('').optional(),
     recommendation: Joi.string().allow('').optional()
     
-}).min(1).unknown(true);
+}).min(1).unknown(false);
 
 module.exports = {
     laporanForkliftPayload,

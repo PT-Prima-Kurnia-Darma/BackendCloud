@@ -58,7 +58,7 @@ const bapMobileCranePayload = Joi.object({
         companyName: Joi.string().allow('').optional(),
     }).optional(),
 
-}).min(1).unknown(true);
+}).min(1).unknown(false);
 
 module.exports = {
     bapMobileCranePayload,

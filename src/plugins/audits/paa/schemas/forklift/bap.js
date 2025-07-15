@@ -51,7 +51,7 @@ const bapForkliftPayload = Joi.object({
         }).optional()
     }).optional(),
 
-}).min(1).unknown(true);
+}).min(1).unknown(false);
 
 module.exports = {
     bapForkliftPayload,
