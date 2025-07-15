@@ -227,81 +227,123 @@ const forkliftServices = {
 
 
 const mobileCraneServices = {
+    /**
+     * @private
+     * Fungsi helper internal untuk memetakan data yang sama antara Laporan dan BAP.
+     * @param {object} payload - Data yang dikirim dari request.
+     * @param {'laporan' | 'bap'} source - Sumber data ('laporan' atau 'bap').
+     * @returns {object} - Objek berisi data yang akan disinkronkan.
+     */
+    _getSharedData: (payload, source) => {
+        const dataToSync = {};
+
+        // Peta hubungan antara field Laporan (kunci) dan field BAP (nilai)
+        const mapping = {
+            'examinationType': 'examinationType',
+            'subInspectionType': 'subInspectionType',
+            'generalData.generalDataInspectionDate': 'inspectionDate',
+            'generalData.generalDataOwnerName': 'generalData.ownerName',
+            'generalData.generalDataOwnerAddress': 'generalData.ownerAddress',
+            'generalData.generalDataUserAddress': 'generalData.userAddress',
+            'generalData.generalDataManufacturer': 'technicalData.manufacturer',
+            'generalData.generalDataLocationAndYearOfManufacture': 'technicalData.locationAndYearOfManufacture',
+            'generalData.generalDataSerialNumberUnitNumber': 'technicalData.serialNumberUnitNumber',
+            'generalData.generalDataCapacityWorkingLoad': 'technicalData.capacityWorkingLoad',
+            'technicalData.technicalDataMaxLiftingHeight': 'technicalData.maxLiftingHeight'
+        };
+
+        for (const laporanKey in mapping) {
+            const bapKey = mapping[laporanKey];
+
+            if (source === 'laporan') {
+                // SINKRONISASI DARI LAPORAN KE BAP
+                const [laporanObj, laporanProp] = laporanKey.split('.');
+                const value = laporanProp ? payload[laporanObj]?.[laporanProp] : payload[laporanObj];
+                
+                if (value !== undefined) {
+                    const [bapObj, bapProp] = bapKey.split('.');
+                    if (bapProp) { // Handle nested BAP key (e.g., generalData.ownerName)
+                        if (!dataToSync[bapObj]) dataToSync[bapObj] = {};
+                        dataToSync[bapObj][bapProp] = value;
+                    } else { // Handle top-level BAP key (e.g., inspectionDate)
+                        dataToSync[bapKey] = value;
+                    }
+                }
+            } else if (source === 'bap') {
+                // SINKRONISASI DARI BAP KE LAPORAN
+                const [bapObj, bapProp] = bapKey.split('.');
+                const value = bapProp ? payload[bapObj]?.[bapProp] : payload[bapObj];
+
+                if (value !== undefined) {
+                    // Untuk update nested field di Firestore, kita gunakan dot notation.
+                    dataToSync[laporanKey] = value;
+                }
+            }
+        }
+        return dataToSync;
+    },
+
+    // --- SUB-SERVICE UNTUK LAPORAN ---
     laporan: {
         create: async (payload) => {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
-            const dataToSave = { 
-                ...payload, 
-                // Pastikan subInspectionType selalu diisi untuk query
-                subInspectionType: "Mobile Crane", 
-                documentType: "Laporan", 
-                createdAt 
-            };
+            const dataToSave = { ...payload, subInspectionType: "Mobile Crane", documentType: "Laporan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
-
         getAll: async () => {
-            const snapshot = await auditCollection
-                .where('subInspectionType', '==', 'Mobile Crane')
-                .where('documentType', '==', 'Laporan')
-                .orderBy('createdAt', 'desc')
-                .get();
-            if (snapshot.empty) {
-                return [];
-            }
+            const snapshot = await auditCollection.where('subInspectionType', '==', 'Mobile Crane').where('documentType', '==', 'Laporan').orderBy('createdAt', 'desc').get();
+            if (snapshot.empty) return [];
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
-
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().subInspectionType !== 'Mobile Crane' || doc.data().documentType !== 'Laporan') {
-                return null;
-            }
+            if (!doc.exists || doc.data().documentType !== 'Laporan') return null;
             return { id: doc.id, ...doc.data() };
         },
-
         updateById: async (id, payload) => {
-            const laporanRef = auditCollection.doc(id);
-            const doc = await laporanRef.get();
-            if (!doc.exists || doc.data().documentType !== 'Laporan') {
-                return null;
-            }
-            
-            // 1. Update Laporan
-            await laporanRef.update(payload);
+            try {
+                const laporanRef = auditCollection.doc(id);
+                if (!(await laporanRef.get()).exists) return null;
+                
+                await laporanRef.update(payload);
 
-            // 2.SINKRONISASI KE BAP
-            const bapQuery = await auditCollection.where('laporanId', '==', id).limit(1).get();
-            if (!bapQuery.empty) {
-                const bapRef = bapQuery.docs[0].ref;
-                const dataToSync = getSharedMobileCraneData(payload);
-                if (Object.keys(dataToSync).length > 0) {
-                    await bapRef.update(dataToSync);
+                const bapQuery = await auditCollection.where('laporanId', '==', id).limit(1).get();
+                if (!bapQuery.empty) {
+                    const bapRef = bapQuery.docs[0].ref;
+                    const dataToSync = mobileCraneServices._getSharedData(payload, 'laporan'); // Arah: Laporan -> BAP
+                    if (Object.keys(dataToSync).length > 0) {
+                        await bapRef.update(dataToSync);
+                    }
                 }
+                const updatedDoc = await laporanRef.get();
+                return { id: updatedDoc.id, ...updatedDoc.data() };
+            } catch (error) {
+                console.error("Error updating Laporan Mobile Crane:", error);
+                throw error;
             }
-
-            const updatedDoc = await laporanRef.get();
-            return { id: updatedDoc.id, ...updatedDoc.data() };
         },
-
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
-            const doc = await docRef.get();
-            if (!doc.exists || doc.data().subInspectionType !== 'Mobile Crane' || doc.data().documentType !== 'Laporan') {
-                return null;
+            if (!(await docRef.get()).exists) return null;
+            
+            const bapQuery = await auditCollection.where('laporanId', '==', id).get();
+            if (!bapQuery.empty) {
+                const batch = db.batch();
+                bapQuery.docs.forEach(bapDoc => batch.delete(bapDoc.ref));
+                await batch.commit();
             }
             await docRef.delete();
             return id;
         },
     },
 
+    // --- SUB-SERVICE UNTUK BAP ---
     bap: {
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
             if (!laporanDoc.exists) return null;
             const d = laporanDoc.data();
-            
             return {
                 laporanId,
                 examinationType: d.examinationType || "",
@@ -325,62 +367,52 @@ const mobileCraneServices = {
                 signature: { companyName: d.generalData?.generalDataOwnerName || "" },
             };
         },
-
         create: async (payload) => {
             const { laporanId } = payload;
-            const laporanDoc = await auditCollection.doc(laporanId).get();
-            if (!laporanDoc.exists) {
+            if (!laporanId || !(await auditCollection.doc(laporanId).get()).exists) {
                 throw Boom.notFound('Laporan Mobile Crane dengan ID tersebut tidak ditemukan.');
             }
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
-            const dataToSave = { 
-                ...payload,
-                subInspectionType: "Mobile Crane", 
-                documentType: "Berita Acara Pemeriksaan", 
-                createdAt 
-            };
+            const dataToSave = { ...payload, subInspectionType: "Mobile Crane", documentType: "Berita Acara Pemeriksaan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
-
         getAll: async () => {
-            const snapshot = await auditCollection
-                .where('subInspectionType', '==', 'Mobile Crane')
-                .where('documentType', '==', 'Berita Acara Pemeriksaan')
-                .orderBy('createdAt', 'desc').get();
+            const snapshot = await auditCollection.where('subInspectionType', '==', 'Mobile Crane').where('documentType', '==', 'Berita Acara Pemeriksaan').orderBy('createdAt', 'desc').get();
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
-        
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
             if (!doc.exists || doc.data().documentType !== 'Berita Acara Pemeriksaan') return null;
             return { id: doc.id, ...doc.data() };
         },
-        
         updateById: async (id, payload) => {
-            const bapRef = auditCollection.doc(id);
-            const bapDoc = await bapRef.get();
-            if (!bapDoc.exists) return null;
-            
-            // 1. Update BAP
-            await bapRef.update(payload);
+            try {
+                const bapRef = auditCollection.doc(id);
+                const bapDoc = await bapRef.get();
+                if (!bapDoc.exists) return null;
+                
+                await bapRef.update(payload);
 
-            // 2. SINKRONISASI KE LAPORAN
-            const { laporanId } = bapDoc.data();
-            if (laporanId) {
-                const laporanRef = auditCollection.doc(laporanId);
-                const dataToSync = getSharedMobileCraneData(payload);
-                 if (Object.keys(dataToSync).length > 0) {
-                    await laporanRef.update(dataToSync);
+                const { laporanId } = bapDoc.data();
+                if (laporanId) {
+                    const laporanRef = auditCollection.doc(laporanId);
+                    if ((await laporanRef.get()).exists) {
+                        const dataToSync = mobileCraneServices._getSharedData(payload, 'bap'); // Arah: BAP -> Laporan
+                        if (Object.keys(dataToSync).length > 0) {
+                            await laporanRef.update(dataToSync);
+                        }
+                    }
                 }
+                const updatedDoc = await bapRef.get();
+                return { id: updatedDoc.id, ...updatedDoc.data() };
+            } catch (error) {
+                console.error("Error updating BAP Mobile Crane:", error);
+                throw error;
             }
-            
-            const updatedDoc = await bapRef.get();
-            return { id: updatedDoc.id, ...updatedDoc.data() };
         },
-
         deleteById: async (id) => {
-             const docRef = auditCollection.doc(id);
+            const docRef = auditCollection.doc(id);
             if (!(await docRef.get()).exists) return null;
             await docRef.delete();
             return id;

@@ -12,6 +12,7 @@ const inspectionItemSchema = Joi.object({
 const laporanEskalatorPayload = Joi.object({
     inspectionType: Joi.string().allow('').optional(),
     equipmentType: Joi.string().allow('').optional(),
+    createdAt: Joi.string().allow('').optional(),
 
     // 1. Menambahkan validasi untuk objek 'generalData'
     generalData: Joi.object({

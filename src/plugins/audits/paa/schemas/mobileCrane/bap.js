@@ -7,6 +7,7 @@ const bapMobileCranePayload = Joi.object({
     examinationType: Joi.string().allow('').optional(),
     subInspectionType: Joi.string().allow('').optional(),
     inspectionDate: Joi.string().allow('').optional(),
+    createdAt: Joi.string().allow('').optional(),
 
     generalData: Joi.object({
         ownerName: Joi.string().allow('').optional(),
