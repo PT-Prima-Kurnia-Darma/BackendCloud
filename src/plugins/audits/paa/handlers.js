@@ -21,7 +21,7 @@ const forkliftHandlers = {
         getAll: async (request, h) => {
             try {
                 const allLaporan = await forkliftServices.laporan.getAll();
-                return { status: 'success', data: { laporan: allLaporan } };
+                return { status: 'success', message: 'Laporan Forklift berhasil didapat', data: { laporan: allLaporan } };
             } catch (error) {
                 return Boom.badImplementation('Gagal mengambil daftar Laporan Forklift.');
             }
@@ -30,7 +30,7 @@ const forkliftHandlers = {
             try {
                 const laporan = await forkliftServices.laporan.getById(request.params.id);
                 if (!laporan) return Boom.notFound('Laporan Forklift tidak ditemukan.');
-                return { status: 'success', data: { laporan } };
+                return { status: 'success', message: 'Laporan Forklift berhasil didapat', data: { laporan } };
             } catch (error) {
                 return Boom.badImplementation('Gagal mengambil Laporan Forklift.');
             }
@@ -63,7 +63,7 @@ const forkliftHandlers = {
                 return h.response(docxBuffer)
                     .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
                     .header('Content-Disposition', `attachment; filename="${fileName}"`)
-                     .header('message', 'Laporan Forklift berhasil diunduh');
+                    .header('message', 'Laporan Forklift berhasil diunduh');
             } catch (error) {
                 return Boom.badImplementation('Gagal memproses dokumen Laporan Forklift.');
             }
@@ -78,7 +78,7 @@ const forkliftHandlers = {
                 if (!prefilledData) {
                     return Boom.notFound('Data Laporan Forklift dengan ID tersebut tidak ditemukan.');
                 }
-                return h.response({ status: 'success', data: prefilledData });
+                return h.response({ status: 'success', message: 'Data BAP Forklift berhasil didapat', data: prefilledData });
             } catch (error) {
                 console.error('Error in BAP prefill handler:', error);
                 return Boom.badImplementation('Gagal mengambil data untuk BAP.');
@@ -98,7 +98,7 @@ const forkliftHandlers = {
         getAll: async (request, h) => {
             try {
                 const allBap = await forkliftServices.bap.getAll();
-                return { status: 'success', data: { bap: allBap } };
+                return { status: 'success', message: 'BAP Forklift berhasil didapat', data: { bap: allBap } };
             } catch (error) {
                 return Boom.badImplementation('Gagal mengambil daftar BAP Forklift.');
             }
@@ -108,7 +108,7 @@ const forkliftHandlers = {
             try {
                 const bap = await forkliftServices.bap.getById(request.params.id);
                 if (!bap) return Boom.notFound('BAP Forklift tidak ditemukan.');
-                return { status: 'success', data: { bap } };
+                return { status: 'success', message: 'BAP Forklift berhasil didapat', data: { bap } };
             } catch (error) {
                 return Boom.badImplementation('Gagal mengambil BAP Forklift.');
             }
