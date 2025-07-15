@@ -321,9 +321,32 @@ const mobileCraneServices = {
         },
         create: async (payload) => {
             const { laporanId } = payload;
-            if (!laporanId || !(await auditCollection.doc(laporanId).get()).exists) {
+            const laporanRef = auditCollection.doc(laporanId);
+            const laporanDoc = await laporanRef.get();
+            if (!laporanDoc.exists) {
                 throw Boom.notFound('Laporan Mobile Crane dengan ID tersebut tidak ditemukan.');
             }
+
+            // Sync data from BAP payload back to the original Laporan
+            const p = payload;
+            const dataToSync = {};
+            if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+            if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
+            if (p.inspectionDate !== undefined) dataToSync['generalData.generalDataInspectionDate'] = p.inspectionDate;
+            if (p.generalData?.ownerName !== undefined) dataToSync['generalData.generalDataOwnerName'] = p.generalData.ownerName;
+            if (p.generalData?.ownerAddress !== undefined) dataToSync['generalData.generalDataOwnerAddress'] = p.generalData.ownerAddress;
+            if (p.generalData?.userAddress !== undefined) dataToSync['generalData.generalDataUserAddress'] = p.generalData.userAddress;
+            if (p.technicalData?.manufacturer !== undefined) dataToSync['generalData.generalDataManufacturer'] = p.technicalData.manufacturer;
+            if (p.technicalData?.locationAndYearOfManufacture !== undefined) dataToSync['generalData.generalDataLocationAndYearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
+            if (p.technicalData?.serialNumberUnitNumber !== undefined) dataToSync['generalData.generalDataSerialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
+            if (p.technicalData?.capacityWorkingLoad !== undefined) dataToSync['generalData.generalDataCapacityWorkingLoad'] = p.technicalData.capacityWorkingLoad;
+            if (p.technicalData?.maxLiftingHeight !== undefined) dataToSync['technicalData.technicalDataMaxLiftingHeight'] = p.technicalData.maxLiftingHeight;
+
+            if (Object.keys(dataToSync).length > 0) {
+                await laporanRef.update(dataToSync);
+            }
+            
+            // Create the BAP document
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
             const dataToSave = { ...payload, subInspectionType: "Mobile Crane", documentType: "Berita Acara Pemeriksaan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
