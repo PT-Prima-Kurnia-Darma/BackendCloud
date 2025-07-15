@@ -225,65 +225,7 @@ const forkliftServices = {
     }
 };
 
-
 const mobileCraneServices = {
-    /**
-     * @private
-     * Fungsi helper internal untuk memetakan data yang sama antara Laporan dan BAP.
-     * @param {object} payload - Data yang dikirim dari request.
-     * @param {'laporan' | 'bap'} source - Sumber data ('laporan' atau 'bap').
-     * @returns {object} - Objek berisi data yang akan disinkronkan.
-     */
-    _getSharedData: (payload, source) => {
-        const dataToSync = {};
-
-        // Peta hubungan antara field Laporan (kunci) dan field BAP (nilai)
-        const mapping = {
-            'examinationType': 'examinationType',
-            'subInspectionType': 'subInspectionType',
-            'generalData.generalDataInspectionDate': 'inspectionDate',
-            'generalData.generalDataOwnerName': 'generalData.ownerName',
-            'generalData.generalDataOwnerAddress': 'generalData.ownerAddress',
-            'generalData.generalDataUserAddress': 'generalData.userAddress',
-            'generalData.generalDataManufacturer': 'technicalData.manufacturer',
-            'generalData.generalDataLocationAndYearOfManufacture': 'technicalData.locationAndYearOfManufacture',
-            'generalData.generalDataSerialNumberUnitNumber': 'technicalData.serialNumberUnitNumber',
-            'generalData.generalDataCapacityWorkingLoad': 'technicalData.capacityWorkingLoad',
-            'technicalData.technicalDataMaxLiftingHeight': 'technicalData.maxLiftingHeight'
-        };
-
-        for (const laporanKey in mapping) {
-            const bapKey = mapping[laporanKey];
-
-            if (source === 'laporan') {
-                // SINKRONISASI DARI LAPORAN KE BAP
-                const [laporanObj, laporanProp] = laporanKey.split('.');
-                const value = laporanProp ? payload[laporanObj]?.[laporanProp] : payload[laporanObj];
-                
-                if (value !== undefined) {
-                    const [bapObj, bapProp] = bapKey.split('.');
-                    if (bapProp) { // Handle nested BAP key (e.g., generalData.ownerName)
-                        if (!dataToSync[bapObj]) dataToSync[bapObj] = {};
-                        dataToSync[bapObj][bapProp] = value;
-                    } else { // Handle top-level BAP key (e.g., inspectionDate)
-                        dataToSync[bapKey] = value;
-                    }
-                }
-            } else if (source === 'bap') {
-                // SINKRONISASI DARI BAP KE LAPORAN
-                const [bapObj, bapProp] = bapKey.split('.');
-                const value = bapProp ? payload[bapObj]?.[bapProp] : payload[bapObj];
-
-                if (value !== undefined) {
-                    // Untuk update nested field di Firestore, kita gunakan dot notation.
-                    dataToSync[laporanKey] = value;
-                }
-            }
-        }
-        return dataToSync;
-    },
-
-    // --- SUB-SERVICE UNTUK LAPORAN ---
     laporan: {
         create: async (payload) => {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
@@ -302,26 +244,37 @@ const mobileCraneServices = {
             return { id: doc.id, ...doc.data() };
         },
         updateById: async (id, payload) => {
-            try {
-                const laporanRef = auditCollection.doc(id);
-                if (!(await laporanRef.get()).exists) return null;
-                
-                await laporanRef.update(payload);
+            const laporanRef = auditCollection.doc(id);
+            const laporanDoc = await laporanRef.get();
+            if (!laporanDoc.exists) return null;
 
-                const bapQuery = await auditCollection.where('laporanId', '==', id).limit(1).get();
-                if (!bapQuery.empty) {
-                    const bapRef = bapQuery.docs[0].ref;
-                    const dataToSync = mobileCraneServices._getSharedData(payload, 'laporan'); // Arah: Laporan -> BAP
-                    if (Object.keys(dataToSync).length > 0) {
-                        await bapRef.update(dataToSync);
-                    }
+            await laporanRef.update(payload);
+
+            const bapQuery = await auditCollection.where('laporanId', '==', id).limit(1).get();
+            if (!bapQuery.empty) {
+                const bapRef = bapQuery.docs[0].ref;
+                const dataToSync = {};
+                const p = payload;
+
+                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+                if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
+                if (p.generalData?.generalDataInspectionDate !== undefined) dataToSync.inspectionDate = p.generalData.generalDataInspectionDate;
+                if (p.generalData?.generalDataOwnerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.generalDataOwnerName;
+                if (p.generalData?.generalDataOwnerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.generalDataOwnerAddress;
+                if (p.generalData?.generalDataUserAddress !== undefined) dataToSync['generalData.userAddress'] = p.generalData.generalDataUserAddress;
+                if (p.generalData?.generalDataManufacturer !== undefined) dataToSync['technicalData.manufacturer'] = p.generalData.generalDataManufacturer;
+                if (p.generalData?.generalDataLocationAndYearOfManufacture !== undefined) dataToSync['technicalData.locationAndYearOfManufacture'] = p.generalData.generalDataLocationAndYearOfManufacture;
+                if (p.generalData?.generalDataSerialNumberUnitNumber !== undefined) dataToSync['technicalData.serialNumberUnitNumber'] = p.generalData.generalDataSerialNumberUnitNumber;
+                if (p.generalData?.generalDataCapacityWorkingLoad !== undefined) dataToSync['technicalData.capacityWorkingLoad'] = p.generalData.generalDataCapacityWorkingLoad;
+                if (p.technicalData?.technicalDataMaxLiftingHeight !== undefined) dataToSync['technicalData.maxLiftingHeight'] = p.technicalData.technicalDataMaxLiftingHeight;
+                
+                if (Object.keys(dataToSync).length > 0) {
+                    await bapRef.update(dataToSync);
                 }
-                const updatedDoc = await laporanRef.get();
-                return { id: updatedDoc.id, ...updatedDoc.data() };
-            } catch (error) {
-                console.error("Error updating Laporan Mobile Crane:", error);
-                throw error;
             }
+
+            const updatedDoc = await laporanRef.get();
+            return { id: updatedDoc.id, ...updatedDoc.data() };
         },
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
@@ -338,7 +291,6 @@ const mobileCraneServices = {
         },
     },
 
-    // --- SUB-SERVICE UNTUK BAP ---
     bap: {
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
@@ -387,29 +339,36 @@ const mobileCraneServices = {
             return { id: doc.id, ...doc.data() };
         },
         updateById: async (id, payload) => {
-            try {
-                const bapRef = auditCollection.doc(id);
-                const bapDoc = await bapRef.get();
-                if (!bapDoc.exists) return null;
-                
-                await bapRef.update(payload);
+            const bapRef = auditCollection.doc(id);
+            const bapDoc = await bapRef.get();
+            if (!bapDoc.exists) return null;
+            
+            await bapRef.update(payload);
 
-                const { laporanId } = bapDoc.data();
-                if (laporanId) {
-                    const laporanRef = auditCollection.doc(laporanId);
-                    if ((await laporanRef.get()).exists) {
-                        const dataToSync = mobileCraneServices._getSharedData(payload, 'bap'); // Arah: BAP -> Laporan
-                        if (Object.keys(dataToSync).length > 0) {
-                            await laporanRef.update(dataToSync);
-                        }
-                    }
+            const { laporanId } = bapDoc.data();
+            if (laporanId) {
+                const laporanRef = auditCollection.doc(laporanId);
+                const p = payload;
+                const dataToSync = {};
+
+                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+                if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
+                if (p.inspectionDate !== undefined) dataToSync['generalData.generalDataInspectionDate'] = p.inspectionDate;
+                if (p.generalData?.ownerName !== undefined) dataToSync['generalData.generalDataOwnerName'] = p.generalData.ownerName;
+                if (p.generalData?.ownerAddress !== undefined) dataToSync['generalData.generalDataOwnerAddress'] = p.generalData.ownerAddress;
+                if (p.generalData?.userAddress !== undefined) dataToSync['generalData.generalDataUserAddress'] = p.generalData.userAddress;
+                if (p.technicalData?.manufacturer !== undefined) dataToSync['generalData.generalDataManufacturer'] = p.technicalData.manufacturer;
+                if (p.technicalData?.locationAndYearOfManufacture !== undefined) dataToSync['generalData.generalDataLocationAndYearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
+                if (p.technicalData?.serialNumberUnitNumber !== undefined) dataToSync['generalData.generalDataSerialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
+                if (p.technicalData?.capacityWorkingLoad !== undefined) dataToSync['generalData.generalDataCapacityWorkingLoad'] = p.technicalData.capacityWorkingLoad;
+                if (p.technicalData?.maxLiftingHeight !== undefined) dataToSync['technicalData.technicalDataMaxLiftingHeight'] = p.technicalData.maxLiftingHeight;
+
+                if (Object.keys(dataToSync).length > 0) {
+                    await laporanRef.update(dataToSync);
                 }
-                const updatedDoc = await bapRef.get();
-                return { id: updatedDoc.id, ...updatedDoc.data() };
-            } catch (error) {
-                console.error("Error updating BAP Mobile Crane:", error);
-                throw error;
             }
+            const updatedDoc = await bapRef.get();
+            return { id: updatedDoc.id, ...updatedDoc.data() };
         },
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
@@ -419,7 +378,6 @@ const mobileCraneServices = {
         }
     }
 };
-
 
 module.exports = {
     forkliftServices,

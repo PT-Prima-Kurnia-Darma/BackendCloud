@@ -205,7 +205,6 @@ const mobileCraneHandlers = {
                 const laporanData = await mobileCraneServices.laporan.getById(request.params.id);
                 if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan Mobile Crane tidak ditemukan.');
                 
-                // Gunakan generator yang benar
                 const { docxBuffer, fileName } = await generateMobileCraneLaporanDoc(laporanData);
 
                 return h.response(docxBuffer)
