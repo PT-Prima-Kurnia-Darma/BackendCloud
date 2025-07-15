@@ -11,7 +11,6 @@ const inspectionItemSchema = Joi.object({
 // Skema payload utama, di mana semua field dan objek bersifat opsional
 const laporanElevatorPayload = Joi.object({
     inspectionType: Joi.string().allow('').optional(),
-    subInspectionType: Joi.string().allow('').optional(),
     examinationType: Joi.string().allow('').optional(),
     createdAt: Joi.string().allow('').optional(),
     extraId: Joi.number().allow('').optional(),

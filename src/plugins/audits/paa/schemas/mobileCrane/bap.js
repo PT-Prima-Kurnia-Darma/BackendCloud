@@ -5,7 +5,6 @@ const Joi = require('joi');
 const bapMobileCranePayload = Joi.object({
     laporanId: Joi.string().required(),
     examinationType: Joi.string().allow('').optional(),
-    subInspectionType: Joi.string().allow('').optional(),
     inspectionDate: Joi.string().allow('').optional(),
     createdAt: Joi.string().allow('').optional(),
     extraId: Joi.number().allow('').optional(),

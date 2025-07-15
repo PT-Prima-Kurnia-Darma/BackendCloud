@@ -30,7 +30,6 @@ const Joi = require('joi');
         inspectionType: Joi.string().required(),
         equipmentType: Joi.string().required(),
         examinationType: Joi.string().required(),
-        subInspectionType: Joi.string().allow('').optional(),
         createdAt: Joi.date().optional(),
         extraId: Joi.number().allow('').optional(),
 
@@ -100,7 +99,7 @@ const Joi = require('joi');
         conclusion: Joi.string().allow('').optional(),
         recommendation: Joi.string().allow('').optional()
 
-}).unknown(false);
+}).min(1).unknown(false);
 
 module.exports = {
     laporanMobileCranePayload,
