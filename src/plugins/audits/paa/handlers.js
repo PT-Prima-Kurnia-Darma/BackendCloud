@@ -61,7 +61,8 @@ const forkliftHandlers = {
 
                 return h.response(docxBuffer)
                     .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-                    .header('Content-Disposition', `attachment; filename="${fileName}"`);
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                     .header('message', 'Laporan Forklift berhasil diunduh');
             } catch (error) {
                 return Boom.badImplementation('Gagal memproses dokumen Laporan Forklift.');
             }
@@ -202,7 +203,8 @@ const mobileCraneHandlers = {
 
                 return h.response(docxBuffer)
                     .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-                    .header('Content-Disposition', `attachment; filename="${fileName}"`);
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'Laporan Mobile Crane berhasil diunduh');
             } catch (error) {
                 console.error("Download Error:", error);
                 return Boom.badImplementation('Gagal memproses dokumen Laporan Mobile Crane.');
