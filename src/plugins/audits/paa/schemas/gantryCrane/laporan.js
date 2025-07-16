@@ -1,9 +1,10 @@
-// src/plugins/audits/paa/schemas/gantryCrane/laporan.js
 'use strict';
 
 const Joi = require('joi');
 
 // Skema dasar untuk item pemeriksaan visual (status dan hasil)
+// Catatan: inspectionItemSchema tidak digunakan langsung di laporanGantryCranePayload
+// namun mendefinisikan struktur objek yang mungkin.
 const inspectionItemSchema = Joi.object({
     status: Joi.boolean().allow(null).optional(),
     result: Joi.string().allow('', null).optional()
@@ -557,7 +558,7 @@ const laporanGantryCranePayload = Joi.object({
 
     ndt: Joi.object({
         wireropeMethod: Joi.string().allow('').optional(),
-        wirerope: Joi.array().items(wireropeItemSchema).optional(),
+        wireropeNumber: Joi.array().items(wireropeItemSchema).optional(), // Perubahan nama kunci array
         HookspecA: Joi.string().allow('').optional(),
         HookspecB: Joi.string().allow('').optional(),
         HookspecC: Joi.string().allow('').optional(),
@@ -592,7 +593,7 @@ const laporanGantryCranePayload = Joi.object({
         toleranceTidakBaik: Joi.boolean().optional(),
         toleranceDesc: Joi.string().allow('').optional(),
         griderMethod: Joi.string().allow('').optional(),
-        girder: Joi.array().items(girderItemSchema).optional()
+        griderNumber: Joi.array().items(girderItemSchema).optional() // Perubahan nama kunci array
     }).optional(),
 
     dynamicTesting: Joi.object({
@@ -638,7 +639,7 @@ const laporanGantryCranePayload = Joi.object({
         lengthSpan: Joi.string().allow('').optional(),
         xspan: Joi.string().allow('').optional(),
         resultDefleksi: Joi.string().allow('').optional(),
-        defleksi: Joi.array().items(defleksiItemSchema).optional()
+        defleksiPosision: Joi.array().items(defleksiItemSchema).optional() // Perubahan nama kunci array
     }).optional(),
 
     conclusion: Joi.string().allow('').optional(),
