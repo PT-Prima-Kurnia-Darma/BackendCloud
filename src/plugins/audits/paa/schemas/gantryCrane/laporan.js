@@ -638,7 +638,7 @@ const laporanGantryCranePayload = Joi.object({
         basedDesign: Joi.string().allow('').optional(),
         lengthSpan: Joi.string().allow('').optional(),
         xspan: Joi.string().allow('').optional(),
-        resultDefleksi: Joi.string().allow('').optional(),
+        resultDefleksi: Joi.boolean().optional(),
         defleksiPosision: Joi.array().items(defleksiItemSchema).optional() // Perubahan nama kunci array
     }).optional(),
 
