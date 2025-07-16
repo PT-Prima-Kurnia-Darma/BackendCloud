@@ -1,17 +1,19 @@
 'use strict';
 
 const Joi = require('joi');
-const { forkliftHandlers, mobileCraneHandlers } = require('./handlers');
+const { forkliftHandlers, mobileCraneHandlers, gantryCraneHandlers } = require('./handlers');
 const { laporanForkliftPayload } = require('./schemas/forklift/laporan');
 const { bapForkliftPayload } = require('./schemas/forklift/bap');
 const { laporanMobileCranePayload } = require('./schemas/mobileCrane/laporan');
 const { bapMobileCranePayload } = require('./schemas/mobileCrane/bap');
+const { laporanGantryCranePayload } = require('./schemas/gantryCrane/laporan');
 
-// forlift
+// prefix
 const FORKLIFT_LAPORAN_PREFIX = '/paa/forklift/laporan';
 const FORKLIFT_BAP_PREFIX = '/paa/forklift/bap';
 const MOBILE_CRANE_LAPORAN_PREFIX = '/paa/mobileCrane/laporan';
 const MOBILE_CRANE_BAP_PREFIX = '/paa/mobileCrane/bap';
+const GANTRY_CRANE_LAPORAN_PREFIX = '/paa/gantryCrane/laporan';
 
 
 module.exports = [
@@ -75,7 +77,6 @@ module.exports = [
             validate: { params: Joi.object({ id: Joi.string().required() }) } 
         },
     },
-    
     
     // --- RUTE BAP FORKLIFT ---
     {
@@ -277,6 +278,68 @@ module.exports = [
             auth: 'jwt', 
             tags: ['api', 'PAA - Mobile Crane BAP'],
             validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+
+    // --- RUTE BARU UNTUK GANTRY CRANE LAPORAN ---
+    {
+        method: 'POST',
+        path: GANTRY_CRANE_LAPORAN_PREFIX,
+        handler: gantryCraneHandlers.laporan.create,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Gantry Crane Laporan'],
+            validate: { payload: laporanGantryCranePayload } // Menggunakan skema yang baru dibuat
+        },
+    },
+    {
+        method: 'GET',
+        path: GANTRY_CRANE_LAPORAN_PREFIX,
+        handler: gantryCraneHandlers.laporan.getAll,
+        options: { auth: 'jwt', tags: ['api', 'PAA - Gantry Crane Laporan'] },
+    },
+    {
+        method: 'GET',
+        path: `${GANTRY_CRANE_LAPORAN_PREFIX}/{id}`,
+        handler: gantryCraneHandlers.laporan.getById,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Gantry Crane Laporan'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${GANTRY_CRANE_LAPORAN_PREFIX}/{id}`,
+        handler: gantryCraneHandlers.laporan.update,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Gantry Crane Laporan'],
+            validate: {
+                params: Joi.object({ id: Joi.string().required() }),
+                payload: laporanGantryCranePayload
+            }
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${GANTRY_CRANE_LAPORAN_PREFIX}/{id}`,
+        handler: gantryCraneHandlers.laporan.delete,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Gantry Crane Laporan'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'GET',
+        path: `${GANTRY_CRANE_LAPORAN_PREFIX}/download/{id}`,
+        handler: gantryCraneHandlers.laporan.download,
+        options: {
+            auth: 'jwt',
+            description: 'Download dokumen laporan Gantry Crane berdasarkan ID',
+            tags: ['api', 'PAA - Gantry Crane Laporan'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
         },
     },
 ];

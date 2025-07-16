@@ -1,11 +1,12 @@
 'use strict';
 
 const Boom = require('@hapi/boom');
-const { forkliftServices, mobileCraneServices } = require('./services');
+const { forkliftServices, mobileCraneServices, gantryCraneServices } = require('./services');
 const { createLaporanForklift: generateLaporanDoc } = require('../../../services/documentGenerator/paa/forklift/laporan/generator');
 const { createBapForklift: generateBapDoc } = require('../../../services/documentGenerator/paa/forklift/bap/generator');
 const { createLaporanMobileCrane: generateMobileCraneLaporanDoc } = require('../../../services/documentGenerator/paa/mobileCrane/laporan/generator')
 const { createBapMobileCrane: generateMobileCraneBapDoc } = require('../../../services/documentGenerator/paa/mobileCrane/bap/generator');
+const { createLaporanGantryCrane: generateGantryCraneLaporanDoc } = require('../../../services/documentGenerator/paa/gantryCrane/laporan/generator'); // Import generator baru
 
 // ---FORKLIFT ---
 const forkliftHandlers = {
@@ -295,8 +296,76 @@ const mobileCraneHandlers = {
     }
 };
 
+// -- gantry crane
+const gantryCraneHandlers = {
+    laporan: {
+        create: async (request, h) => {
+            try {
+                const newLaporan = await gantryCraneServices.laporan.create(request.payload);
+                return h.response({ status: 'success', message: 'Laporan Gantry Crane berhasil dibuat', data: { laporan: newLaporan } }).code(201);
+            } catch (error) {
+                console.error("Create Error:", error);
+                return Boom.badImplementation('Gagal membuat Laporan Gantry Crane.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allLaporan = await gantryCraneServices.laporan.getAll();
+                return { status: 'success', message: 'Laporan Gantry Crane berhasil didapat', data: { laporan: allLaporan } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil daftar Laporan Gantry Crane.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const laporan = await gantryCraneServices.laporan.getById(request.params.id);
+                if (!laporan) return Boom.notFound('Laporan Gantry Crane tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Gantry Crane berhasil didapat', data: { laporan } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil Laporan Gantry Crane.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await gantryCraneServices.laporan.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, Laporan Gantry Crane tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Gantry Crane berhasil diperbarui', data: { laporan: updated } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal memperbarui Laporan Gantry Crane.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await gantryCraneServices.laporan.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, Laporan Gantry Crane tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Gantry Crane berhasil dihapus' };
+            } catch (error) {
+                return Boom.badImplementation('Gagal menghapus Laporan Gantry Crane.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const laporanData = await gantryCraneServices.laporan.getById(request.params.id);
+                if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan Gantry Crane tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateGantryCraneLaporanDoc(laporanData); // Menggunakan generator baru
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'Laporan Gantry Crane berhasil diunduh');
+            } catch (error) {
+                console.error("Download Error:", error);
+                return Boom.badImplementation('Gagal memproses dokumen Laporan Gantry Crane.');
+            }
+        },
+    },
+
+};
+
 
 module.exports = {
     forkliftHandlers,
-    mobileCraneHandlers
+    mobileCraneHandlers,
+    gantryCraneHandlers
 };

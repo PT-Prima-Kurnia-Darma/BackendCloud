@@ -434,7 +434,81 @@ const mobileCraneServices = {
     }
 };
 
+const gantryCraneServices = {
+    laporan: {
+        create: async (payload) => {
+            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const dataToSave = {
+                ...payload,
+                subInspectionType: "Gantry Crane", // Identifikasi sub-tipe
+                documentType: "Laporan", // Identifikasi tipe dokumen
+                createdAt
+            };
+            const docRef = await auditCollection.add(dataToSave);
+            return { id: docRef.id, ...dataToSave };
+        },
+
+        getAll: async () => {
+            const snapshot = await auditCollection
+                .where('subInspectionType', '==', 'Gantry Crane')
+                .where('documentType', '==', 'Laporan')
+                .orderBy('createdAt', 'desc')
+                .get();
+            if (snapshot.empty) {
+                return [];
+            }
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+
+        getById: async (id) => {
+            const doc = await auditCollection.doc(id).get();
+            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Gantry Crane') {
+                return null;
+            }
+            return { id: doc.id, ...doc.data() };
+        },
+
+        updateById: async (id, payload) => {
+            const laporanRef = auditCollection.doc(id);
+            const laporanDoc = await laporanRef.get();
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gantry Crane') {
+                return null;
+            }
+
+            // Update Laporan utama
+            await laporanRef.update(payload);
+
+            // TODO: Tambahkan logika sinkronisasi ke BAP Gantry Crane jika ada
+            // Misalnya, jika Anda memiliki BAP untuk Gantry Crane, Anda bisa mencarinya
+            // dan memperbarui field yang relevan di sana, mirip dengan forklift/mobileCrane.
+
+            const updatedDoc = await laporanRef.get();
+            return { id: updatedDoc.id, ...updatedDoc.data() };
+        },
+
+        deleteById: async (id) => {
+            const docRef = auditCollection.doc(id);
+            const doc = await docRef.get();
+            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Gantry Crane') {
+                return null;
+            }
+            // Hapus BAP yang terkait jika ada
+            const bapQuery = await auditCollection.where('laporanId', '==', id).get();
+            if (!bapQuery.empty) {
+                const batch = db.batch();
+                bapQuery.docs.forEach(bapDoc => {
+                    batch.delete(bapDoc.ref);
+                });
+                await batch.commit();
+            }
+            await docRef.delete();
+            return id;
+        },
+    },
+};
+
 module.exports = {
     forkliftServices,
-    mobileCraneServices
+    mobileCraneServices,
+    gantryCraneServices
 };
