@@ -7,6 +7,7 @@ const { bapForkliftPayload } = require('./schemas/forklift/bap');
 const { laporanMobileCranePayload } = require('./schemas/mobileCrane/laporan');
 const { bapMobileCranePayload } = require('./schemas/mobileCrane/bap');
 const { laporanGantryCranePayload } = require('./schemas/gantryCrane/laporan');
+const { bapGantryCranePayload } = require('./schemas/gantryCrane/bap');
 
 // prefix
 const FORKLIFT_LAPORAN_PREFIX = '/paa/forklift/laporan';
@@ -14,6 +15,7 @@ const FORKLIFT_BAP_PREFIX = '/paa/forklift/bap';
 const MOBILE_CRANE_LAPORAN_PREFIX = '/paa/mobileCrane/laporan';
 const MOBILE_CRANE_BAP_PREFIX = '/paa/mobileCrane/bap';
 const GANTRY_CRANE_LAPORAN_PREFIX = '/paa/gantryCrane/laporan';
+const GANTRY_CRANE_BAP_PREFIX = '/paa/gantryCrane/bap';
 
 
 module.exports = [
@@ -281,7 +283,7 @@ module.exports = [
         },
     },
 
-    // --- RUTE BARU UNTUK GANTRY CRANE LAPORAN ---
+    // --- RUTE GANTRY CRANE LAPORAN ---
     {
         method: 'POST',
         path: GANTRY_CRANE_LAPORAN_PREFIX,
@@ -339,6 +341,68 @@ module.exports = [
             auth: 'jwt',
             description: 'Download dokumen laporan Gantry Crane berdasarkan ID',
             tags: ['api', 'PAA - Gantry Crane Laporan'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+
+        // --- RUTE BARU UNTUK BAP GANTRY CRANE ---
+    {
+        method: 'POST',
+        path: GANTRY_CRANE_BAP_PREFIX,
+        handler: gantryCraneHandlers.bap.create,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Gantry Crane BAP'],
+            validate: { payload: bapGantryCranePayload }
+        },
+    },
+    {
+        method: 'GET',
+        path: GANTRY_CRANE_BAP_PREFIX,
+        handler: gantryCraneHandlers.bap.getAll,
+        options: { auth: 'jwt', tags: ['api', 'PAA - Gantry Crane BAP'] },
+    },
+    {
+        method: 'GET',
+        path: `${GANTRY_CRANE_BAP_PREFIX}/{id}`,
+        handler: gantryCraneHandlers.bap.getById,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Gantry Crane BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${GANTRY_CRANE_BAP_PREFIX}/{id}`,
+        handler: gantryCraneHandlers.bap.update,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Gantry Crane BAP'],
+            validate: {
+                params: Joi.object({ id: Joi.string().required() }),
+                payload: bapGantryCranePayload
+            }
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${GANTRY_CRANE_BAP_PREFIX}/{id}`,
+        handler: gantryCraneHandlers.bap.delete,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Gantry Crane BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'GET',
+        path: `${GANTRY_CRANE_BAP_PREFIX}/download/{id}`,
+        handler: gantryCraneHandlers.bap.download,
+        options: {
+            auth: 'jwt',
+            description: 'Download dokumen BAP Gantry Crane berdasarkan ID',
+            tags: ['api', 'PAA - Gantry Crane BAP'],
             validate: { params: Joi.object({ id: Joi.string().required() }) }
         },
     },

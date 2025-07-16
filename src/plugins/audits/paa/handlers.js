@@ -6,7 +6,8 @@ const { createLaporanForklift: generateLaporanDoc } = require('../../../services
 const { createBapForklift: generateBapDoc } = require('../../../services/documentGenerator/paa/forklift/bap/generator');
 const { createLaporanMobileCrane: generateMobileCraneLaporanDoc } = require('../../../services/documentGenerator/paa/mobileCrane/laporan/generator')
 const { createBapMobileCrane: generateMobileCraneBapDoc } = require('../../../services/documentGenerator/paa/mobileCrane/bap/generator');
-const { createLaporanGantryCrane: generateGantryCraneLaporanDoc } = require('../../../services/documentGenerator/paa/gantryCrane/laporan/generator'); // Import generator baru
+const { createLaporanGantryCrane: generateGantryCraneLaporanDoc } = require('../../../services/documentGenerator/paa/gantryCrane/laporan/generator');
+const { createBapGantryCrane: generateGantryCraneBapDoc } = require('../../../services/documentGenerator/paa/gantryCrane/bap/generator');
 
 // ---FORKLIFT ---
 const forkliftHandlers = {
@@ -360,6 +361,69 @@ const gantryCraneHandlers = {
             }
         },
     },
+
+    bap: {
+        create: async (request, h) => {
+            try {
+                const newBap = await gantryCraneServices.bap.create(request.payload);
+                return h.response({ status: 'success', message: 'BAP Gantry Crane berhasil dibuat', data: { bap: newBap } }).code(201);
+            } catch (error) {
+                console.error("Create BAP Gantry Crane Error:", error);
+                return Boom.badImplementation('Gagal membuat BAP Gantry Crane.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allBap = await gantryCraneServices.bap.getAll();
+                return { status: 'success', message: 'BAP Gantry Crane berhasil didapat', data: { bap: allBap } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil daftar BAP Gantry Crane.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const bap = await gantryCraneServices.bap.getById(request.params.id);
+                if (!bap) return Boom.notFound('BAP Gantry Crane tidak ditemukan.');
+                return { status: 'success', message: 'BAP Gantry Crane berhasil didapat', data: { bap } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil BAP Gantry Crane.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await gantryCraneServices.bap.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, BAP Gantry Crane tidak ditemukan.');
+                return { status: 'success', message: 'BAP Gantry Crane berhasil diperbarui', data: { bap: updated } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal memperbarui BAP Gantry Crane.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await gantryCraneServices.bap.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Gantry Crane tidak ditemukan.');
+                return { status: 'success', message: 'BAP Gantry Crane berhasil dihapus' };
+            } catch (error) {
+                return Boom.badImplementation('Gagal menghapus BAP Gantry Crane.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const bapData = await gantryCraneServices.bap.getById(request.params.id);
+                if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Gantry Crane tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateGantryCraneBapDoc(bapData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'BAP Gantry Crane berhasil diunduh');
+            } catch (error) {
+                console.error("BAP Download Error:", error);
+                return Boom.badImplementation('Gagal memproses dokumen BAP Gantry Crane.');
+            }
+        },
+    }
 
 };
 
