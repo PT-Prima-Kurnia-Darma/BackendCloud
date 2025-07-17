@@ -147,7 +147,7 @@ const laporanGondolaPayload = Joi.object({
 
     conclusion: Joi.string().optional(),
     recommendation: Joi.string().optional()
-});
+}).min(1).unknown(false)
 
 module.exports = {
     laporanGondolaPayload,
