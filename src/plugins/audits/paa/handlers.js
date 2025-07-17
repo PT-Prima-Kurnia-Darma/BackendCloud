@@ -1,13 +1,14 @@
 'use strict';
 
 const Boom = require('@hapi/boom');
-const { forkliftServices, mobileCraneServices, gantryCraneServices } = require('./services');
+const { forkliftServices, mobileCraneServices, gantryCraneServices, gondolaServices } = require('./services');
 const { createLaporanForklift: generateLaporanDoc } = require('../../../services/documentGenerator/paa/forklift/laporan/generator');
 const { createBapForklift: generateBapDoc } = require('../../../services/documentGenerator/paa/forklift/bap/generator');
 const { createLaporanMobileCrane: generateMobileCraneLaporanDoc } = require('../../../services/documentGenerator/paa/mobileCrane/laporan/generator')
 const { createBapMobileCrane: generateMobileCraneBapDoc } = require('../../../services/documentGenerator/paa/mobileCrane/bap/generator');
 const { createLaporanGantryCrane: generateGantryCraneLaporanDoc } = require('../../../services/documentGenerator/paa/gantryCrane/laporan/generator');
 const { createBapGantryCrane: generateGantryCraneBapDoc } = require('../../../services/documentGenerator/paa/gantryCrane/bap/generator');
+const { createLaporanGondola: generateGondolaLaporanDoc } = require('../../../services/documentGenerator/paa/gondola/laporan/generator');
 
 // ---FORKLIFT ---
 const forkliftHandlers = {
@@ -441,9 +442,76 @@ const gantryCraneHandlers = {
     }
 };
 
+// -- Gondola
+const gondolaHandlers = {
+    laporan: {
+        create: async (request, h) => {
+            try {
+                const newLaporan = await gondolaServices.laporan.create(request.payload);
+                return h.response({ status: 'success', message: 'Laporan Gondola berhasil dibuat', data: { laporan: newLaporan } }).code(201);
+            } catch (error) {
+                console.error("Create Gondola Laporan Error:", error);
+                return Boom.badImplementation('Gagal membuat Laporan Gondola.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allLaporan = await gondolaServices.laporan.getAll();
+                return { status: 'success', message: 'Laporan Gondola berhasil didapat', data: { laporan: allLaporan } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil daftar Laporan Gondola.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const laporan = await gondolaServices.laporan.getById(request.params.id);
+                if (!laporan) return Boom.notFound('Laporan Gondola tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Gondola berhasil didapat', data: { laporan } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil Laporan Gondola.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await gondolaServices.laporan.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, Laporan Gondola tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Gondola berhasil diperbarui', data: { laporan: updated } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal memperbarui Laporan Gondola.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await gondolaServices.laporan.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, Laporan Gondola tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Gondola berhasil dihapus' };
+            } catch (error) {
+                return Boom.badImplementation('Gagal menghapus Laporan Gondola.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const laporanData = await gondolaServices.laporan.getById(request.params.id);
+                if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan Gondola tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateGondolaLaporanDoc(laporanData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'Laporan Gondola berhasil diunduh');
+            } catch (error) {
+                console.error("Download Laporan Gondola Error:", error);
+                return Boom.badImplementation('Gagal memproses dokumen Laporan Gondola.');
+            }
+        },
+    }
+};
+
 
 module.exports = {
     forkliftHandlers,
     mobileCraneHandlers,
-    gantryCraneHandlers
+    gantryCraneHandlers,
+    gondolaHandlers
 };
