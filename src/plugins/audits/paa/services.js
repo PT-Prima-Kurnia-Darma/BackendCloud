@@ -494,6 +494,7 @@ const gantryCraneServices = {
             return id;
         },
     },
+
     bap: {
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
@@ -627,6 +628,114 @@ const gondolaServices = {
             await docRef.delete();
             return id;
         },
+    },
+
+    bap: {
+        getDataForPrefill: async (laporanId) => {
+            const laporanRef = auditCollection.doc(laporanId);
+            const laporanDoc = await laporanRef.get();
+
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
+                const error = new Error('Laporan dengan ID yang diberikan tidak ditemukan.');
+                error.isBoom = true;
+                error.output = { statusCode: 404 };
+                throw error;
+            }
+
+            const laporanData = laporanDoc.data();
+
+            return {
+                laporanId: laporanId,
+                examinationType: laporanData.examinationType,
+                inspectionType: laporanData.inspectionType,
+                inspectionDate: laporanData.inspectionDate,
+                equipmentType: "Gondola",
+                generalData: {
+                    companyName: laporanData.generalData.ownerName,
+                    companyLocation: laporanData.generalData.ownerAddress,
+                    userInCharge: laporanData.generalData.userInCharge,
+                    ownerAddress: laporanData.generalData.ownerAddress
+                },
+                technicalData: {
+                    manufacturer: laporanData.technicalData.manufacturer,
+                    locationAndYearOfManufacture: laporanData.technicalData.locationAndYearOfManufacture,
+                    serialNumberUnitNumber: laporanData.technicalData.serialNumberUnitNumber,
+                    intendedUse: laporanData.generalData.intendedUse,
+                    capacityWorkingLoad: laporanData.generalData.capacityWorkingLoad,
+                    maxLiftingHeightMeters: laporanData.technicalData.gondolaSpecification.speed
+                },
+                inspectionResult: { visualCheck: {}, functionalTest: {} }
+            };
+        },
+
+        create: async (payload) => {
+            const laporanRef = auditCollection.doc(payload.laporanId);
+            const laporanDoc = await laporanRef.get();
+            if (!laporanDoc.exists) {
+                const error = new Error('Laporan dengan ID yang diberikan tidak ditemukan.');
+                error.isBoom = true;
+                error.output = { statusCode: 404 };
+                throw error;
+            }
+
+            // --- LOGIKA SINKRONISASI (BAP -> Laporan) ---
+            const dataToSyncWithLaporan = {
+                'generalData.ownerName': payload.generalData.companyName,
+                'generalData.ownerAddress': payload.generalData.companyLocation,
+            };
+            await laporanRef.update(dataToSyncWithLaporan);
+            // --- AKHIR LOGIKA SINKRONISASI ---
+
+            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const dataToSave = { ...payload, subInspectionType: "Gondola", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
+            const docRef = await auditCollection.add(dataToSave);
+            return { id: docRef.id, ...dataToSave };
+        },
+
+        getAll: async () => {
+            const snapshot = await auditCollection
+                .where('subInspectionType', '==', 'Gondola')
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+                .orderBy('createdAt', 'desc')
+                .get();
+            if (snapshot.empty) return [];
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+
+        getById: async (id) => {
+            const doc = await auditCollection.doc(id).get();
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') return null;
+            return { id: doc.id, ...doc.data() };
+        },
+
+        updateById: async (id, payload) => {
+            const bapRef = auditCollection.doc(id);
+            const bapDoc = await bapRef.get();
+            if (!bapDoc.exists) return null;
+
+            // --- LOGIKA SINKRONISASI (BAP -> Laporan) ---
+            const laporanRef = auditCollection.doc(payload.laporanId);
+            const dataToSyncWithLaporan = {
+                'generalData.ownerName': payload.generalData.companyName,
+                'generalData.ownerAddress': payload.generalData.companyLocation,
+            };
+            await laporanRef.update(dataToSyncWithLaporan);
+            // --- AKHIR LOGIKA SINKRONISASI ---
+
+            await bapRef.update(payload);
+            const updatedDoc = await bapRef.get();
+            return { id: updatedDoc.id, ...updatedDoc.data() };
+        },
+
+        deleteById: async (id) => {
+            const docRef = auditCollection.doc(id);
+            const doc = await docRef.get();
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Gondola') {
+             return null;
+            }
+            await docRef.delete();
+            return id;
+        }
     }
 };
 

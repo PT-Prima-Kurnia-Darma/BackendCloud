@@ -8,7 +8,6 @@ const bapGantryCranePayload = Joi.object({
   
   examinationType: Joi.string().allow('').optional(),
   inspectionType: Joi.string().allow('').optional(),
-  subInspectionType: Joi.string().allow('').optional(),
   inspectionDate: Joi.string().allow('').optional(),
   createdAt: Joi.string().allow('').optional(),
   extraId: Joi.number().allow('').optional(),

@@ -9,6 +9,7 @@ const { createBapMobileCrane: generateMobileCraneBapDoc } = require('../../../se
 const { createLaporanGantryCrane: generateGantryCraneLaporanDoc } = require('../../../services/documentGenerator/paa/gantryCrane/laporan/generator');
 const { createBapGantryCrane: generateGantryCraneBapDoc } = require('../../../services/documentGenerator/paa/gantryCrane/bap/generator');
 const { createLaporanGondola: generateGondolaLaporanDoc } = require('../../../services/documentGenerator/paa/gondola/laporan/generator');
+const { createBapGondola: generateGondolaBapDoc } = require('../../../services/documentGenerator/paa/gondola/bap/generator');
 
 // ---FORKLIFT ---
 const forkliftHandlers = {
@@ -364,6 +365,7 @@ const gantryCraneHandlers = {
             }
         },
     },
+
     bap: {
         prefill: async (request, h) => {
             try {
@@ -503,6 +505,95 @@ const gondolaHandlers = {
             } catch (error) {
                 console.error("Download Laporan Gondola Error:", error);
                 return Boom.badImplementation('Gagal memproses dokumen Laporan Gondola.');
+            }
+        },
+    },
+    
+    bap: {
+        getPrefill: async (request, h) => {
+            try {
+                const prefillData = await gondolaServices.bap.getDataForPrefill(request.params.laporanId);
+                return { 
+                    status: 'success', 
+                    message: 'Data pre-fill BAP berhasil didapat', 
+                    data: prefillData 
+                };
+            } catch (error) {
+                console.error("Get Gondola BAP Prefill Error:", error);
+                if (error.isBoom) return error;
+                return Boom.badImplementation('Gagal mengambil data pre-fill BAP.');
+            }
+        },
+
+        create: async (request, h) => {
+            try {
+                const newBap = await gondolaServices.bap.create(request.payload);
+                return h.response({ status: 'success', message: 'BAP Gondola berhasil dibuat', data: { bap: newBap } }).code(201);
+            } catch (error) {
+                console.error("Create Gondola BAP Error:", error);
+                if (error.isBoom) return error;
+                return Boom.badImplementation('Gagal membuat BAP Gondola.');
+            }
+        },
+
+        getAll: async (request, h) => {
+            try {
+                const allBap = await gondolaServices.bap.getAll();
+                return { status: 'success', message: 'Semua BAP Gondola berhasil didapat', data: { bap: allBap } };
+            } catch (error) {
+                console.error("Get All Gondola BAP Error:", error);
+                return Boom.badImplementation('Gagal mengambil daftar BAP Gondola.');
+            }
+        },
+
+        getById: async (request, h) => {
+            try {
+                const bap = await gondolaServices.bap.getById(request.params.id);
+                if (!bap) return Boom.notFound('BAP Gondola tidak ditemukan.');
+                return { status: 'success', message: 'BAP Gondola berhasil didapat', data: { bap } };
+            } catch (error) {
+                console.error("Get Gondola BAP By ID Error:", error);
+                return Boom.badImplementation('Gagal mengambil BAP Gondola.');
+            }
+        },
+
+        update: async (request, h) => {
+            try {
+                const updated = await gondolaServices.bap.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, BAP Gondola tidak ditemukan.');
+                return { status: 'success', message: 'BAP Gondola berhasil diperbarui', data: { bap: updated } };
+            } catch (error) {
+                console.error("Update Gondola BAP Error:", error);
+                return Boom.badImplementation('Gagal memperbarui BAP Gondola.');
+            }
+        },
+
+        delete: async (request, h) => {
+            try {
+                const deletedId = await gondolaServices.bap.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Gondola tidak ditemukan.');
+                return { status: 'success', message: 'BAP Gondola berhasil dihapus' };
+            } catch (error) {
+                console.error("Delete Gondola BAP Error:", error);
+                return Boom.badImplementation('Gagal menghapus BAP Gondola.');
+            }
+        },
+
+        download: async (request, h) => {
+            try {
+                const bapData = await gondolaServices.bap.getById(request.params.id);
+                if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Gondola tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateGondolaBapDoc(bapData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'BAP Gondola berhasil diunduh');
+            } catch (error)
+            {
+                console.error("Download BAP Gondola Error:", error);
+                return Boom.badImplementation('Gagal memproses dokumen BAP Gondola.');
             }
         },
     }

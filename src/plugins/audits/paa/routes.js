@@ -9,6 +9,7 @@ const { bapMobileCranePayload } = require('./schemas/mobileCrane/bap');
 const { laporanGantryCranePayload } = require('./schemas/gantryCrane/laporan');
 const { bapGantryCranePayload } = require('./schemas/gantryCrane/bap');
 const { laporanGondolaPayload } = require('./schemas/gondola/laporan');
+const { bapGondolaPayload } = require('./schemas/gondola/bap');
 
 // prefix
 const FORKLIFT_LAPORAN_PREFIX = '/paa/forklift/laporan';
@@ -18,6 +19,7 @@ const MOBILE_CRANE_BAP_PREFIX = '/paa/mobileCrane/bap';
 const GANTRY_CRANE_LAPORAN_PREFIX = '/paa/gantryCrane/laporan';
 const GANTRY_CRANE_BAP_PREFIX = '/paa/gantryCrane/bap';
 const GONDOLA_LAPORAN_PREFIX = '/paa/gondola/laporan';
+const GONDOLA_BAP_PREFIX = '/paa/gondola/bap';
 
 
 module.exports = [
@@ -477,6 +479,81 @@ module.exports = [
         options: { 
             auth: 'jwt', 
             tags: ['api', 'PAA - Gondola Laporan'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+
+    // -- RUTE BAP GONDOLA ---
+    {
+        method: 'GET',
+        path: `${GONDOLA_BAP_PREFIX}/prefill/{laporanId}`, // Rute baru untuk pre-fill
+        handler: gondolaHandlers.bap.getPrefill,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Gondola BAP'],
+            validate: {
+                params: Joi.object({
+                    laporanId: Joi.string().required()
+                })
+            }
+        },
+    },
+    {
+        method: 'POST',
+        path: GONDOLA_BAP_PREFIX,
+        handler: gondolaHandlers.bap.create,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Gondola BAP'],
+            validate: { payload: bapGondolaPayload }
+        },
+    },
+    {
+        method: 'GET',
+        path: GONDOLA_BAP_PREFIX,
+        handler: gondolaHandlers.bap.getAll,
+        options: { auth: 'jwt', tags: ['api', 'PAA - Gondola BAP'] },
+    },
+    {
+        method: 'GET',
+        path: `${GONDOLA_BAP_PREFIX}/{id}`,
+        handler: gondolaHandlers.bap.getById,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Gondola BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${GONDOLA_BAP_PREFIX}/{id}`,
+        handler: gondolaHandlers.bap.update,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Gondola BAP'],
+            validate: { 
+                params: Joi.object({ id: Joi.string().required() }), 
+                payload: bapGondolaPayload
+            } 
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${GONDOLA_BAP_PREFIX}/{id}`,
+        handler: gondolaHandlers.bap.delete,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Gondola BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+    {
+        method: 'GET',
+        path: `${GONDOLA_BAP_PREFIX}/download/{id}`,
+        handler: gondolaHandlers.bap.download,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Gondola BAP'],
             validate: { params: Joi.object({ id: Joi.string().required() }) } 
         },
     },
