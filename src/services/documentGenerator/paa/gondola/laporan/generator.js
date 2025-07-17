@@ -16,18 +16,9 @@ const storage = new Storage({
 
 const BUCKET_NAME = 'tamplate-audit-riksauji'; // Pastikan nama bucket Anda benar
 
-/**
- * Mengubah nilai boolean menjadi tanda centang ('V') atau strip ('-').
- * @param {boolean} status - Nilai boolean.
- * @returns {string} 'V' jika true, '-' jika false.
- */
-const getCheckmark = (status) => (status ? 'V' : '-');
+const getCheckmark = (status) => (status ? '√' : '');
 
-/**
- * Membuat dokumen Laporan Gondola dari data yang diberikan.
- * @param {object} data - Data laporan dari Firestore.
- * @returns {Promise<{docxBuffer: Buffer, fileName: string}>} Buffer dokumen dan nama file.
- */
+
 const createLaporanGondola = async (data) => {
     const templatePath = 'paa/gondola/laporanGondola.docx'; // Path ke template di GCS
 
@@ -252,9 +243,12 @@ const createLaporanGondola = async (data) => {
         safetyDevicesHarnessAnchorageMemenuhi: getCheckmark(data.visualInspection.safetyDevices.harnessAnchorage.status),
         safetyDevicesHarnessAnchorageTidakMemenuhi: getCheckmark(!data.visualInspection.safetyDevices.harnessAnchorage.status),
         safetyDevicesHarnessAnchorageResult: data.visualInspection.safetyDevices.harnessAnchorage.result,
-        handyTalkieMemenuhi: getCheckmark(data.visualInspection.safetyDevices.communicationTool.status),
-        handyTalkieTidakMemenuhi: getCheckmark(!data.visualInspection.safetyDevices.communicationTool.status),
-        handyTalkieResult: data.visualInspection.safetyDevices.communicationTool.result,
+        safetyDevicesCommunicationToolMemenuhi: getCheckmark(data.visualInspection.safetyDevices.communicationTool.status),
+        safetyDevicesCommunicationToolTidakMemenuhi: getCheckmark(!data.visualInspection.safetyDevices.communicationTool.status),
+        safetyDevicesCommunicationToolResult: data.visualInspection.safetyDevices.communicationTool.result,
+        handyTalkieMemenuhi: getCheckmark(data.visualInspection.safetyDevices.handyTalkie.status),
+        handyTalkieTidakMemenuhi: getCheckmark(!data.visualInspection.safetyDevices.handyTalkie.status),
+        handyTalkieResult: data.visualInspection.safetyDevices.handyTalkie.result,
         safetyDevicesSafetyHelmetMemenuhi: getCheckmark(data.visualInspection.safetyDevices.safetyHelmet.status),
         safetyDevicesSafetyHelmetTidakMemenuhi: getCheckmark(!data.visualInspection.safetyDevices.safetyHelmet.status),
         safetyDevicesSafetyHelmetResult: data.visualInspection.safetyDevices.safetyHelmet.result,
