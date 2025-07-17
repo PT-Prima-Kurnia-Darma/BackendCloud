@@ -305,7 +305,7 @@ const gantryCraneHandlers = {
                 const newLaporan = await gantryCraneServices.laporan.create(request.payload);
                 return h.response({ status: 'success', message: 'Laporan Gantry Crane berhasil dibuat', data: { laporan: newLaporan } }).code(201);
             } catch (error) {
-                console.error("Create Error:", error);
+                console.error("Create Gantry Crane Laporan Error:", error);
                 return Boom.badImplementation('Gagal membuat Laporan Gantry Crane.');
             }
         },
@@ -314,6 +314,7 @@ const gantryCraneHandlers = {
                 const allLaporan = await gantryCraneServices.laporan.getAll();
                 return { status: 'success', message: 'Laporan Gantry Crane berhasil didapat', data: { laporan: allLaporan } };
             } catch (error) {
+                console.error("Get All Gantry Crane Laporan Error:", error);
                 return Boom.badImplementation('Gagal mengambil daftar Laporan Gantry Crane.');
             }
         },
@@ -323,6 +324,7 @@ const gantryCraneHandlers = {
                 if (!laporan) return Boom.notFound('Laporan Gantry Crane tidak ditemukan.');
                 return { status: 'success', message: 'Laporan Gantry Crane berhasil didapat', data: { laporan } };
             } catch (error) {
+                console.error("Get Gantry Crane Laporan By ID Error:", error);
                 return Boom.badImplementation('Gagal mengambil Laporan Gantry Crane.');
             }
         },
@@ -332,6 +334,7 @@ const gantryCraneHandlers = {
                 if (!updated) return Boom.notFound('Gagal memperbarui, Laporan Gantry Crane tidak ditemukan.');
                 return { status: 'success', message: 'Laporan Gantry Crane berhasil diperbarui', data: { laporan: updated } };
             } catch (error) {
+                console.error("Update Gantry Crane Laporan Error:", error);
                 return Boom.badImplementation('Gagal memperbarui Laporan Gantry Crane.');
             }
         },
@@ -341,6 +344,7 @@ const gantryCraneHandlers = {
                 if (!deletedId) return Boom.notFound('Gagal menghapus, Laporan Gantry Crane tidak ditemukan.');
                 return { status: 'success', message: 'Laporan Gantry Crane berhasil dihapus' };
             } catch (error) {
+                console.error("Delete Gantry Crane Laporan Error:", error);
                 return Boom.badImplementation('Gagal menghapus Laporan Gantry Crane.');
             }
         },
@@ -348,27 +352,36 @@ const gantryCraneHandlers = {
             try {
                 const laporanData = await gantryCraneServices.laporan.getById(request.params.id);
                 if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan Gantry Crane tidak ditemukan.');
-                
-                const { docxBuffer, fileName } = await generateGantryCraneLaporanDoc(laporanData); // Menggunakan generator baru
-
+                const { docxBuffer, fileName } = await generateGantryCraneLaporanDoc(laporanData);
                 return h.response(docxBuffer)
                     .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
                     .header('Content-Disposition', `attachment; filename="${fileName}"`)
                     .header('message', 'Laporan Gantry Crane berhasil diunduh');
             } catch (error) {
-                console.error("Download Error:", error);
+                console.error("Download Gantry Crane Laporan Error:", error);
                 return Boom.badImplementation('Gagal memproses dokumen Laporan Gantry Crane.');
             }
         },
     },
-
     bap: {
+        prefill: async (request, h) => {
+            try {
+                const { laporanId } = request.params;
+                const prefilledData = await gantryCraneServices.bap.getDataForPrefill(laporanId);
+                if (!prefilledData) return Boom.notFound('Data Laporan Gantry Crane dengan ID tersebut tidak ditemukan.');
+                return h.response({ status: 'success', message: 'Data BAP Gantry Crane berhasil didapat', data: prefilledData });
+            } catch (error) {
+                console.error('Error in Gantry Crane BAP prefill handler:', error);
+                return Boom.badImplementation('Gagal mengambil data untuk BAP Gantry Crane.');
+            }
+        },
         create: async (request, h) => {
             try {
                 const newBap = await gantryCraneServices.bap.create(request.payload);
                 return h.response({ status: 'success', message: 'BAP Gantry Crane berhasil dibuat', data: { bap: newBap } }).code(201);
             } catch (error) {
-                console.error("Create BAP Gantry Crane Error:", error);
+                console.error("Create Gantry Crane BAP Error:", error);
+                if (error.isBoom) return error;
                 return Boom.badImplementation('Gagal membuat BAP Gantry Crane.');
             }
         },
@@ -377,6 +390,7 @@ const gantryCraneHandlers = {
                 const allBap = await gantryCraneServices.bap.getAll();
                 return { status: 'success', message: 'BAP Gantry Crane berhasil didapat', data: { bap: allBap } };
             } catch (error) {
+                console.error("Get All Gantry Crane BAP Error:", error);
                 return Boom.badImplementation('Gagal mengambil daftar BAP Gantry Crane.');
             }
         },
@@ -386,6 +400,7 @@ const gantryCraneHandlers = {
                 if (!bap) return Boom.notFound('BAP Gantry Crane tidak ditemukan.');
                 return { status: 'success', message: 'BAP Gantry Crane berhasil didapat', data: { bap } };
             } catch (error) {
+                console.error("Get Gantry Crane BAP By ID Error:", error);
                 return Boom.badImplementation('Gagal mengambil BAP Gantry Crane.');
             }
         },
@@ -395,6 +410,7 @@ const gantryCraneHandlers = {
                 if (!updated) return Boom.notFound('Gagal memperbarui, BAP Gantry Crane tidak ditemukan.');
                 return { status: 'success', message: 'BAP Gantry Crane berhasil diperbarui', data: { bap: updated } };
             } catch (error) {
+                console.error("Update Gantry Crane BAP Error:", error);
                 return Boom.badImplementation('Gagal memperbarui BAP Gantry Crane.');
             }
         },
@@ -404,6 +420,7 @@ const gantryCraneHandlers = {
                 if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Gantry Crane tidak ditemukan.');
                 return { status: 'success', message: 'BAP Gantry Crane berhasil dihapus' };
             } catch (error) {
+                console.error("Delete Gantry Crane BAP Error:", error);
                 return Boom.badImplementation('Gagal menghapus BAP Gantry Crane.');
             }
         },
@@ -411,20 +428,17 @@ const gantryCraneHandlers = {
             try {
                 const bapData = await gantryCraneServices.bap.getById(request.params.id);
                 if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Gantry Crane tidak ditemukan.');
-                
                 const { docxBuffer, fileName } = await generateGantryCraneBapDoc(bapData);
-
                 return h.response(docxBuffer)
                     .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
                     .header('Content-Disposition', `attachment; filename="${fileName}"`)
                     .header('message', 'BAP Gantry Crane berhasil diunduh');
             } catch (error) {
-                console.error("BAP Download Error:", error);
+                console.error('Error in Gantry Crane BAP download handler:', error);
                 return Boom.badImplementation('Gagal memproses dokumen BAP Gantry Crane.');
             }
         },
     }
-
 };
 
 

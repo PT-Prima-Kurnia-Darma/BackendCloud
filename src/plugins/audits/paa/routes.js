@@ -347,6 +347,17 @@ module.exports = [
 
         // --- RUTE BARU UNTUK BAP GANTRY CRANE ---
     {
+        method: 'GET',
+        path: `${GANTRY_CRANE_BAP_PREFIX}/prefill/{laporanId}`,
+        handler: gantryCraneHandlers.bap.prefill,
+        options: {
+            auth: 'jwt',
+            description: 'Get prefilled BAP data from a Laporan for Gantry Crane',
+            tags: ['api', 'PAA - Gantry Crane BAP'],
+            validate: { params: Joi.object({ laporanId: Joi.string().required() }) }
+        },
+    },
+    {
         method: 'POST',
         path: GANTRY_CRANE_BAP_PREFIX,
         handler: gantryCraneHandlers.bap.create,

@@ -438,118 +438,145 @@ const gantryCraneServices = {
     laporan: {
         create: async (payload) => {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
-            const dataToSave = {
-                ...payload,
-                subInspectionType: "Gantry Crane", // Identifikasi sub-tipe
-                documentType: "Laporan", // Identifikasi tipe dokumen
-                createdAt
-            };
+            const dataToSave = { ...payload, subInspectionType: "Gantry Crane", documentType: "Laporan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
-
         getAll: async () => {
-            const snapshot = await auditCollection
-                .where('subInspectionType', '==', 'Gantry Crane')
-                .where('documentType', '==', 'Laporan')
-                .orderBy('createdAt', 'desc')
-                .get();
-            if (snapshot.empty) {
-                return [];
-            }
+            const snapshot = await auditCollection.where('subInspectionType', '==', 'Gantry Crane').where('documentType', '==', 'Laporan').orderBy('createdAt', 'desc').get();
+            if (snapshot.empty) return [];
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
-
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Gantry Crane') {
-                return null;
-            }
+            if (!doc.exists || doc.data().documentType !== 'Laporan') return null;
             return { id: doc.id, ...doc.data() };
         },
-
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
-            const laporanDoc = await laporanRef.get();
-            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gantry Crane') {
-                return null;
-            }
-
-            // Update Laporan utama
+            if (!(await laporanRef.get()).exists) return null;
             await laporanRef.update(payload);
-
-            // TODO: Tambahkan logika sinkronisasi ke BAP Gantry Crane jika ada
-            // Misalnya, jika Anda memiliki BAP untuk Gantry Crane, Anda bisa mencarinya
-            // dan memperbarui field yang relevan di sana, mirip dengan forklift/mobileCrane.
-
+            const bapQuery = await auditCollection.where('laporanId', '==', id).limit(1).get();
+            if (!bapQuery.empty) {
+                const bapRef = bapQuery.docs[0].ref;
+                const dataToSync = {};
+                const p = payload;
+                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+                if (p.inspectionType !== undefined) dataToSync.inspectionType = p.inspectionType;
+                if (p.generalData?.inspectionDate !== undefined) dataToSync.inspectionDate = p.generalData.inspectionDate;
+                if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
+                if (p.generalData?.companyLocation !== undefined) dataToSync['generalData.companyLocation'] = p.generalData.companyLocation;
+                if (p.generalData?.usageLocation !== undefined) dataToSync['generalData.usageLocation'] = p.generalData.usageLocation;
+                if (p.generalData?.location !== undefined) dataToSync['generalData.location'] = p.generalData.location;
+                if (p.generalData?.manufacturerHoist !== undefined) dataToSync['technicalData.manufacturerHoist'] = p.generalData.manufacturerHoist;
+                if (p.generalData?.manufacturerStructure !== undefined) dataToSync['technicalData.manufactureStructure'] = p.generalData.manufacturerStructure;
+                if (p.generalData?.brandOrType !== undefined) dataToSync['technicalData.brandOrType'] = p.generalData.brandOrType;
+                if (p.generalData?.manufactureYear !== undefined) dataToSync['technicalData.manufactureYear'] = p.generalData.manufactureYear;
+                if (p.generalData?.serialNumber !== undefined) dataToSync['technicalData.serialNumber'] = p.generalData.serialNumber;
+                if (p.generalData?.maxLiftingCapacityKg !== undefined) dataToSync['technicalData.maxLiftingCapacityKg'] = p.generalData.maxLiftingCapacityKg;
+                if (p.technicalData?.hoistingSpeed !== undefined) dataToSync['technicalData.liftingSpeedMpm'] = p.technicalData.hoistingSpeed;
+                if (Object.keys(dataToSync).length > 0) await bapRef.update(dataToSync);
+            }
             const updatedDoc = await laporanRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
-
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
-            const doc = await docRef.get();
-            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Gantry Crane') {
-                return null;
-            }
-            // Hapus BAP yang terkait jika ada
+            if (!(await docRef.get()).exists) return null;
             const bapQuery = await auditCollection.where('laporanId', '==', id).get();
             if (!bapQuery.empty) {
                 const batch = db.batch();
-                bapQuery.docs.forEach(bapDoc => {
-                    batch.delete(bapDoc.ref);
-                });
+                bapQuery.docs.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
             }
             await docRef.delete();
             return id;
         },
     },
-
-        bap: {
-        create: async (payload) => {
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
-            const dataToSave = {
-                ...payload,
+    bap: {
+        getDataForPrefill: async (laporanId) => {
+            const laporanDoc = await auditCollection.doc(laporanId).get();
+            if (!laporanDoc.exists) return null;
+            const d = laporanDoc.data();
+            return {
+                laporanId,
+                examinationType: d.examinationType || "",
+                inspectionType: d.inspectionType || "",
                 subInspectionType: "Gantry Crane",
-                documentType: "Berita Acara Pemeriksaan",
-                createdAt
+                inspectionDate: d.generalData?.inspectionDate || "",
+                generalData: { companyName: d.generalData?.companyName || "", companyLocation: d.generalData?.companyLocation || "", usageLocation: d.generalData?.usageLocation || "", location: d.generalData?.location || "" },
+                technicalData: { brandOrType: d.generalData?.brandOrType || "", manufacturerHoist: d.generalData?.manufacturerHoist || "", manufactureStructure: d.generalData?.manufacturerStructure || "", manufactureYear: d.generalData?.manufactureYear || "", manufactureCountry: d.technicalData?.manufactureCountry || "", serialNumber: d.generalData?.serialNumber || "", maxLiftingCapacityKg: d.generalData?.maxLiftingCapacityKg || "", liftingSpeedMpm: d.technicalData?.hoistingSpeed || "" },
+                inspectionResult: { visualCheck: {}, functionalTest: {}, ndtTest: {}, loadTest: {} }
             };
+        },
+        create: async (payload) => {
+            const { laporanId } = payload;
+            const laporanRef = auditCollection.doc(laporanId);
+            if (!(await laporanRef.get()).exists) throw Boom.notFound('Laporan Gantry Crane tidak ditemukan.');
+            const p = payload;
+            const dataToSync = {};
+            if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+            if (p.inspectionType !== undefined) dataToSync.inspectionType = p.inspectionType;
+            if (p.inspectionDate !== undefined) dataToSync['generalData.inspectionDate'] = p.inspectionDate;
+            if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
+            if (p.generalData?.companyLocation !== undefined) dataToSync['generalData.companyLocation'] = p.generalData.companyLocation;
+            if (p.generalData?.usageLocation !== undefined) dataToSync['generalData.usageLocation'] = p.generalData.usageLocation;
+            if (p.generalData?.location !== undefined) dataToSync['generalData.location'] = p.generalData.location;
+            if (p.technicalData?.manufacturerHoist !== undefined) dataToSync['generalData.manufacturerHoist'] = p.technicalData.manufacturerHoist;
+            if (p.technicalData?.manufactureStructure !== undefined) dataToSync['generalData.manufactureStructure'] = p.technicalData.manufactureStructure;
+            if (p.technicalData?.brandOrType !== undefined) dataToSync['generalData.brandOrType'] = p.technicalData.brandOrType;
+            if (p.technicalData?.manufactureYear !== undefined) dataToSync['generalData.manufactureYear'] = p.technicalData.manufactureYear;
+            if (p.technicalData?.serialNumber !== undefined) dataToSync['generalData.serialNumber'] = p.technicalData.serialNumber;
+            if (p.technicalData?.maxLiftingCapacityKg !== undefined) dataToSync['generalData.maxLiftingCapacityKg'] = p.technicalData.maxLiftingCapacityKg;
+            if (p.technicalData?.liftingSpeedMpm !== undefined) dataToSync['technicalData.hoistingSpeed'] = p.technicalData.liftingSpeedMpm;
+            if (Object.keys(dataToSync).length > 0) await laporanRef.update(dataToSync);
+            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const dataToSave = { ...payload, subInspectionType: "Gantry Crane", documentType: "Berita Acara Pemeriksaan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
         getAll: async () => {
-            const snapshot = await auditCollection
-                .where('subInspectionType', '==', 'Gantry Crane')
-                .where('documentType', '==', 'Berita Acara Pemeriksaan')
-                .orderBy('createdAt', 'desc')
-                .get();
+            const snapshot = await auditCollection.where('subInspectionType', '==', 'Gantry Crane').where('documentType', '==', 'Berita Acara Pemeriksaan').orderBy('createdAt', 'desc').get();
             if (snapshot.empty) return [];
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara Pemeriksaan' || doc.data().subInspectionType !== 'Gantry Crane') {
-                return null;
-            }
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara Pemeriksaan') return null;
             return { id: doc.id, ...doc.data() };
         },
         updateById: async (id, payload) => {
-            const docRef = auditCollection.doc(id);
-            const doc = await docRef.get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara Pemeriksaan' || doc.data().subInspectionType !== 'Gantry Crane') {
-                return null;
+            const bapRef = auditCollection.doc(id);
+            const bapDoc = await bapRef.get();
+            if (!bapDoc.exists) return null;
+            await bapRef.update(payload);
+            const { laporanId } = bapDoc.data();
+            if (laporanId) {
+                const laporanRef = auditCollection.doc(laporanId);
+                const dataToSync = {};
+                const p = payload;
+                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+                if (p.inspectionType !== undefined) dataToSync.inspectionType = p.inspectionType;
+                if (p.inspectionDate !== undefined) dataToSync['generalData.inspectionDate'] = p.inspectionDate;
+                if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
+                if (p.generalData?.companyLocation !== undefined) dataToSync['generalData.companyLocation'] = p.generalData.companyLocation;
+                if (p.generalData?.usageLocation !== undefined) dataToSync['generalData.usageLocation'] = p.generalData.usageLocation;
+                if (p.generalData?.location !== undefined) dataToSync['generalData.location'] = p.generalData.location;
+                if (p.technicalData?.manufacturerHoist !== undefined) dataToSync['generalData.manufacturerHoist'] = p.technicalData.manufacturerHoist;
+                if (p.technicalData?.manufactureStructure !== undefined) dataToSync['generalData.manufactureStructure'] = p.technicalData.manufactureStructure;
+                if (p.technicalData?.brandOrType !== undefined) dataToSync['generalData.brandOrType'] = p.technicalData.brandOrType;
+                if (p.technicalData?.manufactureYear !== undefined) dataToSync['generalData.manufactureYear'] = p.technicalData.manufactureYear;
+                if (p.technicalData?.serialNumber !== undefined) dataToSync['generalData.serialNumber'] = p.technicalData.serialNumber;
+                if (p.technicalData?.maxLiftingCapacityKg !== undefined) dataToSync['generalData.maxLiftingCapacityKg'] = p.technicalData.maxLiftingCapacityKg;
+                if (p.technicalData?.liftingSpeedMpm !== undefined) dataToSync['technicalData.hoistingSpeed'] = p.technicalData.liftingSpeedMpm;
+                if (Object.keys(dataToSync).length > 0) await laporanRef.update(dataToSync);
             }
-            await docRef.update(payload);
-            const updatedDoc = await docRef.get();
+            const updatedDoc = await bapRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
-            const doc = await docRef.get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara Pemeriksaan' || doc.data().subInspectionType !== 'Gantry Crane') {
-                return null;
-            }
+            if (!(await docRef.get()).exists) return null;
             await docRef.delete();
             return id;
         }
