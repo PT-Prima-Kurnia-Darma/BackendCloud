@@ -58,7 +58,7 @@ const bapGantryCranePayload = Joi.object({
       isLoadTestResultGood: Joi.boolean().required(),
     }).optional(),
   }).optional(),
-}).min(1);
+}).min(1).unknown(false);
 
 module.exports = {
     bapGantryCranePayload,

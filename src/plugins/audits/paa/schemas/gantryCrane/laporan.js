@@ -645,7 +645,7 @@ const laporanGantryCranePayload = Joi.object({
     conclusion: Joi.string().allow('').optional(),
     recomendation: Joi.string().allow('').optional()
 
-}).min(1).unknown(false); // unknown(false) akan menolak kunci yang tidak didefinisikan dalam skema
+}).min(1).unknown(false);
 
 module.exports = {
     laporanGantryCranePayload,
