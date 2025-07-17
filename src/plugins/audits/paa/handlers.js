@@ -78,7 +78,7 @@ const forkliftHandlers = {
                 const { laporanId } = request.params;
                 const prefilledData = await forkliftServices.bap.getDataForPrefill(laporanId);
                 if (!prefilledData) {
-                    return Boom.notFound('Data Laporan Forklift dengan ID tersebut tidak ditemukan.');
+                    return Boom.notFound('Data Laporan Forklift tidak ditemukan.');
                 }
                 return h.response({ status: 'success', message: 'Data BAP Forklift berhasil didapat', data: prefilledData });
             } catch (error) {
@@ -226,7 +226,7 @@ const mobileCraneHandlers = {
                 const { laporanId } = request.params;
                 const prefilledData = await mobileCraneServices.bap.getDataForPrefill(laporanId);
                 if (!prefilledData) {
-                    return Boom.notFound('Data Laporan Mobile Crane dengan ID tersebut tidak ditemukan.');
+                    return Boom.notFound('Data Laporan Mobile Crane tidak ditemukan.');
                 }
                 return h.response({ status: 'success', message: 'BAP Mobile Crane berhasil dibuat', data: prefilledData });
             } catch (error) {
@@ -368,7 +368,7 @@ const gantryCraneHandlers = {
             try {
                 const { laporanId } = request.params;
                 const prefilledData = await gantryCraneServices.bap.getDataForPrefill(laporanId);
-                if (!prefilledData) return Boom.notFound('Data Laporan Gantry Crane dengan ID tersebut tidak ditemukan.');
+                if (!prefilledData) return Boom.notFound('Data Laporan Gantry Crane tidak ditemukan.');
                 return h.response({ status: 'success', message: 'Data BAP Gantry Crane berhasil didapat', data: prefilledData });
             } catch (error) {
                 console.error('Error in Gantry Crane BAP prefill handler:', error);

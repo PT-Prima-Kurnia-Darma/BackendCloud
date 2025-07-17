@@ -40,7 +40,7 @@ const elevatorHandlers = {
         const { id } = request.params;
         const laporan = await elevatorServices.laporan.getById(id);
         if (!laporan) {
-          return Boom.notFound('laporan elevator dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('laporan elevator tidak ditemukan.');
         }
         return { status: 'success',message: 'Data Laporan berhasil didapatkan', data: { laporan } };
       } catch (error) {
@@ -54,7 +54,7 @@ const elevatorHandlers = {
         const { id } = request.params;
         const updatedLaporan = await elevatorServices.laporan.updateById(id, request.payload);
         if (!updatedLaporan) {
-          return Boom.notFound('Gagal memperbarui. laporan elevator dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('Gagal memperbarui. laporan elevator tidak ditemukan.');
         }
         return h.response({ status: 'success', message: 'laporan elevator berhasil diperbarui', data: { laporan: updatedLaporan } });
       } catch (error) {
@@ -68,7 +68,7 @@ const elevatorHandlers = {
         const { id } = request.params;
         const deletedId = await elevatorServices.laporan.deleteById(id);
         if (!deletedId) {
-          return Boom.notFound('Gagal menghapus. laporan elevator dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('Gagal menghapus. laporan elevator tidak ditemukan.');
         }
         return { status: 'success', message: 'laporan elevator berhasil dihapus' };
       } catch (error) {
@@ -82,7 +82,7 @@ const elevatorHandlers = {
         const { id } = request.params;
         const LaporanData = await elevatorServices.laporan.getById(id);
         if (!LaporanData) {
-          return Boom.notFound('Gagal membuat dokumen. laporan dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('Gagal membuat dokumen. laporan Elevator tidak ditemukan.');
         }
         const { docxBuffer, fileName } = await generateLaporanElevatorDoc(LaporanData);
 
@@ -107,7 +107,7 @@ const elevatorHandlers = {
         try {
             const { LaporanId } = request.params;
             const prefilledData = await elevatorServices.bap.getDataForPrefill(LaporanId);
-            if (!prefilledData) return Boom.notFound('Data laporan dengan ID tersebut tidak ditemukan.');
+            if (!prefilledData) return Boom.notFound('Data laporan Elevator tidak ditemukan.');
             return h.response({ status: 'success', message: 'Data BAP berhasil didapatkan', data: prefilledData });
         } catch (error) {
             console.error('Error in BAP prefill handler:', error);
@@ -146,7 +146,7 @@ const elevatorHandlers = {
         getById: async (request, h) => {
         try {
             const bap = await elevatorServices.bap.getById(request.params.id);
-            if (!bap) return Boom.notFound('BAP elevator dengan ID tersebut tidak ditemukan.');
+            if (!bap) return Boom.notFound('BAP elevator tidak ditemukan.');
             return { status: 'success', message: 'Data BAP berhasil didapatkan', data: { bap } };
         } catch (error) {
             console.error('Error in get BAP by ID handler:', error);
@@ -157,7 +157,7 @@ const elevatorHandlers = {
         update: async (request, h) => {
         try {
             const updatedBap = await elevatorServices.bap.updateById(request.params.id, request.payload);
-            if (!updatedBap) return Boom.notFound('Gagal memperbarui, BAP tidak ditemukan.');
+            if (!updatedBap) return Boom.notFound('Gagal memperbarui, BAP Elevator tidak ditemukan.');
             return { status: 'success', message: 'BAP elevator berhasil diperbarui', data: { bap: updatedBap } };
         } catch (error) {
             console.error('Error in update BAP handler:', error);
@@ -168,7 +168,7 @@ const elevatorHandlers = {
         delete: async (request, h) => {
         try {
             const deletedId = await elevatorServices.bap.deleteById(request.params.id);
-            if (!deletedId) return Boom.notFound('Gagal menghapus, BAP tidak ditemukan.');
+            if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Elevator tidak ditemukan.');
             return { status: 'success', message: 'BAP elevator berhasil dihapus' };
         } catch (error) {
             console.error('Error in delete BAP handler:', error);
@@ -179,7 +179,7 @@ const elevatorHandlers = {
         download: async (request, h) => {
         try {
             const bapData = await elevatorServices.bap.getById(request.params.id);
-            if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP tidak ditemukan.');
+            if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Elevator tidak ditemukan.');
             const { docxBuffer, fileName } = await generateBapElevatorDoc(bapData);
             return h.response(docxBuffer)
             .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
@@ -223,7 +223,7 @@ const eskalatorHandlers = {
         const { id } = request.params;
         const laporan = await eskalatorServices.laporan.getById(id);
         if (!laporan) {
-          return Boom.notFound('Laporan eskalator dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('Laporan eskalator tidak ditemukan.');
         }
         return { status: 'success',message: 'Data Laporan eskalator berhasil didapatkan', data: { laporan } };
       } catch (error) {
@@ -237,7 +237,7 @@ const eskalatorHandlers = {
         const { id } = request.params;
         const updatedLaporan = await eskalatorServices.laporan.updateById(id, request.payload);
         if (!updatedLaporan) {
-          return Boom.notFound('Gagal memperbarui. Laporan eskalator dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('Gagal memperbarui. Laporan eskalator tidak ditemukan.');
         }
         return h.response({ status: 'success', message: 'Laporan eskalator berhasil diperbarui', data: { laporan: updatedLaporan } });
       } catch (error) {
@@ -251,7 +251,7 @@ const eskalatorHandlers = {
         const { id } = request.params;
         const deletedId = await eskalatorServices.laporan.deleteById(id);
         if (!deletedId) {
-          return Boom.notFound('Gagal menghapus. Laporan eskalator dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('Gagal menghapus. Laporan eskalator tidak ditemukan.');
         }
         return { status: 'success', message: 'Laporan eskalator berhasil dihapus' };
       } catch (error) {
@@ -266,7 +266,7 @@ const eskalatorHandlers = {
         const laporanData = await eskalatorServices.laporan.getById(id);
 
         if (!laporanData) {
-          return Boom.notFound('Gagal membuat dokumen. Laporan dengan ID tersebut tidak ditemukan.');
+          return Boom.notFound('Gagal membuat dokumen. Laporan Eskalator tidak ditemukan.');
         }
 
         // Panggil fungsi generator dengan data dari Firestore
@@ -297,7 +297,7 @@ const eskalatorHandlers = {
         try {
             const { LaporanId } = request.params;
             const prefilledData = await eskalatorServices.bap.getDataForPrefill(LaporanId);
-            if (!prefilledData) return Boom.notFound('Data laporan eskalator dengan ID tersebut tidak ditemukan untuk prefill.');
+            if (!prefilledData) return Boom.notFound('Data laporan eskalator tidak ditemukan untuk prefill.');
             return h.response({ status: 'success', message: 'Data BAP berhasil didapatkan', data: prefilledData });
         } catch (error) {
             console.error('Error in BAP eskalator prefill handler:', error);
@@ -329,7 +329,7 @@ const eskalatorHandlers = {
     getById: async (request, h) => {
         try {
             const bap = await eskalatorServices.bap.getById(request.params.id);
-            if (!bap) return Boom.notFound('BAP eskalator dengan ID tersebut tidak ditemukan.');
+            if (!bap) return Boom.notFound('BAP Eskalator tidak ditemukan.');
             return { status: 'success', message: 'Data BAP eskalator berhasil didapatkan', data: { bap } };
         } catch (error) {
             console.error('Error in get BAP eskalator by ID handler:', error);
@@ -351,7 +351,7 @@ const eskalatorHandlers = {
     delete: async (request, h) => {
         try {
             const deletedId = await eskalatorServices.bap.deleteById(request.params.id);
-            if (!deletedId) return Boom.notFound('Gagal menghapus, BAP eskalator tidak ditemukan.');
+            if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Eskalator tidak ditemukan.');
             return { status: 'success', message: 'BAP eskalator berhasil dihapus' };
         } catch (error) {
             console.error('Error in delete BAP eskalator handler:', error);
@@ -362,7 +362,7 @@ const eskalatorHandlers = {
     download: async (request, h) => {
       try {
           const bapData = await eskalatorServices.bap.getById(request.params.id);
-          if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP eskalator tidak ditemukan.');
+          if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Eskalator tidak ditemukan.');
           
           const { docxBuffer, fileName } = await generateBapEskalatorDoc(bapData);
 

@@ -57,7 +57,7 @@ const forkliftServices = {
             // 2. Cari BAP yang terhubung
             const bapQuery = await auditCollection
                 .where('laporanId', '==', id)
-                .where('documentType', '==', 'Berita Acara Pemeriksaan')
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
                 .limit(1)
                 .get();
             
@@ -96,14 +96,6 @@ const forkliftServices = {
             const doc = await docRef.get();
             if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Forklift') {
                 return null;
-            }
-            const bapQuery = await auditCollection.where('laporanId', '==', id).get();
-            if (!bapQuery.empty) {
-                const batch = db.batch();
-                bapQuery.docs.forEach(bapDoc => {
-                    batch.delete(bapDoc.ref);
-                });
-                await batch.commit();
             }
             await docRef.delete();
             return id;
@@ -144,13 +136,13 @@ const forkliftServices = {
             const { laporanId } = payload;
             const laporanDoc = await auditCollection.doc(laporanId).get();
             if (!laporanDoc.exists) {
-                throw Boom.notFound('Laporan Forklift dengan ID tersebut tidak ditemukan.');
+                throw Boom.notFound('Laporan Forklift tidak ditemukan.');
             }
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
             const dataToSave = { 
                 ...payload,
                 subInspectionType: "Forklift",
-                documentType: "Berita Acara Pemeriksaan", 
+                documentType: "Berita Acara dan Pemeriksaan Pengujian", 
                 createdAt 
             };
             const docRef = await auditCollection.add(dataToSave);
@@ -159,7 +151,7 @@ const forkliftServices = {
         getAll: async () => {
             const snapshot = await auditCollection
                 .where('subInspectionType', '==', 'Forklift')
-                .where('documentType', '==', 'Berita Acara Pemeriksaan')
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
                 .orderBy('createdAt', 'desc')
                 .get();
             if (snapshot.empty) return [];
@@ -167,7 +159,7 @@ const forkliftServices = {
         },
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara Pemeriksaan' || doc.data().subInspectionType !== 'Forklift') {
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Forklift') {
                 return null;
             }
             return { id: doc.id, ...doc.data() };
@@ -179,7 +171,7 @@ const forkliftServices = {
         updateById: async (id, payload) => {
             const bapRef = auditCollection.doc(id);
             const bapDoc = await bapRef.get();
-            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara Pemeriksaan') {
+            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') {
                 return null;
             }
             
@@ -220,12 +212,12 @@ const forkliftServices = {
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
             const doc = await docRef.get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara Pemeriksaan' || doc.data().subInspectionType !== 'Forklift') {
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Forklift') {
                 return null;
             }
             await docRef.delete();
             return id;
-        },
+        }
     }
 };
 
@@ -237,16 +229,19 @@ const mobileCraneServices = {
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
+
         getAll: async () => {
             const snapshot = await auditCollection.where('subInspectionType', '==', 'Mobile Crane').where('documentType', '==', 'Laporan').orderBy('createdAt', 'desc').get();
             if (snapshot.empty) return [];
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
+
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
             if (!doc.exists || doc.data().documentType !== 'Laporan') return null;
             return { id: doc.id, ...doc.data() };
         },
+
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
             const laporanDoc = await laporanRef.get();
@@ -292,15 +287,12 @@ const mobileCraneServices = {
 
             return { id: updatedDoc.id, ...data };
         },
+
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
-            if (!(await docRef.get()).exists) return null;
-            
-            const bapQuery = await auditCollection.where('laporanId', '==', id).get();
-            if (!bapQuery.empty) {
-                const batch = db.batch();
-                bapQuery.docs.forEach(bapDoc => batch.delete(bapDoc.ref));
-                await batch.commit();
+            const doc = await docRef.get();
+            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Mobile Crane') {
+                return null;
             }
             await docRef.delete();
             return id;
@@ -335,12 +327,13 @@ const mobileCraneServices = {
                 signature: { companyName: d.generalData?.generalDataOwnerName || "" },
             };
         },
+
         create: async (payload) => {
             const { laporanId } = payload;
             const laporanRef = auditCollection.doc(laporanId);
             const laporanDoc = await laporanRef.get();
             if (!laporanDoc.exists) {
-                throw Boom.notFound('Laporan Mobile Crane dengan ID tersebut tidak ditemukan.');
+                throw Boom.notFound('Laporan Mobile Crane tidak ditemukan.');
             }
 
             const p = payload;
@@ -368,19 +361,22 @@ const mobileCraneServices = {
             }
             
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
-            const dataToSave = { ...payload, subInspectionType: "Mobile Crane", documentType: "Berita Acara Pemeriksaan", createdAt };
+            const dataToSave = { ...payload, subInspectionType: "Mobile Crane", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
+
         getAll: async () => {
-            const snapshot = await auditCollection.where('subInspectionType', '==', 'Mobile Crane').where('documentType', '==', 'Berita Acara Pemeriksaan').orderBy('createdAt', 'desc').get();
+            const snapshot = await auditCollection.where('subInspectionType', '==', 'Mobile Crane').where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian').orderBy('createdAt', 'desc').get();
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
+
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara Pemeriksaan') return null;
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') return null;
             return { id: doc.id, ...doc.data() };
         },
+
         updateById: async (id, payload) => {
             const bapRef = auditCollection.doc(id);
             const bapDoc = await bapRef.get();
@@ -425,9 +421,13 @@ const mobileCraneServices = {
 
             return { id: updatedDoc.id, ...data };
         },
+
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
-            if (!(await docRef.get()).exists) return null;
+            const doc = await docRef.get();
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Mobile Crane') {
+                return null;
+            }
             await docRef.delete();
             return id;
         }
@@ -442,16 +442,19 @@ const gantryCraneServices = {
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
+
         getAll: async () => {
             const snapshot = await auditCollection.where('subInspectionType', '==', 'Gantry Crane').where('documentType', '==', 'Laporan').orderBy('createdAt', 'desc').get();
             if (snapshot.empty) return [];
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
+
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
             if (!doc.exists || doc.data().documentType !== 'Laporan') return null;
             return { id: doc.id, ...doc.data() };
         },
+
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
             if (!(await laporanRef.get()).exists) return null;
@@ -480,14 +483,12 @@ const gantryCraneServices = {
             const updatedDoc = await laporanRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
+
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
-            if (!(await docRef.get()).exists) return null;
-            const bapQuery = await auditCollection.where('laporanId', '==', id).get();
-            if (!bapQuery.empty) {
-                const batch = db.batch();
-                bapQuery.docs.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
+            const doc = await docRef.get();
+            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Gantry Crane') {
+                return null;
             }
             await docRef.delete();
             return id;
@@ -531,18 +532,18 @@ const gantryCraneServices = {
             if (p.technicalData?.liftingSpeedMpm !== undefined) dataToSync['technicalData.hoistingSpeed'] = p.technicalData.liftingSpeedMpm;
             if (Object.keys(dataToSync).length > 0) await laporanRef.update(dataToSync);
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
-            const dataToSave = { ...payload, subInspectionType: "Gantry Crane", documentType: "Berita Acara Pemeriksaan", createdAt };
+            const dataToSave = { ...payload, subInspectionType: "Gantry Crane", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
         getAll: async () => {
-            const snapshot = await auditCollection.where('subInspectionType', '==', 'Gantry Crane').where('documentType', '==', 'Berita Acara Pemeriksaan').orderBy('createdAt', 'desc').get();
+            const snapshot = await auditCollection.where('subInspectionType', '==', 'Gantry Crane').where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian').orderBy('createdAt', 'desc').get();
             if (snapshot.empty) return [];
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara Pemeriksaan') return null;
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') return null;
             return { id: doc.id, ...doc.data() };
         },
         updateById: async (id, payload) => {
@@ -576,7 +577,10 @@ const gantryCraneServices = {
         },
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
-            if (!(await docRef.get()).exists) return null;
+            const doc = await docRef.get();
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Gantry Crane') {
+                return null;
+            }
             await docRef.delete();
             return id;
         }

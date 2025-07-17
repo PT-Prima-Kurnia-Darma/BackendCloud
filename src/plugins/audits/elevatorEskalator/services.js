@@ -129,7 +129,7 @@ const elevatorServices = {
             const laporanDoc = await laporanDocRef.get();
 
             if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
-                throw Boom.notFound('Laporan dengan ID yang diberikan tidak ditemukan.');
+                throw Boom.notFound('Laporan Elevator tidak ditemukan.');
             }
             
             const cleanPayload = { ...payload };
@@ -353,7 +353,7 @@ const eskalatorServices = {
             const laporanDocRef = auditCollection.doc(laporanId);
             const laporanDoc = await laporanDocRef.get();
 
-            if (!laporanDoc.exists) throw Boom.notFound('Laporan Eskalator dengan ID tersebut tidak ditemukan.');
+            if (!laporanDoc.exists) throw Boom.notFound('Laporan Eskalator tidak ditemukan.');
             
             const dataToSync = {
                 'generalData.examinationType': payload.examinationType,
@@ -425,9 +425,12 @@ const eskalatorServices = {
         /**
          * Menghapus dokumen BAP Eskalator berdasarkan ID.
          */
-        deleteById: async (id) => {
+       deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
-            if (!(await docRef.get()).exists) return null;
+            const doc = await docRef.get();
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Eskalator') {
+                return null;
+            }
             await docRef.delete();
             return id;
         },
