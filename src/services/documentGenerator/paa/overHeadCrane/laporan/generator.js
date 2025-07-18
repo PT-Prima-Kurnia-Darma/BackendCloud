@@ -17,6 +17,13 @@ const BUCKET_NAME = 'tamplate-audit-riksauji';
 
 const getCheckmark = (status) => (status === true ? '√' : '');
 const getOppositeCheckmark = (status) => (status === false ? '√' : '');
+const getCheckmarkForValue = (value) => (value ? '√' : '');
+
+const formatResultText = (status) => {
+    if (status === true) return 'Memenuhi Syarat';
+    if (status === false) return 'Tidak Memenuhi Syarat';
+    return ''; // Jika nilainya null atau undefined
+};
 
 const createLaporanOverheadCrane = async (data) => {
     const templatePath = 'paa/overHeadCrane/laporanOverheadCrane.docx';
@@ -33,7 +40,7 @@ const createLaporanOverheadCrane = async (data) => {
     const doc = new Docxtemplater(zip, {
         paragraphLoop: true,
         linebreaks: true,
-        nullGetter: () => ""
+        nullGetter: () => "" 
     });
 
     const general = data.generalData || {};
@@ -44,10 +51,9 @@ const createLaporanOverheadCrane = async (data) => {
 
     const renderData = {
         // --- DATA UTAMA & UMUM ---
-        examinationType: data.examinationType,
+        examinationType: data.examinationType?.toUpperCase(),
         inspectionType: data.inspectionType?.toUpperCase(),
-        subInspectionType: general.equipmentType,
-        reportNumber: data.reportNumber,
+        subInspectionType: data.subInspectionType,
         ownerName: general.ownerName,
         ownerAddress: general.ownerAddress,
         userInCharge: general.userInCharge,
@@ -572,10 +578,11 @@ const createLaporanOverheadCrane = async (data) => {
             extendLengthMax: item.extendLengthMax,
             wearMax: item.wearMax,
             safetyFactor: item.safetyFactor,
-            defectAda: getCheckmark(item.defectAda),
-            defectTidakAda: getCheckmark(!item.defectAda),
-            description: item.description
+            defectAda: getCheckmarkForValue(item.defectAda),
+            defectTidakAda: getCheckmarkForValue(item.defectTidakAda),
+            chanDesc: item.description
         })),
+        mainHookMethod: ndt.mainHook?.method,
         mainHookSpecificationA: ndt.mainHook?.tolerances?.A,
         mainHookSpecificationB: ndt.mainHook?.tolerances?.B,
         mainHookSpecificationC: ndt.mainHook?.tolerances?.C,
@@ -609,7 +616,7 @@ const createLaporanOverheadCrane = async (data) => {
         mainHookToleranceMeasureTrue: getCheckmark(ndt.mainHook?.result === 'Baik, tidak ditemukan cacat permukaan.'),
         mainHookToleranceMeasureFalse: getOppositeCheckmark(ndt.mainHook?.result === 'Baik, tidak ditemukan cacat permukaan.'),
         mainHookToleranceMeasureResult: ndt.mainHook?.result,
-
+        
         // --- PENGUJIAN ---
         dynamicTestWithoutLoadTravelingShouldBe: test.dynamicTest?.withoutLoad?.[0]?.shouldBe,
         dynamicTestWithoutLoadTravelingTestedOrMeasured: test.dynamicTest?.withoutLoad?.[0]?.testedOrMeasured,
@@ -668,13 +675,14 @@ const createLaporanOverheadCrane = async (data) => {
         double5DeflectionDesc: test.staticTest?.deflection?.doubleGirder?.description,
         singleGirderDesign: test.staticTest?.singleGirder?.design_mm,
         singleGirderSpan: test.staticTest?.singleGirder?.span_mm,
-        resultSingleGrider: test.staticTest?.singleGirder?.result,
+        resultSingleGrider: formatResultText(test.staticTest?.singleGirder?.result),
         doubleGirderDesign: test.staticTest?.doubleGirder?.design_mm,
         doubleGirderSpan: test.staticTest?.doubleGirder?.span_mm,
+        resultDoubleGrider: formatResultText(test.staticTest?.doubleGirder?.result),
         noteStatis: test.staticTest?.notes,
 
         // --- KESIMPULAN & SARAN ---
-        conclusion: data.conclusion,
+        conslusion: data.conclusion,
         recommendations: data.recommendations,
 
         // --- OTORITAS INSPEKSI ---
@@ -685,7 +693,6 @@ const createLaporanOverheadCrane = async (data) => {
         doc.render(renderData);
     } catch (error) {
         console.error("Error saat rendering dokumen:", error);
-        // Log yang lebih detail untuk debugging
         const e = {
             message: error.message,
             name: error.name,

@@ -164,8 +164,8 @@ const laporanOverheadCranePayload = Joi.object({
                 singleGirder: Joi.object({ measurement: Joi.string().allow('', null).optional(), description: Joi.string().allow('', null).optional() }).optional(),
                 doubleGirder: Joi.object({ measurement: Joi.string().allow('', null).optional(), description: Joi.string().allow('', null).optional() }).optional()
             }).optional(),
-            singleGirder: Joi.object({ design_mm: Joi.string().allow('', null).optional(), span_mm: Joi.string().allow('', null).optional(), result: Joi.string().allow('', null).optional() }).optional(),
-            doubleGirder: Joi.object({ design_mm: Joi.string().allow('', null).optional(), span_mm: Joi.string().allow('', null).optional(), result: Joi.string().allow('', null).optional() }).optional(),
+            singleGirder: Joi.object({ design_mm: Joi.string().allow('', null).optional(), span_mm: Joi.string().allow('', null).optional(), result: Joi.boolean().allow('', null).optional() }).optional(),
+            doubleGirder: Joi.object({ design_mm: Joi.string().allow('', null).optional(), span_mm: Joi.string().allow('', null).optional(), result: Joi.boolean().allow('', null).optional() }).optional(),
             notes: Joi.string().allow('', null).optional()
         }).optional()
     }).optional(),
