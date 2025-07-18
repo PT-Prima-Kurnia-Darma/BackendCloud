@@ -1,7 +1,7 @@
 'use strict';
 
 const Joi = require('joi');
-const { forkliftHandlers, mobileCraneHandlers, gantryCraneHandlers, gondolaHandlers } = require('./handlers');
+const { forkliftHandlers, mobileCraneHandlers, gantryCraneHandlers, gondolaHandlers, overheadCraneHandlers  } = require('./handlers');
 const { laporanForkliftPayload } = require('./schemas/forklift/laporan');
 const { bapForkliftPayload } = require('./schemas/forklift/bap');
 const { laporanMobileCranePayload } = require('./schemas/mobileCrane/laporan');
@@ -10,6 +10,7 @@ const { laporanGantryCranePayload } = require('./schemas/gantryCrane/laporan');
 const { bapGantryCranePayload } = require('./schemas/gantryCrane/bap');
 const { laporanGondolaPayload } = require('./schemas/gondola/laporan');
 const { bapGondolaPayload } = require('./schemas/gondola/bap');
+const { laporanOverheadCranePayload } = require('./schemas/overHeadCrane/laporan');
 
 // prefix
 const FORKLIFT_LAPORAN_PREFIX = '/paa/forklift/laporan';
@@ -20,6 +21,7 @@ const GANTRY_CRANE_LAPORAN_PREFIX = '/paa/gantryCrane/laporan';
 const GANTRY_CRANE_BAP_PREFIX = '/paa/gantryCrane/bap';
 const GONDOLA_LAPORAN_PREFIX = '/paa/gondola/laporan';
 const GONDOLA_BAP_PREFIX = '/paa/gondola/bap';
+const OVERHEAD_CRANE_LAPORAN_PREFIX = '/paa/overHeadCrane/laporan';
 
 
 module.exports = [
@@ -554,6 +556,68 @@ module.exports = [
         options: { 
             auth: 'jwt', 
             tags: ['api', 'PAA - Gondola BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+
+    // --- RUTE LAPORAN OVERHEAD CRANE ---
+    {
+        method: 'POST',
+        path: OVERHEAD_CRANE_LAPORAN_PREFIX,
+        handler: overheadCraneHandlers.laporan.create,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Overhead Crane Laporan'],
+            validate: { payload: laporanOverheadCranePayload }
+        },
+    },
+    {
+        method: 'GET',
+        path: OVERHEAD_CRANE_LAPORAN_PREFIX,
+        handler: overheadCraneHandlers.laporan.getAll,
+        options: { auth: 'jwt', tags: ['api', 'PAA - Overhead Crane Laporan'] },
+    },
+    {
+        method: 'GET',
+        path: `${OVERHEAD_CRANE_LAPORAN_PREFIX}/{id}`,
+        handler: overheadCraneHandlers.laporan.getById,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Overhead Crane Laporan'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${OVERHEAD_CRANE_LAPORAN_PREFIX}/{id}`,
+        handler: overheadCraneHandlers.laporan.update,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Overhead Crane Laporan'],
+            validate: { 
+                params: Joi.object({ id: Joi.string().required() }), 
+                payload: laporanOverheadCranePayload
+            } 
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${OVERHEAD_CRANE_LAPORAN_PREFIX}/{id}`,
+        handler: overheadCraneHandlers.laporan.delete,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Overhead Crane Laporan'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+    {
+        method: 'GET',
+        path: `${OVERHEAD_CRANE_LAPORAN_PREFIX}/download/{id}`,
+        handler: overheadCraneHandlers.laporan.download,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PAA - Overhead Crane Laporan'],
+            description: 'Download dokumen laporan Overhead Crane berdasarkan ID',
             validate: { params: Joi.object({ id: Joi.string().required() }) } 
         },
     },

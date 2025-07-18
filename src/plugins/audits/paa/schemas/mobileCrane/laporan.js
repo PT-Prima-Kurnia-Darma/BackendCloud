@@ -4,7 +4,7 @@ const Joi = require('joi');
 
     // Skema dasar untuk item inspeksi (status dan hasil)
     const inspectionItemSchema = Joi.object({
-        status: Joi.boolean().allow(null).required(),
+        status: Joi.boolean().allow(null).optional(),
         result: Joi.string().allow('', null).optional()
     });
 

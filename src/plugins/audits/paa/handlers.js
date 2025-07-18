@@ -1,7 +1,7 @@
 'use strict';
 
 const Boom = require('@hapi/boom');
-const { forkliftServices, mobileCraneServices, gantryCraneServices, gondolaServices } = require('./services');
+const { forkliftServices, mobileCraneServices, gantryCraneServices, gondolaServices, overheadCraneServices } = require('./services');
 const { createLaporanForklift: generateLaporanDoc } = require('../../../services/documentGenerator/paa/forklift/laporan/generator');
 const { createBapForklift: generateBapDoc } = require('../../../services/documentGenerator/paa/forklift/bap/generator');
 const { createLaporanMobileCrane: generateMobileCraneLaporanDoc } = require('../../../services/documentGenerator/paa/mobileCrane/laporan/generator')
@@ -10,6 +10,7 @@ const { createLaporanGantryCrane: generateGantryCraneLaporanDoc } = require('../
 const { createBapGantryCrane: generateGantryCraneBapDoc } = require('../../../services/documentGenerator/paa/gantryCrane/bap/generator');
 const { createLaporanGondola: generateGondolaLaporanDoc } = require('../../../services/documentGenerator/paa/gondola/laporan/generator');
 const { createBapGondola: generateGondolaBapDoc } = require('../../../services/documentGenerator/paa/gondola/bap/generator');
+const { createLaporanOverheadCrane: generateOverheadCraneLaporanDoc } = require('../../../services/documentGenerator/paa/overHeadCrane/laporan/generator');
 
 // ---FORKLIFT ---
 const forkliftHandlers = {
@@ -599,10 +600,81 @@ const gondolaHandlers = {
     }
 };
 
+// -- over head crane
+const overheadCraneHandlers = {
+    laporan: {
+        create: async (request, h) => {
+            try {
+                const newLaporan = await overheadCraneServices.laporan.create(request.payload);
+                return h.response({ status: 'success', message: 'Laporan Overhead Crane berhasil dibuat', data: { laporan: newLaporan } }).code(201);
+            } catch (error) {
+                console.error("Create Overhead Crane Error:", error);
+                return Boom.badImplementation('Gagal membuat Laporan Overhead Crane.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allLaporan = await overheadCraneServices.laporan.getAll();
+                return { status: 'success', message: 'Semua Laporan Overhead Crane berhasil didapatkan', data: { laporan: allLaporan } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil daftar Laporan Overhead Crane.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const laporan = await overheadCraneServices.laporan.getById(request.params.id);
+                if (!laporan) return Boom.notFound('Laporan Overhead Crane tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Overhead Crane berhasil didapatkan', data: { laporan } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil Laporan Overhead Crane.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await overheadCraneServices.laporan.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, Laporan Overhead Crane tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Overhead Crane berhasil diperbarui', data: { laporan: updated } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal memperbarui Laporan Overhead Crane.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await overheadCraneServices.laporan.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, Laporan Overhead Crane tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Overhead Crane berhasil dihapus' };
+            } catch (error) {
+                return Boom.badImplementation('Gagal menghapus Laporan Overhead Crane.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const laporanData = await overheadCraneServices.laporan.getById(request.params.id);
+                if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan Overhead Crane tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateOverheadCraneLaporanDoc(laporanData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'Laporan Overhead Crane berhasil diunduh');
+            } catch (error) {
+                console.error("Download Laporan Overhead Crane Error:", error);
+                return Boom.badImplementation('Gagal memproses dokumen Laporan Overhead Crane.');
+            }
+        },
+    },
+
+    bap: {
+        // Handler untuk BAP akan ditambahkan di sini
+    }
+};
+
 
 module.exports = {
     forkliftHandlers,
     mobileCraneHandlers,
     gantryCraneHandlers,
-    gondolaHandlers
+    gondolaHandlers,
+    overheadCraneHandlers
 };

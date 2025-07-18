@@ -816,9 +816,73 @@ const gondolaServices = {
     }
 };
 
+const overheadCraneServices = {
+    laporan: {
+        create: async (payload) => {
+            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const dataToSave = { 
+                ...payload, 
+                subInspectionType: "Overhead Crane", 
+                documentType: "Laporan", 
+                createdAt 
+            };
+            const docRef = await auditCollection.add(dataToSave);
+            return { id: docRef.id, ...dataToSave };
+        },
+
+        getAll: async () => {
+            const snapshot = await auditCollection
+                .where('subInspectionType', '==', 'Overhead Crane')
+                .where('documentType', '==', 'Laporan')
+                .orderBy('createdAt', 'desc')
+                .get();
+            if (snapshot.empty) return [];
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+
+        getById: async (id) => {
+            const doc = await auditCollection.doc(id).get();
+            if (!doc.exists || doc.data().subInspectionType !== 'Overhead Crane' || doc.data().documentType !== 'Laporan') {
+                return null;
+            }
+            return { id: doc.id, ...doc.data() };
+        },
+
+        updateById: async (id, payload) => {
+            const docRef = auditCollection.doc(id);
+            const doc = await docRef.get();
+            if (!doc.exists) {
+                return null;
+            }
+            await docRef.update(payload);
+            
+            // Logika sinkronisasi ke BAP bisa ditambahkan di sini jika diperlukan
+            // ...
+
+            const updatedDoc = await docRef.get();
+            return { id: updatedDoc.id, ...updatedDoc.data() };
+        },
+
+        deleteById: async (id) => {
+            const docRef = auditCollection.doc(id);
+            const doc = await docRef.get();
+            if (!doc.exists || doc.data().subInspectionType !== 'Overhead Crane' || doc.data().documentType !== 'Laporan') {
+                return null;
+            }
+            await docRef.delete();
+            return id;
+        },
+    },
+
+    bap: {
+        // Fungsi untuk BAP akan ditambahkan di sini di masa depan
+    }
+};
+
 module.exports = {
     forkliftServices,
     mobileCraneServices,
     gantryCraneServices,
-    gondolaServices
+    gondolaServices,
+    overheadCraneServices
 };
