@@ -849,17 +849,54 @@ const overheadCraneServices = {
         },
 
         updateById: async (id, payload) => {
-            const docRef = auditCollection.doc(id);
-            const doc = await docRef.get();
+            const laporanRef = auditCollection.doc(id);
+            const doc = await laporanRef.get();
             if (!doc.exists) {
                 return null;
             }
-            await docRef.update(payload);
-            
-            // Logika sinkronisasi ke BAP bisa ditambahkan di sini jika diperlukan
-            // ...
+            await laporanRef.update(payload);
 
-            const updatedDoc = await docRef.get();
+            // --- SINKRONISASI LAPORAN KE BAP ---
+            const bapQuery = await auditCollection
+                .where('laporanId', '==', id)
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+                .limit(1)
+                .get();
+            
+            if (!bapQuery.empty) {
+                const bapRef = bapQuery.docs[0].ref;
+                const dataToSync = {};
+                const p = payload;
+
+                if (p.examinationType !== undefined) dataToSync['reportHeader.examinationType'] = p.examinationType;
+                if (p.inspectionDate !== undefined) dataToSync['reportHeader.inspectionDate'] = p.inspectionDate;
+                if (p.extraId !== undefined) dataToSync['reportHeader.extraId'] = p.extraId;
+                if (p.inspectionType !== undefined) dataToSync['reportHeader.inspectionType'] = p.inspectionType;
+                if (p.createdAt !== undefined) dataToSync['reportHeader.createdAt'] = p.createdAt;
+                if (p.equipmentType !== undefined) dataToSync['reportHeader.equipmentType'] = p.equipmentType;
+
+                if (p.generalData) {
+                    if (p.generalData.ownerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.ownerName;
+                    if (p.generalData.ownerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.ownerAddress;
+                    if (p.generalData.userInCharge !== undefined) dataToSync['generalData.userInCharge'] = p.generalData.userInCharge;
+                    if (p.generalData.unitLocation !== undefined) dataToSync['generalData.unitLocation'] = p.generalData.unitLocation;
+                    if (p.generalData.brandType !== undefined) dataToSync['technicalData.brandType'] = p.generalData.brandType;
+                    if (p.generalData.manufacturer !== undefined) dataToSync['technicalData.manufacturer'] = p.generalData.manufacturer;
+                    if (p.generalData.yearOfManufacture !== undefined) dataToSync['technicalData.locationAndYearOfManufacture'] = p.generalData.yearOfManufacture;
+                    if (p.generalData.serialNumberUnitNumber !== undefined) dataToSync['technicalData.serialNumberUnitNumber'] = p.generalData.serialNumberUnitNumber;
+                    if (p.generalData.capacityWorkingLoadKg !== undefined) dataToSync['technicalData.capacityWorkingLoad'] = p.generalData.capacityWorkingLoadKg;
+                }
+                
+                if (p.technicalData?.specifications?.speed_m_per_min?.hoisting !== undefined) {
+                    dataToSync['technicalData.liftingSpeedMpm'] = p.technicalData.specifications.speed_m_per_min.hoisting;
+                }
+
+                if (Object.keys(dataToSync).length > 0) {
+                    await bapRef.update(dataToSync);
+                }
+            }
+
+            const updatedDoc = await laporanRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
@@ -875,7 +912,167 @@ const overheadCraneServices = {
     },
 
     bap: {
-        // Fungsi untuk BAP akan ditambahkan di sini di masa depan
+        getDataForPrefill: async (laporanId) => {
+            const laporanDoc = await auditCollection.doc(laporanId).get();
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
+                return null;
+            }
+            const d = laporanDoc.data();
+            return {
+                laporanId,
+                reportHeader: {
+                    examinationType: d.examinationType || "",
+                    inspectionDate: d.inspectionDate || "",
+                    extraId: d.extraId || null,
+                    inspectionType: d.inspectionType || "",
+                    createdAt: d.createdAt || "",
+                    equipmentType: d.equipmentType || ""
+                },
+                generalData: {
+                    ownerName: d.generalData?.ownerName || "",
+                    ownerAddress: d.generalData?.ownerAddress || "",
+                    userInCharge: d.generalData?.userInCharge || "",
+                    unitLocation: d.generalData?.unitLocation || ""
+                },
+                technicalData: {
+                    brandType: d.generalData?.brandType || "",
+                    manufacturer: d.generalData?.manufacturer || "",
+                    locationAndYearOfManufacture: d.generalData?.yearOfManufacture || "",
+                    serialNumberUnitNumber: d.generalData?.serialNumberUnitNumber || "",
+                    capacityWorkingLoad: d.generalData?.capacityWorkingLoadKg || "",
+                    liftingSpeedMpm: d.technicalData?.specifications?.speed_m_per_min?.hoisting || ""
+                },
+                visualInspection: {},
+                testing: {
+                    loadTest: {},
+                    ndtTest: {}
+                }
+            };
+        },
+
+        create: async (payload) => {
+            const { laporanId } = payload;
+            const laporanRef = auditCollection.doc(laporanId);
+            const laporanDoc = await laporanRef.get();
+            if (!laporanDoc.exists) {
+                throw Boom.notFound('Laporan Overhead Crane tidak ditemukan.');
+            }
+
+            // --- SINKRONISASI BAP KE LAPORAN ---
+            const dataToSync = {};
+            const p = payload;
+
+            if (p.reportHeader) {
+                if (p.reportHeader.examinationType !== undefined) dataToSync.examinationType = p.reportHeader.examinationType;
+                if (p.reportHeader.inspectionDate !== undefined) dataToSync.inspectionDate = p.reportHeader.inspectionDate;
+                if (p.reportHeader.extraId !== undefined) dataToSync.extraId = p.reportHeader.extraId;
+                if (p.reportHeader.inspectionType !== undefined) dataToSync.inspectionType = p.reportHeader.inspectionType;
+                if (p.reportHeader.createdAt !== undefined) dataToSync.createdAt = p.reportHeader.createdAt;
+                if (p.reportHeader.equipmentType !== undefined) dataToSync.equipmentType = p.reportHeader.equipmentType;
+            }
+
+            if (p.generalData) {
+                if (p.generalData.ownerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.ownerName;
+                if (p.generalData.ownerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.ownerAddress;
+                if (p.generalData.userInCharge !== undefined) dataToSync['generalData.userInCharge'] = p.generalData.userInCharge;
+                if (p.generalData.unitLocation !== undefined) dataToSync['generalData.unitLocation'] = p.generalData.unitLocation;
+            }
+
+            if (p.technicalData) {
+                if (p.technicalData.brandType !== undefined) dataToSync['generalData.brandType'] = p.technicalData.brandType;
+                if (p.technicalData.manufacturer !== undefined) dataToSync['generalData.manufacturer'] = p.technicalData.manufacturer;
+                if (p.technicalData.locationAndYearOfManufacture !== undefined) dataToSync['generalData.yearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
+                if (p.technicalData.serialNumberUnitNumber !== undefined) dataToSync['generalData.serialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
+                if (p.technicalData.capacityWorkingLoad !== undefined) dataToSync['generalData.capacityWorkingLoadKg'] = p.technicalData.capacityWorkingLoad;
+                if (p.technicalData.liftingSpeedMpm !== undefined) dataToSync['technicalData.specifications.speed_m_per_min.hoisting'] = p.technicalData.liftingSpeedMpm;
+            }
+
+            if (Object.keys(dataToSync).length > 0) {
+                await laporanRef.update(dataToSync);
+            }
+
+            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const dataToSave = { ...payload, subInspectionType: "Overhead Crane", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
+            const docRef = await auditCollection.add(dataToSave);
+            return { id: docRef.id, ...dataToSave };
+        },
+        
+        getAll: async () => {
+            const snapshot = await auditCollection
+                .where('subInspectionType', '==', 'Overhead Crane')
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+                .orderBy('createdAt', 'desc')
+                .get();
+            if (snapshot.empty) return [];
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+        
+        getById: async (id) => {
+            const doc = await auditCollection.doc(id).get();
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Overhead Crane') {
+                return null;
+            }
+            return { id: doc.id, ...doc.data() };
+        },
+        
+        updateById: async (id, payload) => {
+            const bapRef = auditCollection.doc(id);
+            const bapDoc = await bapRef.get();
+            if (!bapDoc.exists) {
+                return null;
+            }
+            await bapRef.update(payload);
+
+            const { laporanId } = bapDoc.data();
+            if (laporanId) {
+                const laporanRef = auditCollection.doc(laporanId);
+                // --- SINKRONISASI BAP KE LAPORAN ---
+                const dataToSync = {};
+                const p = payload;
+
+                if (p.reportHeader) {
+                    if (p.reportHeader.examinationType !== undefined) dataToSync.examinationType = p.reportHeader.examinationType;
+                    if (p.reportHeader.inspectionDate !== undefined) dataToSync.inspectionDate = p.reportHeader.inspectionDate;
+                    if (p.reportHeader.extraId !== undefined) dataToSync.extraId = p.reportHeader.extraId;
+                    if (p.reportHeader.inspectionType !== undefined) dataToSync.inspectionType = p.reportHeader.inspectionType;
+                    if (p.reportHeader.createdAt !== undefined) dataToSync.createdAt = p.reportHeader.createdAt;
+                    if (p.reportHeader.equipmentType !== undefined) dataToSync.equipmentType = p.reportHeader.equipmentType;
+                }
+
+                if (p.generalData) {
+                    if (p.generalData.ownerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.ownerName;
+                    if (p.generalData.ownerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.ownerAddress;
+                    if (p.generalData.userInCharge !== undefined) dataToSync['generalData.userInCharge'] = p.generalData.userInCharge;
+                    if (p.generalData.unitLocation !== undefined) dataToSync['generalData.unitLocation'] = p.generalData.unitLocation;
+                }
+
+                if (p.technicalData) {
+                    if (p.technicalData.brandType !== undefined) dataToSync['generalData.brandType'] = p.technicalData.brandType;
+                    if (p.technicalData.manufacturer !== undefined) dataToSync['generalData.manufacturer'] = p.technicalData.manufacturer;
+                    if (p.technicalData.locationAndYearOfManufacture !== undefined) dataToSync['generalData.yearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
+                    if (p.technicalData.serialNumberUnitNumber !== undefined) dataToSync['generalData.serialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
+                    if (p.technicalData.capacityWorkingLoad !== undefined) dataToSync['generalData.capacityWorkingLoadKg'] = p.technicalData.capacityWorkingLoad;
+                    if (p.technicalData.liftingSpeedMpm !== undefined) dataToSync['technicalData.specifications.speed_m_per_min.hoisting'] = p.technicalData.liftingSpeedMpm;
+                }
+
+                if (Object.keys(dataToSync).length > 0) {
+                    await laporanRef.update(dataToSync);
+                }
+            }
+            
+            const updatedDoc = await bapRef.get();
+            return { id: updatedDoc.id, ...updatedDoc.data() };
+        },
+
+        deleteById: async (id) => {
+            const docRef = auditCollection.doc(id);
+            const doc = await docRef.get();
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Overhead Crane') {
+                return null;
+            }
+            await docRef.delete();
+            return id;
+        }
     }
 };
 

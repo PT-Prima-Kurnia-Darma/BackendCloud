@@ -11,6 +11,7 @@ const { createBapGantryCrane: generateGantryCraneBapDoc } = require('../../../se
 const { createLaporanGondola: generateGondolaLaporanDoc } = require('../../../services/documentGenerator/paa/gondola/laporan/generator');
 const { createBapGondola: generateGondolaBapDoc } = require('../../../services/documentGenerator/paa/gondola/bap/generator');
 const { createLaporanOverheadCrane: generateOverheadCraneLaporanDoc } = require('../../../services/documentGenerator/paa/overHeadCrane/laporan/generator');
+const { createBapOverheadCrane: generateOverheadCraneBapDoc } = require('../../../services/documentGenerator/paa/overHeadCrane/bap/generator');
 
 // ---FORKLIFT ---
 const forkliftHandlers = {
@@ -666,7 +667,79 @@ const overheadCraneHandlers = {
     },
 
     bap: {
-        // Handler untuk BAP akan ditambahkan di sini
+        prefill: async (request, h) => {
+            try {
+                const { laporanId } = request.params;
+                const prefilledData = await overheadCraneServices.bap.getDataForPrefill(laporanId);
+                if (!prefilledData) {
+                    return Boom.notFound('Data Laporan Overhead Crane tidak ditemukan.');
+                }
+                return h.response({ status: 'success', message: 'Data BAP Overhead Crane berhasil didapat', data: prefilledData });
+            } catch (error) {
+                console.error('Error in BAP prefill handler:', error);
+                return Boom.badImplementation('Gagal mengambil data untuk BAP.');
+            }
+        },
+        create: async (request, h) => {
+            try {
+                const newBap = await overheadCraneServices.bap.create(request.payload);
+                return h.response({ status: 'success', message: 'BAP Overhead Crane berhasil dibuat', data: { bap: newBap } }).code(201);
+            } catch (error) {
+                if(error.isBoom) return error;
+                return Boom.badImplementation('Gagal membuat BAP Overhead Crane.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allBap = await overheadCraneServices.bap.getAll();
+                return { status: 'success', message: 'BAP Overhead Crane berhasil didapat', data: { bap: allBap } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil daftar BAP Overhead Crane.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const bap = await overheadCraneServices.bap.getById(request.params.id);
+                if (!bap) return Boom.notFound('BAP Overhead Crane tidak ditemukan.');
+                return { status: 'success', message: 'BAP Overhead Crane berhasil didapat', data: { bap } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil BAP Overhead Crane.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await overheadCraneServices.bap.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, BAP Overhead Crane tidak ditemukan.');
+                return { status: 'success', message: 'BAP Overhead Crane berhasil diperbarui', data: { bap: updated } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal memperbarui BAP Overhead Crane.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await overheadCraneServices.bap.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Overhead Crane tidak ditemukan.');
+                return { status: 'success', message: 'BAP Overhead Crane berhasil dihapus' };
+            } catch (error) {
+                return Boom.badImplementation('Gagal menghapus BAP Overhead Crane.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const bapData = await overheadCraneServices.bap.getById(request.params.id);
+                if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Overhead Crane tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateOverheadCraneBapDoc(bapData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'BAP Overhead Crane berhasil diunduh');
+            } catch (error) {
+                console.error('Error in BAP download handler:', error);
+                return Boom.badImplementation('Gagal memproses dokumen BAP Overhead Crane.');
+            }
+        },
     }
 };
 

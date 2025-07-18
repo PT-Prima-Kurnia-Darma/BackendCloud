@@ -11,6 +11,7 @@ const { bapGantryCranePayload } = require('./schemas/gantryCrane/bap');
 const { laporanGondolaPayload } = require('./schemas/gondola/laporan');
 const { bapGondolaPayload } = require('./schemas/gondola/bap');
 const { laporanOverheadCranePayload } = require('./schemas/overHeadCrane/laporan');
+const { bapOverheadCranePayload } = require('./schemas/overHeadCrane/bap');
 
 // prefix
 const FORKLIFT_LAPORAN_PREFIX = '/paa/forklift/laporan';
@@ -22,6 +23,7 @@ const GANTRY_CRANE_BAP_PREFIX = '/paa/gantryCrane/bap';
 const GONDOLA_LAPORAN_PREFIX = '/paa/gondola/laporan';
 const GONDOLA_BAP_PREFIX = '/paa/gondola/bap';
 const OVERHEAD_CRANE_LAPORAN_PREFIX = '/paa/overHeadCrane/laporan';
+const OVERHEAD_CRANE_BAP_PREFIX = '/paa/overHeadCrane/bap';
 
 
 module.exports = [
@@ -619,6 +621,77 @@ module.exports = [
             tags: ['api', 'PAA - Overhead Crane Laporan'],
             description: 'Download dokumen laporan Overhead Crane berdasarkan ID',
             validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+
+    // --- RUTE BAP OVERHEAD CRANE ---
+    {
+        method: 'GET',
+        path: `${OVERHEAD_CRANE_BAP_PREFIX}/prefill/{laporanId}`,
+        handler: overheadCraneHandlers.bap.prefill,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Overhead Crane BAP'],
+            validate: { params: Joi.object({ laporanId: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'POST',
+        path: OVERHEAD_CRANE_BAP_PREFIX,
+        handler: overheadCraneHandlers.bap.create,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Overhead Crane BAP'],
+            validate: { payload: bapOverheadCranePayload }
+        },
+    },
+    {
+        method: 'GET',
+        path: OVERHEAD_CRANE_BAP_PREFIX,
+        handler: overheadCraneHandlers.bap.getAll,
+        options: { auth: 'jwt', tags: ['api', 'PAA - Overhead Crane BAP'] },
+    },
+    {
+        method: 'GET',
+        path: `${OVERHEAD_CRANE_BAP_PREFIX}/{id}`,
+        handler: overheadCraneHandlers.bap.getById,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Overhead Crane BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${OVERHEAD_CRANE_BAP_PREFIX}/{id}`,
+        handler: overheadCraneHandlers.bap.update,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Overhead Crane BAP'],
+            validate: {
+                params: Joi.object({ id: Joi.string().required() }),
+                payload: bapOverheadCranePayload
+            }
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${OVERHEAD_CRANE_BAP_PREFIX}/{id}`,
+        handler: overheadCraneHandlers.bap.delete,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Overhead Crane BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'GET',
+        path: `${OVERHEAD_CRANE_BAP_PREFIX}/download/{id}`,
+        handler: overheadCraneHandlers.bap.download,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PAA - Overhead Crane BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
         },
     },
 ];
