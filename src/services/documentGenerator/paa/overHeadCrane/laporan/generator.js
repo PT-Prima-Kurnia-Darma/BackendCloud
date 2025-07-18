@@ -15,10 +15,7 @@ const storage = new Storage({
 });
 const BUCKET_NAME = 'tamplate-audit-riksauji';
 
-// Fungsi helper untuk status 'Memenuhi Syarat'
 const getCheckmark = (status) => (status === true ? '√' : '');
-
-// Fungsi helper untuk status 'Tidak Memenuhi Syarat'
 const getOppositeCheckmark = (status) => (status === false ? '√' : '');
 
 const createLaporanOverheadCrane = async (data) => {
@@ -39,7 +36,6 @@ const createLaporanOverheadCrane = async (data) => {
         nullGetter: () => ""
     });
 
-    // Menyiapkan alias untuk akses data yang lebih mudah dan aman
     const general = data.generalData || {};
     const tech = data.technicalData || {};
     const vi = data.visualInspection || {};
@@ -50,7 +46,7 @@ const createLaporanOverheadCrane = async (data) => {
         // --- DATA UTAMA & UMUM ---
         examinationType: data.examinationType,
         inspectionType: data.inspectionType?.toUpperCase(),
-        subInspectionType: data.subInspectionType,
+        subInspectionType: general.equipmentType,
         reportNumber: data.reportNumber,
         ownerName: general.ownerName,
         ownerAddress: general.ownerAddress,
@@ -68,7 +64,7 @@ const createLaporanOverheadCrane = async (data) => {
         operatorCertificate: general.operatorCertificate,
         technicalOrManualData: general.technicalOrManualData,
 
-        // --- DATA TEKNIS (LENGKAP) ---
+        // --- DATA TEKNIS ---
         specificationHoistingLiftingHeight: tech.specifications?.liftingHeight?.hoisting,
         specificationTravelingLiftingHeight: tech.specifications?.liftingHeight?.traveling,
         specificationTraversingLiftingHeight: tech.specifications?.liftingHeight?.traversing,
@@ -577,8 +573,8 @@ const createLaporanOverheadCrane = async (data) => {
             wearMax: item.wearMax,
             safetyFactor: item.safetyFactor,
             defectAda: getCheckmark(item.defectAda),
-            defectTidakAda: getCheckmark(item.defectTidakAda),
-            chanDesc: item.description
+            defectTidakAda: getCheckmark(!item.defectAda),
+            description: item.description
         })),
         mainHookSpecificationA: ndt.mainHook?.tolerances?.A,
         mainHookSpecificationB: ndt.mainHook?.tolerances?.B,
@@ -588,8 +584,8 @@ const createLaporanOverheadCrane = async (data) => {
         mainHookSpecificationF: ndt.mainHook?.tolerances?.F,
         mainHookSpecificationG: ndt.mainHook?.tolerances?.G,
         mainHookSpecificationH: ndt.mainHook?.tolerances?.H,
-        mainHookSpecificationTrue: getCheckmark(ndt.mainHook?.result === 'Baik'),
-        mainHookSpecificationFalse: getOppositeCheckmark(ndt.mainHook?.result === 'Baik'),
+        mainHookSpecificationTrue: getCheckmark(ndt.mainHook?.result === 'Baik, tidak ditemukan cacat permukaan.'),
+        mainHookSpecificationFalse: getOppositeCheckmark(ndt.mainHook?.result === 'Baik, tidak ditemukan cacat permukaan.'),
         mainHookSpecificationResult: ndt.mainHook?.result,
         mainHookMeasurementResultsA: ndt.mainHook?.measurements?.A,
         mainHookMeasurementResultsB: ndt.mainHook?.measurements?.B,
@@ -599,8 +595,8 @@ const createLaporanOverheadCrane = async (data) => {
         mainHookMeasurementResultsF: ndt.mainHook?.measurements?.F,
         mainHookMeasurementResultsG: ndt.mainHook?.measurements?.G,
         mainHookMeasurementResultsH: ndt.mainHook?.measurements?.H,
-        mainHookMeasurementResultsTrue: getCheckmark(ndt.mainHook?.result === 'Baik'),
-        mainHookMeasurementResultsFalse: getOppositeCheckmark(ndt.mainHook?.result === 'Baik'),
+        mainHookMeasurementResultsTrue: getCheckmark(ndt.mainHook?.result === 'Baik, tidak ditemukan cacat permukaan.'),
+        mainHookMeasurementResultsFalse: getOppositeCheckmark(ndt.mainHook?.result === 'Baik, tidak ditemukan cacat permukaan.'),
         mainHookMeasurementResultsResult: ndt.mainHook?.result,
         mainHookToleranceMeasureA: ndt.mainHook?.tolerances?.A,
         mainHookToleranceMeasureB: ndt.mainHook?.tolerances?.B,
@@ -610,8 +606,8 @@ const createLaporanOverheadCrane = async (data) => {
         mainHookToleranceMeasureF: ndt.mainHook?.tolerances?.F,
         mainHookToleranceMeasureG: ndt.mainHook?.tolerances?.G,
         mainHookToleranceMeasureH: ndt.mainHook?.tolerances?.H,
-        mainHookToleranceMeasureTrue: getCheckmark(ndt.mainHook?.result === 'Baik'),
-        mainHookToleranceMeasureFalse: getOppositeCheckmark(ndt.mainHook?.result === 'Baik'),
+        mainHookToleranceMeasureTrue: getCheckmark(ndt.mainHook?.result === 'Baik, tidak ditemukan cacat permukaan.'),
+        mainHookToleranceMeasureFalse: getOppositeCheckmark(ndt.mainHook?.result === 'Baik, tidak ditemukan cacat permukaan.'),
         mainHookToleranceMeasureResult: ndt.mainHook?.result,
 
         // --- PENGUJIAN ---
@@ -678,7 +674,7 @@ const createLaporanOverheadCrane = async (data) => {
         noteStatis: test.staticTest?.notes,
 
         // --- KESIMPULAN & SARAN ---
-        conslusion: data.conclusion,
+        conclusion: data.conclusion,
         recommendations: data.recommendations,
 
         // --- OTORITAS INSPEKSI ---
@@ -689,6 +685,14 @@ const createLaporanOverheadCrane = async (data) => {
         doc.render(renderData);
     } catch (error) {
         console.error("Error saat rendering dokumen:", error);
+        // Log yang lebih detail untuk debugging
+        const e = {
+            message: error.message,
+            name: error.name,
+            stack: error.stack,
+            properties: error.properties,
+        };
+        console.log(JSON.stringify({ error: e }));
         throw new Error("Gagal mengisi data ke template.");
     }
 
@@ -698,7 +702,7 @@ const createLaporanOverheadCrane = async (data) => {
     });
 
     const safeOwnerName = (general.ownerName || 'UnknownOwner').replace(/[^\w\s.-]/g, '_');
-    const fileName = `Laporan-OverheadCrane-${safeOwnerName}-${data.id}.docx`;
+    const fileName = `Laporan-OverheadCrane-${safeOwnerName}-${data.id || 'new'}.docx`;
 
     return { docxBuffer, fileName };
 };
