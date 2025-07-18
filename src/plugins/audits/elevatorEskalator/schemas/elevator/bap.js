@@ -12,6 +12,7 @@ const bapElevatorPayload = Joi.object({
     equipmentType: Joi.string().allow('').optional(),
     createdAt: Joi.string().allow('').optional(),
     extraId: Joi.number().allow('').optional(),
+    inspectionType: Joi.string().allow('').optional(),
 
     generalData: Joi.object({
         ownerName: Joi.string().allow('').optional(),

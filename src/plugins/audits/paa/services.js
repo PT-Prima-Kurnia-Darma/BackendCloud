@@ -605,16 +605,66 @@ const gondolaServices = {
 
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Laporan') return null;
+            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Gondola') {
+             return null;
+            }
             return { id: doc.id, ...doc.data() };
         },
 
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
             const laporanDoc = await laporanRef.get();
-            if (!laporanDoc.exists) return null;
+            if (!laporanDoc.exists) {
+                // Menggunakan Boom untuk error yang lebih informatif
+                throw Boom.notFound('Laporan Gondola tidak ditemukan');
+            }
 
+            // 1. Update Laporan utama
             await laporanRef.update(payload);
+
+            // --- LOGIKA SINKRONISASI (Laporan -> BAP) ---
+            const bapQuery = await auditCollection
+                .where('laporanId', '==', id)
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+                .where('subInspectionType', '==', 'Gondola')
+                .limit(1)
+                .get();
+
+            // 2. Jika BAP terhubung ditemukan, siapkan data untuk disinkronkan dengan aman
+            if (!bapQuery.empty) {
+                const bapRef = bapQuery.docs[0].ref;
+                const dataToSyncWithBap = {};
+                const p = payload;
+
+                // Memeriksa setiap field sebelum menambahkannya ke objek sinkronisasi
+                // Menggunakan Optional Chaining (?.) untuk mencegah crash
+                if (p.inspectionDate !== undefined) dataToSyncWithBap.inspectionDate = p.inspectionDate;
+                if (p.generalData?.ownerName !== undefined) dataToSyncWithBap['generalData.companyName'] = p.generalData.ownerName;
+                if (p.generalData?.ownerAddress !== undefined) dataToSyncWithBap['generalData.companyLocation'] = p.generalData.ownerAddress;
+                if (p.generalData?.userInCharge !== undefined) dataToSyncWithBap['generalData.userInCharge'] = p.generalData.userInCharge;
+                if (p.generalData?.unitLocation !== undefined) dataToSyncWithBap['generalData.ownerAddress'] = p.generalData.unitLocation; // Perhatikan pemetaan ini
+                if (p.technicalData?.manufacturer !== undefined) dataToSyncWithBap['technicalData.manufacturer'] = p.technicalData.manufacturer;
+                if (p.technicalData?.locationAndYearOfManufacture !== undefined) dataToSyncWithBap['technicalData.locationAndYearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
+                if (p.technicalData?.serialNumberUnitNumber !== undefined) dataToSyncWithBap['technicalData.serialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
+                if (p.technicalData?.intendedUse !== undefined) dataToSyncWithBap['technicalData.intendedUse'] = p.technicalData.intendedUse;
+                if (p.technicalData?.capacityWorkingLoad !== undefined) dataToSyncWithBap['technicalData.capacityWorkingLoad'] = p.technicalData.capacityWorkingLoad;
+                // Penambahan pengecekan untuk 'speed' yang mungkin juga tidak ada
+                if (p.technicalData?.gondolaSpecification?.speed !== undefined) {
+                    const speedValue = p.technicalData.gondolaSpecification.speed;
+                    // Ekstrak angka dari string kecepatan, contoh: "9-11 m / menit" -> "9-11"
+                    const match = String(speedValue).match(/[\d.-]+/);
+                    if (match) {
+                        dataToSyncWithBap['technicalData.maxLiftingHeightMeters'] = match[0];
+                    }
+                }
+
+                // Hanya update BAP jika ada data yang perlu disinkronkan
+                if (Object.keys(dataToSyncWithBap).length > 0) {
+                    await bapRef.update(dataToSyncWithBap);
+                }
+            }
+            // --- AKHIR LOGIKA SINKRONISASI ---
+
             const updatedDoc = await laporanRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
@@ -649,7 +699,7 @@ const gondolaServices = {
                 examinationType: laporanData.examinationType,
                 inspectionType: laporanData.inspectionType,
                 inspectionDate: laporanData.inspectionDate,
-                equipmentType: "Gondola",
+                equipmentType: laporanData.equipmentType,
                 generalData: {
                     companyName: laporanData.generalData.ownerName,
                     companyLocation: laporanData.generalData.ownerAddress,
@@ -667,8 +717,7 @@ const gondolaServices = {
                 inspectionResult: { visualCheck: {}, functionalTest: {} }
             };
         },
-
-        create: async (payload) => {
+       create: async (payload) => {
             const laporanRef = auditCollection.doc(payload.laporanId);
             const laporanDoc = await laporanRef.get();
             if (!laporanDoc.exists) {
@@ -680,8 +729,17 @@ const gondolaServices = {
 
             // --- LOGIKA SINKRONISASI (BAP -> Laporan) ---
             const dataToSyncWithLaporan = {
-                'generalData.ownerName': payload.generalData.companyName,
-                'generalData.ownerAddress': payload.generalData.companyLocation,
+        inspectionDate: payload.inspectionDate,
+            'generalData.ownerName': payload.generalData.companyName,
+            'generalData.ownerAddress': payload.generalData.companyLocation,
+            'generalData.userInCharge': payload.generalData.userInCharge,
+            'generalData.unitLocation': payload.generalData.ownerAddress,
+            'technicalData.manufacturer': payload.technicalData.manufacturer,
+            'technicalData.locationAndYearOfManufacture': payload.technicalData.locationAndYearOfManufacture,
+            'technicalData.serialNumberUnitNumber': payload.technicalData.serialNumberUnitNumber,
+            'technicalData.intendedUse': payload.technicalData.intendedUse,
+            'technicalData.capacityWorkingLoad': payload.technicalData.capacityWorkingLoad,
+            'technicalData.gondolaSpecification.capacity': payload.technicalData.capacityWorkingLoad,
             };
             await laporanRef.update(dataToSyncWithLaporan);
             // --- AKHIR LOGIKA SINKRONISASI ---
@@ -704,27 +762,46 @@ const gondolaServices = {
 
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') return null;
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Gondola') {
+             return null;
+            }
             return { id: doc.id, ...doc.data() };
         },
 
         updateById: async (id, payload) => {
-            const bapRef = auditCollection.doc(id);
-            const bapDoc = await bapRef.get();
-            if (!bapDoc.exists) return null;
+        const bapRef = auditCollection.doc(id);
+        const bapDoc = await bapRef.get();
+        if (!bapDoc.exists) {
+            throw new NotFoundError('BAP Gondola tidak ditemukan');
+        }
 
-            // --- LOGIKA SINKRONISASI (BAP -> Laporan) ---
-            const laporanRef = auditCollection.doc(payload.laporanId);
-            const dataToSyncWithLaporan = {
-                'generalData.ownerName': payload.generalData.companyName,
-                'generalData.ownerAddress': payload.generalData.companyLocation,
-            };
-            await laporanRef.update(dataToSyncWithLaporan);
-            // --- AKHIR LOGIKA SINKRONISASI ---
+        const laporanRef = auditCollection.doc(payload.laporanId);
+        const laporanDoc = await laporanRef.get();
+        if (!laporanDoc.exists) {
+            throw new InvariantError('BAP gagal diupdate. Laporan Induk tidak ditemukan');
+        }
 
-            await bapRef.update(payload);
-            const updatedDoc = await bapRef.get();
-            return { id: updatedDoc.id, ...updatedDoc.data() };
+        await bapRef.update(payload);
+
+        // --- LOGIKA SINKRONISASI (BAP -> Laporan) ---
+        const dataToSyncWithLaporan = {
+            inspectionDate: payload.inspectionDate,
+            'generalData.ownerName': payload.generalData.companyName,
+            'generalData.ownerAddress': payload.generalData.companyLocation,
+            'generalData.userInCharge': payload.generalData.userInCharge,
+            'generalData.unitLocation': payload.generalData.ownerAddress,
+            'technicalData.manufacturer': payload.technicalData.manufacturer,
+            'technicalData.locationAndYearOfManufacture': payload.technicalData.locationAndYearOfManufacture,
+            'technicalData.serialNumberUnitNumber': payload.technicalData.serialNumberUnitNumber,
+            'technicalData.intendedUse': payload.technicalData.intendedUse,
+            'technicalData.capacityWorkingLoad': payload.technicalData.capacityWorkingLoad,
+            'technicalData.gondolaSpecification.capacity': payload.technicalData.capacityWorkingLoad,
+        };
+        await laporanRef.update(dataToSyncWithLaporan);
+        // --- AKHIR LOGIKA SINKRONISASI ---
+
+        const updatedDoc = await bapRef.get();
+        return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
         deleteById: async (id) => {
