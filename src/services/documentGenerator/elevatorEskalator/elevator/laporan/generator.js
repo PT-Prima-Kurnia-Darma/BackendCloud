@@ -40,11 +40,6 @@ function getSyaratStatus(status) {
     return ''; // Kembalikan string kosong jika data tidak ada (null/undefined)
 }
 
-/**
- * Membuat dokumen laporan elevator dari template di GCS.
- * @param {object} data - Objek data audit lengkap dari Firestore.
- * @returns {Promise<{docxBuffer: Buffer, fileName: string}>} Buffer dokumen dan nama filenya.
- */
 const createLaporanElevator = async (data) => {
     const templatePathInBucket = 'elevatorEskalator/elevator/laporanElevator.docx';
 
@@ -63,8 +58,6 @@ const createLaporanElevator = async (data) => {
     const doc = new Docxtemplater(zip, {
         paragraphLoop: true,
         linebreaks: true,
-        // Penting: Jika sebuah tag di template tidak ditemukan datanya di sini,
-        // ia akan diganti dengan string kosong, bukan error.
         nullGetter: () => "",
     });
 
@@ -538,6 +531,10 @@ const createLaporanElevator = async (data) => {
         labelFireswitchMemenuhi: getCheckmark(i.electricalInstallation?.fireServiceElevator?.label?.status),
         labelFireswitchTidakMemenuhi: getOppositeCheckmark(i.electricalInstallation?.fireServiceElevator?.label?.status),
 
+        labelresult: i.electricalInstallation?.fireServiceElevator?.label?.result,
+        labelMemenuhi: getCheckmark(i.electricalInstallation?.fireServiceElevator?.label?.status),
+        labelTidakMemenuhi: getOppositeCheckmark(i.electricalInstallation?.fireServiceElevator?.label?.status),
+
         electricalFireResistanceresult: i.electricalInstallation?.fireServiceElevator?.electricalFireResistance?.result,
         electricalFireResistanceMemenuhi: getCheckmark(i.electricalInstallation?.fireServiceElevator?.electricalFireResistance?.status),
         electricalFireResistanceTidakMemenuhi: getOppositeCheckmark(i.electricalInstallation?.fireServiceElevator?.electricalFireResistance?.status),
@@ -595,7 +592,8 @@ const createLaporanElevator = async (data) => {
         functionTidakMemenuhi: getOppositeCheckmark(i.electricalInstallation?.seismicSensor?.function?.status),
         
         // --- Kesimpulan ---
-        conclusion: data?.conclusion
+        conclusion: data?.conclusion,
+        recomendations: data?.recomendations
     };
 
     try {

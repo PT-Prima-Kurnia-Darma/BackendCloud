@@ -28,7 +28,6 @@ module.exports = [
             auth: 'jwt',
             description: 'Membuat data laporan elevator baru',
             tags: ['api', 'laporan Elevator'],
-            // DIUBAH: Menggunakan variabel yang benar (laporanElevatorPayload)
             validate: { payload: laporanElevatorPayload } 
         },
     },
@@ -63,7 +62,6 @@ module.exports = [
             tags: ['api', 'laporan Elevator'],
             validate: {
                 params: Joi.object({ id: Joi.string().required() }),
-                // DIUBAH: Menggunakan variabel yang benar (laporanElevatorPayload)
                 payload: laporanElevatorPayload, 
             },
         },

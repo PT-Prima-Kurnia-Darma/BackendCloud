@@ -99,96 +99,110 @@ const elevatorHandlers = {
     },
   },
 
-    /**
-   * HANDLER UNTUK BAP ELEVATOR
-   */
   bap: {
         prefill: async (request, h) => {
-        try {
-            const { LaporanId } = request.params;
-            const prefilledData = await elevatorServices.bap.getDataForPrefill(LaporanId);
-            if (!prefilledData) return Boom.notFound('Data laporan Elevator tidak ditemukan.');
-            return h.response({ status: 'success', message: 'Data BAP berhasil didapatkan', data: prefilledData });
-        } catch (error) {
-            console.error('Error in BAP prefill handler:', error);
-            return Boom.badImplementation('Gagal mengambil data untuk BAP.');
-        }
+            try {
+                const { LaporanId } = request.params;
+                const prefilledData = await elevatorServices.bap.getDataForPrefill(LaporanId);
+                if (!prefilledData) return Boom.notFound('Data laporan elevator tidak ditemukan untuk prefill BAP.');
+                return h.response({ status: 'success', message: 'Data untuk prefill BAP berhasil didapatkan', data: prefilledData });
+            } catch (error) {
+                if (error.isBoom) {
+                    return error;
+                }
+                console.error('Error in BAP prefill handler:', error);
+                return Boom.badImplementation('Gagal mengambil data untuk prefill BAP.');
+            }
         },
 
         create: async (request, h) => {
-        try {
-            const newBap = await elevatorServices.bap.create(request.payload);
-            return h.response({ status: 'success', message: 'BAP elevator berhasil dibuat', data: { bap: newBap } }).code(201);
-        } catch (error) {
-
-          if (error.isBoom) {
-            return error;
-          }
-
-          console.error('Error in create BAP handler:', error);
-          return h.response({
-            status: 'error',
-            message: 'An internal server error occurred',
-          }).code(500);
-        }
+            try {
+                const newBap = await elevatorServices.bap.create(request.payload);
+                return h.response({ status: 'success', message: 'BAP elevator berhasil dibuat', data: { bap: newBap } }).code(201);
+            } catch (error) {
+                if (error.isBoom) {
+                    return error;
+                }
+                console.error('Error in create BAP handler:', error);
+                return Boom.badImplementation('Terjadi kesalahan pada server saat membuat BAP.');
+            }
         },
 
         getAll: async (request, h) => {
-        try {
-            const allBap = await elevatorServices.bap.getAll();
-            return { status: 'success', message: 'Data BAP berhasil didapatkan', data: { bap: allBap } };
-        } catch (error) {
-            console.error('Error in getAll BAP handler:', error);
-            return Boom.badImplementation('Gagal mengambil semua BAP elevator.');
-        }
+            try {
+                const allBap = await elevatorServices.bap.getAll();
+                return { status: 'success', message: 'Data semua BAP elevator berhasil didapatkan', data: { bap: allBap } };
+            } catch (error) {
+                if (error.isBoom) {
+                    return error;
+                }
+                console.error('Error in getAll BAP handler:', error);
+                return Boom.badImplementation('Gagal mengambil semua BAP elevator.');
+            }
         },
 
         getById: async (request, h) => {
-        try {
-            const bap = await elevatorServices.bap.getById(request.params.id);
-            if (!bap) return Boom.notFound('BAP elevator tidak ditemukan.');
-            return { status: 'success', message: 'Data BAP berhasil didapatkan', data: { bap } };
-        } catch (error) {
-            console.error('Error in get BAP by ID handler:', error);
-            return Boom.badImplementation('Gagal mengambil BAP elevator.');
-        }
+            try {
+                const bap = await elevatorServices.bap.getById(request.params.id);
+                if (!bap) return Boom.notFound('BAP elevator tidak ditemukan.');
+                return { status: 'success', message: 'Data BAP elevator berhasil didapatkan', data: { bap } };
+            } catch (error) {
+                if (error.isBoom) {
+                    return error;
+                }
+                console.error('Error in get BAP by ID handler:', error);
+                return Boom.badImplementation('Gagal mengambil BAP elevator.');
+            }
         },
 
         update: async (request, h) => {
-        try {
-            const updatedBap = await elevatorServices.bap.updateById(request.params.id, request.payload);
-            if (!updatedBap) return Boom.notFound('Gagal memperbarui, BAP Elevator tidak ditemukan.');
-            return { status: 'success', message: 'BAP elevator berhasil diperbarui', data: { bap: updatedBap } };
-        } catch (error) {
-            console.error('Error in update BAP handler:', error);
-            return Boom.badImplementation('Gagal memperbarui BAP elevator.');
-        }
+            try {
+                const updatedBap = await elevatorServices.bap.updateById(request.params.id, request.payload);
+                if (!updatedBap) {
+                    return Boom.notFound('Gagal memperbarui, BAP Elevator tidak ditemukan.');
+                }
+                return { status: 'success', message: 'BAP elevator berhasil diperbarui', data: { bap: updatedBap } };
+            } catch (error) {
+                // --- PERBAIKAN DI SINI ---
+                if (error.isBoom) {
+                    return error; // Kembalikan error spesifik dari service (e.g., 404 Not Found)
+                }
+                // Hanya log error yang tidak terduga
+                console.error('Error in update BAP handler:', error);
+                return Boom.badImplementation('Terjadi kesalahan pada server saat memperbarui BAP elevator.');
+            }
         },
 
         delete: async (request, h) => {
-        try {
-            const deletedId = await elevatorServices.bap.deleteById(request.params.id);
-            if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Elevator tidak ditemukan.');
-            return { status: 'success', message: 'BAP elevator berhasil dihapus' };
-        } catch (error) {
-            console.error('Error in delete BAP handler:', error);
-            return Boom.badImplementation('Gagal menghapus BAP elevator.');
-        }
+            try {
+                const deletedId = await elevatorServices.bap.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Elevator tidak ditemukan.');
+                return { status: 'success', message: 'BAP elevator berhasil dihapus' };
+            } catch (error) {
+                if (error.isBoom) {
+                    return error;
+                }
+                console.error('Error in delete BAP handler:', error);
+                return Boom.badImplementation('Gagal menghapus BAP elevator.');
+            }
         },
 
         download: async (request, h) => {
-        try {
-            const bapData = await elevatorServices.bap.getById(request.params.id);
-            if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Elevator tidak ditemukan.');
-            const { docxBuffer, fileName } = await generateBapElevatorDoc(bapData);
-            return h.response(docxBuffer)
-            .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-            .header('Content-Disposition', `attachment; filename="${fileName}"`)
-            .header('message', 'Pemeriksaan dan Pengujian Berkala berhasil diunduh');
-        } catch (error) {
-            console.error('Error in download BAP handler:', error);
-            return Boom.badImplementation('Gagal membuat dokumen BAP untuk diunduh.');
-        }
+            try {
+                const bapData = await elevatorServices.bap.getById(request.params.id);
+                if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Elevator tidak ditemukan.');
+                const { docxBuffer, fileName } = await generateBapElevatorDoc(bapData);
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'BAP elevator berhasil diunduh');
+            } catch (error) {
+                if (error.isBoom) {
+                    return error;
+                }
+                console.error('Error in download BAP handler:', error);
+                return Boom.badImplementation('Gagal membuat dokumen BAP untuk diunduh.');
+            }
         },
     }
 };

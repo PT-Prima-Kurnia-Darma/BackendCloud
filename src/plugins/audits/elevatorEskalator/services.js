@@ -5,29 +5,6 @@ const Boom = require('@hapi/boom');
 const auditCollection = db.collection('elevatorEskalator');
 
 const elevatorServices = {
-    /**
-     * FUNGSI BANTUAN INTERNAL: Memfilter data untuk sinkronisasi.
-     * @param {object} payload - Data yang diterima.
-     * @returns {object} - Objek berisi data yang akan disinkronkan.
-     */
-    _getSharedData: (payload) => {
-        const sharedData = {};
-        const syncedFields = [
-            'inspectionDate', 'examinationType', 'equipmentType',
-            'generalData', 'technicalData'
-        ];
-
-        for (const key of syncedFields) {
-            if (payload[key] !== undefined) {
-                sharedData[key] = payload[key];
-            }
-        }
-        return sharedData;
-    },
-
-    /**
-     * KUMPULAN FUNGSI UNTUK LAPORAN ELEVATOR
-     */
     laporan: {
         create: async (payload) => {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
@@ -37,27 +14,33 @@ const elevatorServices = {
         },
 
         getAll: async () => {
-            const snapshot = await auditCollection.where('subInspectionType', '==', 'Elevator').where('documentType', '==', 'Laporan').orderBy('createdAt', 'desc').get();
+            const snapshot = await auditCollection
+                .where('subInspectionType', '==', 'Elevator')
+                .where('documentType', '==', 'Laporan')
+                .orderBy('createdAt', 'desc')
+                .get();
+            if (snapshot.empty) return [];
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
 
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Elevator') {
+            if (!doc.exists || doc.data().subInspectionType !== 'Elevator' || doc.data().documentType !== 'Laporan') {
                 return null;
             }
             return { id: doc.id, ...doc.data() };
         },
 
         updateById: async (id, payload) => {
-            const docRef = auditCollection.doc(id);
-            const doc = await docRef.get();
+            const laporanRef = auditCollection.doc(id);
+            const doc = await laporanRef.get();
             if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Elevator') {
                 return null;
             }
             
-            await docRef.update(payload);
+            await laporanRef.update(payload);
 
+            // --- SINKRONISASI DARI LAPORAN KE BAP ---
             const bapQuery = await auditCollection
                 .where('laporanId', '==', id)
                 .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
@@ -65,31 +48,43 @@ const elevatorServices = {
                 .get();
 
             if (!bapQuery.empty) {
-                const bapDocRef = bapQuery.docs[0].ref;
-                
-                const dataForBap = {};
-                if (payload.generalData?.ownerName) dataForBap['generalData.ownerName'] = payload.generalData.ownerName;
-                if (payload.generalData?.ownerAddress) dataForBap['generalData.ownerAddress'] = payload.generalData.ownerAddress;
-                
-                if (payload.generalData?.inspectionDate) {
-                    dataForBap.inspectionDate = payload.generalData.inspectionDate;
+                const bapRef = bapQuery.docs[0].ref;
+                const dataToSync = {};
+                const p = payload;
+
+                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+                if (p.equipmentType !== undefined) dataToSync.equipmentType = p.equipmentType;
+
+                if (p.generalData) {
+                    if (p.generalData.inspectionDate !== undefined) dataToSync.inspectionDate = p.generalData.inspectionDate;
+                    if (p.generalData.ownerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.ownerName;
+                    if (p.generalData.ownerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.ownerAddress;
+                    if (p.generalData.nameUsageLocation !== undefined) dataToSync['generalData.nameUsageLocation'] = p.generalData.nameUsageLocation;
+                    if (p.generalData.addressUsageLocation !== undefined) dataToSync['generalData.addressUsageLocation'] = p.generalData.addressUsageLocation;
+                    
+                    if (p.generalData.elevatorType !== undefined) dataToSync['technicalData.elevatorType'] = p.generalData.elevatorType;
+                    if (p.generalData.manufacturerOrInstaller !== undefined) dataToSync['technicalData.manufacturerOrInstaller'] = p.generalData.manufacturerOrInstaller;
+                    if (p.generalData.brandOrType !== undefined) dataToSync['technicalData.brandOrType'] = p.generalData.brandOrType;
+                    if (p.generalData.countryAndYear !== undefined) dataToSync['technicalData.countryAndYear'] = p.generalData.countryAndYear;
+                    if (p.generalData.serialNumber !== undefined) dataToSync['technicalData.serialNumber'] = p.generalData.serialNumber;
+                    if (p.generalData.capacity !== undefined) dataToSync['technicalData.capacity'] = p.generalData.capacity;
+                    if (p.generalData.speed !== undefined) dataToSync['technicalData.speed'] = p.generalData.speed;
+                    if (p.generalData.floorsServed !== undefined) dataToSync['technicalData.floorsServed'] = p.generalData.floorsServed;
                 }
-                if (payload.examinationType) dataForBap.examinationType = payload.examinationType;
-                if (payload.equipmentType) dataForBap.equipmentType = payload.equipmentType;
-                
-                if (Object.keys(dataForBap).length > 0) {
-                    await bapDocRef.update(dataForBap);
+
+                if (Object.keys(dataToSync).length > 0) {
+                    await bapRef.update(dataToSync);
                 }
             }
 
-            const updatedDoc = await docRef.get();
+            const updatedDoc = await laporanRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
             const doc = await docRef.get();
-            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Elevator') {
+            if (!doc.exists || doc.data().subInspectionType !== 'Elevator' || doc.data().documentType !== 'Laporan') {
                 return null;
             }
             await docRef.delete();
@@ -97,9 +92,6 @@ const elevatorServices = {
         },
     },
 
-    /**
-     * KUMPULAN FUNGSI UNTUK BAP ELEVATOR
-     */
     bap: {
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
@@ -107,17 +99,28 @@ const elevatorServices = {
                 return null;
             }
             const d = laporanDoc.data();
-            const inspectionDate = d.inspectionDate || d.generalData?.inspectionDate || "";
-            const cleanGeneralData = { ...d.generalData };
-            delete cleanGeneralData.inspectionDate;
-
+            
             return {
                 laporanId: laporanId,
-                inspectionDate: inspectionDate,
+                inspectionDate: d.generalData?.inspectionDate || "",
                 examinationType: d.examinationType || "",
                 equipmentType: d.equipmentType || "",
-                generalData: cleanGeneralData,
-                technicalData: d.technicalData || {},
+                generalData: {
+                    ownerName: d.generalData?.ownerName || "",
+                    ownerAddress: d.generalData?.ownerAddress || "",
+                    nameUsageLocation: d.generalData?.nameUsageLocation || "",
+                    addressUsageLocation: d.generalData?.addressUsageLocation || ""
+                },
+                technicalData: {
+                    elevatorType: d.generalData?.elevatorType || "",
+                    manufacturerOrInstaller: d.generalData?.manufacturerOrInstaller || "",
+                    brandOrType: d.generalData?.brandOrType || "",
+                    countryAndYear: d.generalData?.countryAndYear || "",
+                    serialNumber: d.generalData?.serialNumber || "",
+                    capacity: d.generalData?.capacity || "",
+                    speed: d.generalData?.speed || "",
+                    floorsServed: d.generalData?.floorsServed || ""
+                },
                 visualInspection: {},
                 testing: {}
             };
@@ -125,35 +128,55 @@ const elevatorServices = {
 
         create: async (payload) => {
             const { laporanId } = payload;
-            const laporanDocRef = auditCollection.doc(laporanId);
-            const laporanDoc = await laporanDocRef.get();
+            const laporanRef = auditCollection.doc(laporanId);
+            const laporanDoc = await laporanRef.get();
 
             if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
                 throw Boom.notFound('Laporan Elevator tidak ditemukan.');
             }
             
-            const cleanPayload = { ...payload };
-            if (cleanPayload.generalData && cleanPayload.generalData.inspectionDate) {
-                if (!cleanPayload.inspectionDate) {
-                    cleanPayload.inspectionDate = cleanPayload.generalData.inspectionDate;
-                }
-                delete cleanPayload.generalData.inspectionDate;
+            const dataToSync = {};
+            const p = payload; 
+
+            if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+            if (p.equipmentType !== undefined) dataToSync.equipmentType = p.equipmentType;
+            if (p.inspectionDate !== undefined) dataToSync['generalData.inspectionDate'] = p.inspectionDate;
+
+            if (p.generalData) {
+                if (p.generalData.ownerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.ownerName;
+                if (p.generalData.ownerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.ownerAddress;
+                if (p.generalData.nameUsageLocation !== undefined) dataToSync['generalData.nameUsageLocation'] = p.generalData.nameUsageLocation;
+                if (p.generalData.addressUsageLocation !== undefined) dataToSync['generalData.addressUsageLocation'] = p.generalData.addressUsageLocation;
             }
-            
-            // Menggunakan fungsi bantuan internal
-            const dataToSync = elevatorServices._getSharedData(cleanPayload);
+
+            if (p.technicalData) {
+                if (p.technicalData.elevatorType !== undefined) dataToSync['generalData.elevatorType'] = p.technicalData.elevatorType;
+                if (p.technicalData.manufacturerOrInstaller !== undefined) dataToSync['generalData.manufacturerOrInstaller'] = p.technicalData.manufacturerOrInstaller;
+                if (p.technicalData.brandOrType !== undefined) dataToSync['generalData.brandOrType'] = p.technicalData.brandOrType;
+                if (p.technicalData.countryAndYear !== undefined) dataToSync['generalData.countryAndYear'] = p.technicalData.countryAndYear;
+                if (p.technicalData.serialNumber !== undefined) dataToSync['generalData.serialNumber'] = p.technicalData.serialNumber;
+                if (p.technicalData.capacity !== undefined) dataToSync['generalData.capacity'] = p.technicalData.capacity;
+                if (p.technicalData.speed !== undefined) dataToSync['generalData.speed'] = p.technicalData.speed;
+                if (p.technicalData.floorsServed !== undefined) dataToSync['generalData.floorsServed'] = p.technicalData.floorsServed;
+            }
+
             if (Object.keys(dataToSync).length > 0) {
-                await laporanDocRef.update(dataToSync);
+                await laporanRef.update(dataToSync);
             }
             
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
-            const dataToSave = { ...cleanPayload, subInspectionType: "Elevator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
+            const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
 
         getAll: async () => {
-            const snapshot = await auditCollection.where('subInspectionType', '==', 'Elevator').where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian').orderBy('createdAt', 'desc').get();
+            const snapshot = await auditCollection
+                .where('subInspectionType', '==', 'Elevator')
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+                .orderBy('createdAt', 'desc')
+                .get();
+            if (snapshot.empty) return [];
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
 
@@ -164,36 +187,59 @@ const elevatorServices = {
         },
 
         updateById: async (id, payload) => {
-            const docRef = auditCollection.doc(id);
-            const doc = await docRef.get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Elevator') return null;
-            
-            await docRef.update(payload);
-            
-            const updatedBap = (await docRef.get()).data();
-            const { laporanId } = updatedBap;
+            const bapRef = auditCollection.doc(id);
+            const bapDoc = await bapRef.get();
 
-            if (laporanId) {
-                const laporanDocRef = auditCollection.doc(laporanId);
-                const laporanDoc = await laporanDocRef.get();
-                if(laporanDoc.exists){
-                    const dataForLaporan = {};
-                    if (payload.generalData?.ownerName) dataForLaporan['generalData.ownerName'] = payload.generalData.ownerName;
-                    if (payload.generalData?.ownerAddress) dataForLaporan['generalData.ownerAddress'] = payload.generalData.ownerAddress;
-                    
-                    if (payload.inspectionDate) {
-                        dataForLaporan['generalData.inspectionDate'] = payload.inspectionDate;
-                    }
-                    if (payload.examinationType) dataForLaporan.examinationType = payload.examinationType;
-                    if (payload.equipmentType) dataForLaporan.equipmentType = payload.equipmentType;
-
-                    if (Object.keys(dataForLaporan).length > 0) {
-                        await laporanDocRef.update(dataForLaporan);
-                    }
-                }
+            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Elevator') {
+                return null; 
             }
             
-            const updatedDoc = await docRef.get();
+            const { laporanId } = bapDoc.data();
+
+            if (!laporanId) {
+                throw Boom.badRequest('Update gagal. BAP tidak terhubung dengan Laporan (laporanId tidak ditemukan).');
+            }
+
+            const laporanRef = auditCollection.doc(laporanId);
+            const laporanDoc = await laporanRef.get();
+
+            if (!laporanDoc.exists) {
+                throw Boom.notFound('Update gagal. Laporan yang terhubung dengan BAP tidak ditemukan.');
+            }
+
+            await bapRef.update(payload);
+            
+            // --- SINKRONISASI DARI BAP KE LAPORAN ---
+            const dataToSync = {};
+            const p = payload; // payload from the updated BAP
+
+            if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+            if (p.equipmentType !== undefined) dataToSync.equipmentType = p.equipmentType;
+            if (p.inspectionDate !== undefined) dataToSync['generalData.inspectionDate'] = p.inspectionDate;
+
+            if (p.generalData) {
+                if (p.generalData.ownerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.ownerName;
+                if (p.generalData.ownerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.ownerAddress;
+                if (p.generalData.nameUsageLocation !== undefined) dataToSync['generalData.nameUsageLocation'] = p.generalData.nameUsageLocation;
+                if (p.generalData.addressUsageLocation !== undefined) dataToSync['generalData.addressUsageLocation'] = p.generalData.addressUsageLocation;
+            }
+
+            if (p.technicalData) {
+                if (p.technicalData.elevatorType !== undefined) dataToSync['generalData.elevatorType'] = p.technicalData.elevatorType;
+                if (p.technicalData.manufacturerOrInstaller !== undefined) dataToSync['generalData.manufacturerOrInstaller'] = p.technicalData.manufacturerOrInstaller;
+                if (p.technicalData.brandOrType !== undefined) dataToSync['generalData.brandOrType'] = p.technicalData.brandOrType;
+                if (p.technicalData.countryAndYear !== undefined) dataToSync['generalData.countryAndYear'] = p.technicalData.countryAndYear;
+                if (p.technicalData.serialNumber !== undefined) dataToSync['generalData.serialNumber'] = p.technicalData.serialNumber;
+                if (p.technicalData.capacity !== undefined) dataToSync['generalData.capacity'] = p.technicalData.capacity;
+                if (p.technicalData.speed !== undefined) dataToSync['generalData.speed'] = p.technicalData.speed;
+                if (p.technicalData.floorsServed !== undefined) dataToSync['generalData.floorsServed'] = p.technicalData.floorsServed;
+            }
+
+            if (Object.keys(dataToSync).length > 0) {
+                await laporanRef.update(dataToSync);
+            }
+            
+            const updatedDoc = await bapRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
@@ -208,13 +254,7 @@ const elevatorServices = {
 };
 
 const eskalatorServices = {
-    /**
-     * KUMPULAN FUNGSI UNTUK LAPORAN ESKALATOR
-     */
     laporan: {
-        /**
-         * Membuat dokumen laporan Eskalator baru.
-         */
         create: async (payload) => {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
             const dataToSave = { ...payload, subInspectionType: "Eskalator", documentType: "Laporan", createdAt };
@@ -222,17 +262,11 @@ const eskalatorServices = {
             return { id: docRef.id, ...dataToSave };
         },
 
-        /**
-         * Mengambil semua dokumen laporan Eskalator.
-         */
         getAll: async () => {
             const snapshot = await auditCollection.where('subInspectionType', '==', 'Eskalator').where('documentType', '==', 'Laporan').orderBy('createdAt', 'desc').get();
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
 
-        /**
-         * Mengambil satu dokumen laporan Eskalator berdasarkan ID.
-         */
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
             if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Eskalator') {
@@ -241,9 +275,6 @@ const eskalatorServices = {
             return { id: doc.id, ...doc.data() };
         },
 
-        /**
-         * Memperbarui dokumen laporan Eskalator berdasarkan ID dan sinkronisasi ke BAP.
-         */
         updateById: async (id, payload) => {
             const docRef = auditCollection.doc(id);
             const doc = await docRef.get();
@@ -294,9 +325,6 @@ const eskalatorServices = {
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
-        /**
-         * Menghapus dokumen laporan Eskalator berdasarkan ID.
-         */
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
             const doc = await docRef.get();
@@ -308,13 +336,8 @@ const eskalatorServices = {
         },
     },
 
-    /**
-     * KUMPULAN FUNGSI UNTUK BAP ESKALATOR
-     */
     bap: {
-        /**
-         * Mengambil data dari Laporan Eskalator untuk prefill form BAP.
-         */
+
         getDataForPrefill: async (laporanId) => {
         const laporanDoc = await auditCollection.doc(laporanId).get();
         if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Eskalator') {
@@ -338,7 +361,7 @@ const eskalatorServices = {
             inspectionType: d.inspectionType || "",
             inspectionDate: d.generalData?.inspectionDate || "",
             generalData: d.generalData || {},
-            technicalData: technicalDataForBap, // Gunakan technicalData yang sudah aman
+            technicalData: technicalDataForBap,
             visualInspection: {},
             testing: {}
         };
@@ -422,9 +445,6 @@ const eskalatorServices = {
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
-        /**
-         * Menghapus dokumen BAP Eskalator berdasarkan ID.
-         */
        deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
             const doc = await docRef.get();

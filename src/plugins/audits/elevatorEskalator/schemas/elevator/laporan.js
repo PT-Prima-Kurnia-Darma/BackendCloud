@@ -198,7 +198,8 @@ const laporanElevatorPayload = Joi.object({
         }).optional(),
     }).optional(),
     
-    conclusion: Joi.string().allow('').optional()
+    conclusion: Joi.string().allow('').optional(),
+    recomendations: Joi.string().allow('').optional()
 }).unknown(false).min(1);
 
 module.exports = {
