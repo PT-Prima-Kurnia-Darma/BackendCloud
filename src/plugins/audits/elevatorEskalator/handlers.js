@@ -208,9 +208,6 @@ const elevatorHandlers = {
 };
 
 const eskalatorHandlers = {
-  /**
-   * HANDLER UNTUK LAPORAN ESKALATOR
-   */
   laporan: {
     create: async (request, h) => {
       try {
@@ -283,10 +280,8 @@ const eskalatorHandlers = {
           return Boom.notFound('Gagal membuat dokumen. Laporan Eskalator tidak ditemukan.');
         }
 
-        // Panggil fungsi generator dengan data dari Firestore
         const { docxBuffer, fileName } = await generateLaporanEskalatorDoc(laporanData);
 
-        // Kirim buffer sebagai file download
         return h.response(docxBuffer)
           .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
           .header('Content-Disposition', `attachment; filename="${fileName}"`)
@@ -294,7 +289,6 @@ const eskalatorHandlers = {
 
       } catch (error) {
         console.error('Error in downloadLaporanEskalatorHandler:', error);
-        // Cek apakah error berasal dari generator atau error server lain
         if (error.message.includes('Gagal membuat dokumen')) {
             return Boom.badImplementation(error.message);
         }
@@ -303,9 +297,6 @@ const eskalatorHandlers = {
     },
   },
  
-    /**
-   * HANDLER UNTUK BAP ESKALATOR
-   */
   bap: {
     prefill: async (request, h) => {
         try {

@@ -19,41 +19,18 @@ const storage = new Storage({
     },
 });
 
-const BUCKET_NAME = 'tamplate-audit-riksauji'; // Nama bucket yang benar
+const BUCKET_NAME = 'tamplate-audit-riksauji';
 
-// =================================================================================
-// FUNGSI BANTUAN
-// =================================================================================
-
-/**
- * Membuat simbol centang (✓) jika statusnya true.
- * @param {boolean} status
- * @returns {string} '✓' atau string kosong
- */
 function getCheckmark(status) {
     if (status === true) return '✓';
     return '';
 }
 
-/**
- * Membuat simbol centang (✓) jika statusnya false.
- * @param {boolean} status
- * @returns {string} '✓' atau string kosong
- */
 function getOppositeCheckmark(status) {
     if (status === false) return '✓';
     return '';
 }
 
-// =================================================================================
-// FUNGSI GENERATOR UTAMA
-// =================================================================================
-
-/**
- * Membuat dokumen laporan eskalator dari template di GCS.
- * @param {object} data - Objek data audit eskalator lengkap dari Firestore.
- * @returns {Promise<{docxBuffer: Buffer, fileName: string}>} Buffer dokumen dan nama filenya.
- */
 const createLaporanEskalator = async (data) => {
     const templatePathInBucket = 'elevatorEskalator/eskalator/laporanEskalator.docx';
 
@@ -72,18 +49,12 @@ const createLaporanEskalator = async (data) => {
     const doc = new Docxtemplater(zip, {
         paragraphLoop: true,
         linebreaks: true,
-        nullGetter: () => "", // Ganti tag yang tidak ada datanya dengan string kosong
+        nullGetter: () => "", 
     });
 
-    // =================================================================================
-    // PERSIAPAN DATA UNTUK RENDER
-    // =================================================================================
 
-    // Membuat alias untuk objek 'inspectionAndTesting' agar lebih ringkas dan aman
     const i = data.inspectionAndTesting || {};
 
-    // Siapkan data untuk dirender ke dalam template.
-    // Nama key di sini HARUS SAMA PERSIS dengan placeholder di file .docx Anda.
     const renderData = {
         // Data Umum (diambil dari objek 'generalData')
         ...data.generalData,
@@ -100,9 +71,9 @@ const createLaporanEskalator = async (data) => {
         inspectionAndTestingframeAndMachineRoomframeMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoomframeresult?.status),
         inspectionAndTestingframeAndMachineRoomframeTidakMemenuhi: getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoomframeresult?.status),
         
-        'inspectionAndTestingframeAndMachineRoomsupportBeams iresults': i.inspectionAndTestingframeAndMachineRoom?.['inspectionAndTestingframeAndMachineRoomsupportBeams iresults']?.result,
-        'inspectionAndTestingframeAndMachineRoomsupportBeamsMemenuhi': getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.['inspectionAndTestingframeAndMachineRoomsupportBeams iresults']?.status),
-        'inspectionAndTestingframeAndMachineRoomsupportBeamsTidakMemenuhi': getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.['inspectionAndTestingframeAndMachineRoomsupportBeams iresults']?.status),
+        inspectionAndTestingframeAndMachineRoomsupportBeamsresults: i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoomsupportBeamsresults?.result,
+        inspectionAndTestingframeAndMachineRoomsupportBeamsMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoomsupportBeamsresults?.status),
+        inspectionAndTestingframeAndMachineRoomsupportBeamsTidakMemenuhi: getOppositeCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoomsupportBeamsresults?.status),
 
         inspectionAndTestingframeAndMachineRoommachineRoomConditionresult: i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomConditionresult?.result,
         inspectionAndTestingframeAndMachineRoommachineRoomConditionMemenuhi: getCheckmark(i.inspectionAndTestingframeAndMachineRoom?.inspectionAndTestingframeAndMachineRoommachineRoomConditionresult?.status),

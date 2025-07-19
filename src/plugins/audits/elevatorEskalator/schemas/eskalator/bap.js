@@ -52,7 +52,7 @@ const bapEskalatorPayload = Joi.object({
         isEscalatorFunctionOk: Joi.boolean().optional()
     }).optional()
 
-}).min(1); // Menolak payload kosong
+}).unknown(false).min(1);
 
 module.exports = {
     bapEskalatorPayload,

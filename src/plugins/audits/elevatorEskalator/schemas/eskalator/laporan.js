@@ -45,7 +45,7 @@ const laporanEskalatorPayload = Joi.object({
     inspectionAndTesting: Joi.object({
         inspectionAndTestingframeAndMachineRoom: Joi.object({
             inspectionAndTestingframeAndMachineRoomframeresult: inspectionItemSchema,
-            inspectionAndTestingframeAndMachineRoomsupportBeamsiresults: inspectionItemSchema,
+            inspectionAndTestingframeAndMachineRoomsupportBeamsresults: inspectionItemSchema,
             inspectionAndTestingframeAndMachineRoommachineRoomConditionresult: inspectionItemSchema,
             inspectionAndTestingframeAndMachineRoommachineRoomClearanceresult: inspectionItemSchema,
             inspectionAndTestingframeAndMachineRoommachineRoomLightingresult: inspectionItemSchema,
@@ -157,7 +157,7 @@ const laporanEskalatorPayload = Joi.object({
 
 })
 .unknown(false)
-.min(1); // Tetap menolak objek kosong {}
+.min(1); 
 
 module.exports = {
     laporanEskalatorPayload,
