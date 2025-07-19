@@ -5,7 +5,6 @@ const Docxtemplater = require('docxtemplater');
 const { Storage } = require('@google-cloud/storage');
 const config = require('../../../../../config');
 
-// Inisialisasi koneksi ke Google Cloud Storage
 let privateKey = config.FIRESTORE_PRIVATE_KEY;
 if (privateKey && privateKey.includes('\\n')) {
   privateKey = privateKey.replace(/\\n/g, '\n');
@@ -21,23 +20,20 @@ const storage = new Storage({
 
 const bucketName = 'tamplate-audit-riksauji';
 
-// Helper function untuk mengubah boolean menjadi simbol centang (✓) atau string kosong.
 function getCheckmark(status) {
     if (status === true) return '✓';
     return '';
 }
 
-// Helper function untuk mengubah boolean menjadi simbol centang (✓) jika statusnya false.
 function getOppositeCheckmark(status) {
     if (status === false) return '✓';
     return '';
 }
 
-// BARU: Helper function untuk mengubah boolean menjadi status kelayakan.
 function getSyaratStatus(status) {
     if (status === true) return 'Memenuhi Syarat';
     if (status === false) return 'Tidak Memenuhi Syarat';
-    return ''; // Kembalikan string kosong jika data tidak ada (null/undefined)
+    return ''; 
 }
 
 const createLaporanElevator = async (data) => {
@@ -61,11 +57,8 @@ const createLaporanElevator = async (data) => {
         nullGetter: () => "",
     });
 
-    // Membuat alias untuk objek data agar lebih aman dari error jika data tidak lengkap
     const i = data.inspectionAndTesting || {};
 
-    // Siapkan data untuk dirender ke dalam template.
-    // Penggunaan optional chaining (?.) memastikan kode tidak error jika ada objek yang hilang.
     const renderData = {
         // Data Utama
         examinationType: data?.examinationType,
@@ -616,8 +609,7 @@ const createLaporanElevator = async (data) => {
         compression: 'DEFLATE',
     });
 
-    // Membuat nama file yang aman, mengganti spasi dan menangani jika nama pemilik tidak ada
-    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
+    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'Perusahaan Tidak Diketahui';
     const fileName = `Laporan-Elevator-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };

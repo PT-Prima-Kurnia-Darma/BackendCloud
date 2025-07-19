@@ -5,7 +5,6 @@ const Docxtemplater = require('docxtemplater');
 const { Storage } = require('@google-cloud/storage');
 const config = require('../../../../../config');
 
-// Inisialisasi koneksi ke Google Cloud Storage
 let privateKey = config.FIRESTORE_PRIVATE_KEY;
 if (privateKey && privateKey.includes('\\n')) {
   privateKey = privateKey.replace(/\\n/g, '\n');
@@ -21,26 +20,12 @@ const storage = new Storage({
 
 const bucketName = 'tamplate-audit-riksauji';
 
-// BARU: Helper function untuk mengubah boolean menjadi teks yang sesuai.
-/**
- * @param {boolean | null | undefined} status Nilai boolean dari database.
- * @param {string} trueText Teks untuk ditampilkan jika statusnya true.
- * @param {string} falseText Teks untuk ditampilkan jika statusnya false.
- * @param {string} defaultText Teks untuk ditampilkan jika statusnya null atau undefined.
- * @returns {string}
- */
 const formatBoolean = (status, trueText, falseText, defaultText) => {
     if (status === true) return trueText;
     if (status === false) return falseText;
     return defaultText;
 };
 
-
-/**
- * Membuat dokumen BAP (Berita Acara Pemeriksaan) elevator dari template.
- * @param {object} data - Objek data BAP lengkap dari Firestore.
- * @returns {Promise<{docxBuffer: Buffer, fileName: string}>} Buffer dokumen dan nama filenya.
- */
 const createBapElevator = async (data) => {
     const templatePathInBucket = 'elevatorEskalator/elevator/bapElevator.docx';
 
@@ -118,7 +103,7 @@ const createBapElevator = async (data) => {
         compression: 'DEFLATE',
     });
 
-    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
+    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'Perusahaan Tidak Diketahui';
     const fileName = `BAP-Elevator-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
