@@ -45,7 +45,6 @@ const defleksiItemSchema = Joi.object({
 const laporanGantryCranePayload = Joi.object({
     examinationType: Joi.string().required(),
     inspectionType: Joi.string().required(),
-    reportNumber: Joi.string().required(),
     createdAt: Joi.date().iso().optional(), // Menggunakan .iso() untuk format ISO 8601
     extraId: Joi.number().allow('', null).optional(),
     equipmentType: Joi.string().required(),

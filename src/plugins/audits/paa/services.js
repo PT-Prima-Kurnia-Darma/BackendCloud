@@ -265,9 +265,7 @@ const mobileCraneServices = {
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
             const laporanDoc = await laporanRef.get();
-            if (!laporanDoc.exists) {
-                return null;
-            }
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Mobile Crane') {return null;}
 
             await laporanRef.update(payload);
 
@@ -463,15 +461,22 @@ const gantryCraneServices = {
 
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Laporan') return null;
+            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Gantry Crane') return null;
             return { id: doc.id, ...doc.data() };
         },
 
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
-            if (!(await laporanRef.get()).exists) return null;
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gantry Crane') {return null;}
             await laporanRef.update(payload);
-            const bapQuery = await auditCollection.where('laporanId', '==', id).limit(1).get();
+
+            const bapQuery = await auditCollection
+            .where('laporanId', '==', id)
+            .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+            .where('subInspectionType', '==', 'Gantry Crane')
+            .limit(1).get();
+
+
             if (!bapQuery.empty) {
                 const bapRef = bapQuery.docs[0].ref;
                 const dataToSync = {};
@@ -510,7 +515,9 @@ const gantryCraneServices = {
     bap: {
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
-            if (!laporanDoc.exists) return null;
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gantry Crane') {
+            return null;
+            }
             const d = laporanDoc.data();
             return {
                 laporanId,
@@ -523,11 +530,13 @@ const gantryCraneServices = {
                 inspectionResult: { visualCheck: {}, functionalTest: {}, ndtTest: {}, loadTest: {} }
             };
         },
+
         create: async (payload) => {
             const { laporanId } = payload;
             const laporanRef = auditCollection.doc(laporanId);
             if (!(await laporanRef.get()).exists) throw Boom.notFound('Laporan Gantry Crane tidak ditemukan.');
             const p = payload;
+
             const dataToSync = {};
             if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
             if (p.inspectionType !== undefined) dataToSync.inspectionType = p.inspectionType;
@@ -545,26 +554,32 @@ const gantryCraneServices = {
             if (p.technicalData?.liftingSpeedMpm !== undefined) dataToSync['technicalData.hoistingSpeed'] = p.technicalData.liftingSpeedMpm;
             if (Object.keys(dataToSync).length > 0) await laporanRef.update(dataToSync);
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+
             const dataToSave = { ...payload, subInspectionType: "Gantry Crane", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
+
         getAll: async () => {
             const snapshot = await auditCollection.where('subInspectionType', '==', 'Gantry Crane').where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian').orderBy('createdAt', 'desc').get();
             if (snapshot.empty) return [];
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
+
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') return null;
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian'  || doc.data().subInspectionType !== 'Gantry Crane') return null;
             return { id: doc.id, ...doc.data() };
         },
+
         updateById: async (id, payload) => {
             const bapRef = auditCollection.doc(id);
             const bapDoc = await bapRef.get();
-            if (!bapDoc.exists) return null;
+             if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Gantry Crane') return null;
             await bapRef.update(payload);
+
             const { laporanId } = bapDoc.data();
+
             if (laporanId) {
                 const laporanRef = auditCollection.doc(laporanId);
                 const dataToSync = {};
@@ -585,9 +600,11 @@ const gantryCraneServices = {
                 if (p.technicalData?.liftingSpeedMpm !== undefined) dataToSync['technicalData.hoistingSpeed'] = p.technicalData.liftingSpeedMpm;
                 if (Object.keys(dataToSync).length > 0) await laporanRef.update(dataToSync);
             }
+
             const updatedDoc = await bapRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
+
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
             const doc = await docRef.get();
@@ -626,10 +643,11 @@ const gondolaServices = {
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
             const laporanDoc = await laporanRef.get();
-            if (!laporanDoc.exists) {
-                // Menggunakan Boom untuk error yang lebih informatif
-                throw Boom.notFound('Laporan Gondola tidak ditemukan');
-            }
+            // if (!laporanDoc.exists) {
+            //     // Menggunakan Boom untuk error yang lebih informatif
+            //     throw Boom.notFound('Laporan Gondola tidak ditemukan');
+            // }
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gondola') {return null;}
 
             // 1. Update Laporan utama
             await laporanRef.update(payload);
@@ -697,8 +715,8 @@ const gondolaServices = {
             const laporanRef = auditCollection.doc(laporanId);
             const laporanDoc = await laporanRef.get();
 
-            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
-                const error = new Error('Laporan dengan ID yang diberikan tidak ditemukan.');
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gondola') {
+                const error = new Error('Laporan Gondola tidak ditemukan.');
                 error.isBoom = true;
                 error.output = { statusCode: 404 };
                 throw error;
@@ -729,11 +747,12 @@ const gondolaServices = {
                 inspectionResult: { visualCheck: {}, functionalTest: {} }
             };
         },
+
        create: async (payload) => {
             const laporanRef = auditCollection.doc(payload.laporanId);
             const laporanDoc = await laporanRef.get();
-            if (!laporanDoc.exists) {
-                const error = new Error('Laporan dengan ID yang diberikan tidak ditemukan.');
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gondola') {
+                const error = new Error('Laporan Gondola tidak ditemukan.');
                 error.isBoom = true;
                 error.output = { statusCode: 404 };
                 throw error;
@@ -741,7 +760,7 @@ const gondolaServices = {
 
             // --- LOGIKA SINKRONISASI (BAP -> Laporan) ---
             const dataToSyncWithLaporan = {
-        inspectionDate: payload.inspectionDate,
+            inspectionDate: payload.inspectionDate,
             'generalData.ownerName': payload.generalData.companyName,
             'generalData.ownerAddress': payload.generalData.companyLocation,
             'generalData.userInCharge': payload.generalData.userInCharge,
@@ -781,39 +800,39 @@ const gondolaServices = {
         },
 
         updateById: async (id, payload) => {
-        const bapRef = auditCollection.doc(id);
-        const bapDoc = await bapRef.get();
-        if (!bapDoc.exists) {
-            throw new NotFoundError('BAP Gondola tidak ditemukan');
-        }
+            const bapRef = auditCollection.doc(id);
+            const bapDoc = await bapRef.get();
+            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Gantry Crane') {
+                throw new NotFoundError('BAP Gondola tidak ditemukan');
+            }
 
-        const laporanRef = auditCollection.doc(payload.laporanId);
-        const laporanDoc = await laporanRef.get();
-        if (!laporanDoc.exists) {
-            throw new InvariantError('BAP gagal diupdate. Laporan Induk tidak ditemukan');
-        }
+            const laporanRef = auditCollection.doc(payload.laporanId);
+            const laporanDoc = await laporanRef.get();
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || laporanDoc.data().subInspectionType !== 'Gantry Crane') {
+                throw new InvariantError('BAP gagal diupdate. Laporan Gondola tidak ditemukan');
+            }
 
-        await bapRef.update(payload);
+            await bapRef.update(payload);
 
-        // --- LOGIKA SINKRONISASI (BAP -> Laporan) ---
-        const dataToSyncWithLaporan = {
-            inspectionDate: payload.inspectionDate,
-            'generalData.ownerName': payload.generalData.companyName,
-            'generalData.ownerAddress': payload.generalData.companyLocation,
-            'generalData.userInCharge': payload.generalData.userInCharge,
-            'generalData.unitLocation': payload.generalData.ownerAddress,
-            'technicalData.manufacturer': payload.technicalData.manufacturer,
-            'technicalData.locationAndYearOfManufacture': payload.technicalData.locationAndYearOfManufacture,
-            'technicalData.serialNumberUnitNumber': payload.technicalData.serialNumberUnitNumber,
-            'technicalData.intendedUse': payload.technicalData.intendedUse,
-            'technicalData.capacityWorkingLoad': payload.technicalData.capacityWorkingLoad,
-            'technicalData.gondolaSpecification.capacity': payload.technicalData.capacityWorkingLoad,
-        };
-        await laporanRef.update(dataToSyncWithLaporan);
-        // --- AKHIR LOGIKA SINKRONISASI ---
+            // --- LOGIKA SINKRONISASI (BAP -> Laporan) ---
+            const dataToSyncWithLaporan = {
+                inspectionDate: payload.inspectionDate,
+                'generalData.ownerName': payload.generalData.companyName,
+                'generalData.ownerAddress': payload.generalData.companyLocation,
+                'generalData.userInCharge': payload.generalData.userInCharge,
+                'generalData.unitLocation': payload.generalData.ownerAddress,
+                'technicalData.manufacturer': payload.technicalData.manufacturer,
+                'technicalData.locationAndYearOfManufacture': payload.technicalData.locationAndYearOfManufacture,
+                'technicalData.serialNumberUnitNumber': payload.technicalData.serialNumberUnitNumber,
+                'technicalData.intendedUse': payload.technicalData.intendedUse,
+                'technicalData.capacityWorkingLoad': payload.technicalData.capacityWorkingLoad,
+                'technicalData.gondolaSpecification.capacity': payload.technicalData.capacityWorkingLoad,
+            };
+            await laporanRef.update(dataToSyncWithLaporan);
+            // --- AKHIR LOGIKA SINKRONISASI ---
 
-        const updatedDoc = await bapRef.get();
-        return { id: updatedDoc.id, ...updatedDoc.data() };
+            const updatedDoc = await bapRef.get();
+            return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
         deleteById: async (id) => {
@@ -862,16 +881,16 @@ const overheadCraneServices = {
 
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
-            const doc = await laporanRef.get();
-            if (!doc.exists) {
-                return null;
-            }
+            const laporanDoc = await laporanRef.get();
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Overhead Crane') 
+            {return null;}
             await laporanRef.update(payload);
 
             // --- SINKRONISASI LAPORAN KE BAP ---
             const bapQuery = await auditCollection
                 .where('laporanId', '==', id)
                 .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+                .where('subInspectionType', '==', 'Overhead Crane')
                 .limit(1)
                 .get();
             
@@ -926,7 +945,7 @@ const overheadCraneServices = {
     bap: {
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
-            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Overhead Crane') {
                 return null;
             }
             const d = laporanDoc.data();
@@ -966,7 +985,7 @@ const overheadCraneServices = {
             const { laporanId } = payload;
             const laporanRef = auditCollection.doc(laporanId);
             const laporanDoc = await laporanRef.get();
-            if (!laporanDoc.exists) {
+            if (!laporanDoc.exists  || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Overhead Crane') {
                 throw Boom.notFound('Laporan Overhead Crane tidak ditemukan.');
             }
 
@@ -1030,7 +1049,7 @@ const overheadCraneServices = {
         updateById: async (id, payload) => {
             const bapRef = auditCollection.doc(id);
             const bapDoc = await bapRef.get();
-            if (!bapDoc.exists) {
+            if (!bapDoc.exists  || bapDoc.data().documentType !== 'Laporan' || bapDoc.data().subInspectionType !== 'Overhead Crane') {
                 return null;
             }
             await bapRef.update(payload);

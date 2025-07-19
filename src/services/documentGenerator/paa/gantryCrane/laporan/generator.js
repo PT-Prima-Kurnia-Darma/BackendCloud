@@ -57,7 +57,6 @@ const createLaporanGantryCrane = async (data) => {
         // Data Utama (Root Level)
         examinationType: data.examinationType || '',
         inspectionType: data.inspectionType || '',
-        reportNumber: data.reportNumber || '',
         equipmentType: data.equipmentType || '',
         subInspectionType: data.subInspectionType || '',
 
