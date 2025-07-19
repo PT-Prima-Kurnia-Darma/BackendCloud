@@ -5,10 +5,8 @@ const Boom = require('@hapi/boom');
 const auditCollection = db.collection('paa');
 
 
-
 const forkliftServices = {
     laporan: {
-
         create: async (payload) => {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
             const dataToSave = { 
@@ -41,13 +39,10 @@ const forkliftServices = {
             return { id: doc.id, ...doc.data() };
         },
 
-        /**
-         * FUNGSI UPDATE LAPORAN YANG TELAH DISINKRONISASI
-         */
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
             const laporanDoc = await laporanRef.get();
-            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Forklift') {
                 return null;
             }
 
@@ -61,19 +56,20 @@ const forkliftServices = {
                 .limit(1)
                 .get();
             
-            // 3. Jika BAP terhubung ditemukan, siapkan data untuk disinkronkan
+            // 3. Jika BAP terhubung ditemukan, sinkronkan data
             if (!bapQuery.empty) {
                 const bapRef = bapQuery.docs[0].ref;
                 const dataToSync = {};
                 const p = payload;
 
-                // Memeriksa setiap field sebelum menambahkannya ke objek sinkronisasi
+                // Sinkronisasi data umum
                 if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
-                if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
                 if (p.inspectionDate !== undefined) dataToSync.inspectionDate = p.inspectionDate;
                 if (p.generalData?.ownerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.ownerName;
                 if (p.generalData?.ownerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.ownerAddress;
                 if (p.generalData?.userInCharge !== undefined) dataToSync['generalData.userInCharge'] = p.generalData.userInCharge;
+                
+                // Sinkronisasi data teknis dari Laporan ke BAP
                 if (p.generalData?.brandType !== undefined) dataToSync['technicalData.brandType'] = p.generalData.brandType;
                 if (p.generalData?.manufacturer !== undefined) dataToSync['technicalData.manufacturer'] = p.generalData.manufacturer;
                 if (p.generalData?.locationAndYearOfManufacture !== undefined) dataToSync['technicalData.locationAndYearOfManufacture'] = p.generalData.locationAndYearOfManufacture;
@@ -81,7 +77,6 @@ const forkliftServices = {
                 if (p.generalData?.capacityWorkingLoad !== undefined) dataToSync['technicalData.capacityWorkingLoad'] = p.generalData.capacityWorkingLoad;
                 if (p.technicalData?.dimensionForkLiftingHeight !== undefined) dataToSync['technicalData.liftingHeightMeters'] = p.technicalData.dimensionForkLiftingHeight;
 
-                // Hanya update jika ada data yang perlu disinkronkan
                 if (Object.keys(dataToSync).length > 0) {
                     await bapRef.update(dataToSync);
                 }
@@ -103,20 +98,18 @@ const forkliftServices = {
     },
 
     bap: {
-        // Fungsi getDataForPrefill, create, getAll, getById tidak berubah...
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
-            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Forklift') {
                 return null;
             }
             const d = laporanDoc.data();
             return {
                 laporanId,
                 examinationType: d.examinationType || "",
-                subInspectionType: d.subInspectionType || "",
                 inspectionDate: d.inspectionDate || "",
                 generalData: {
-                    ownerName: d.generalData?.ownerNamwe || d.generalData?.ownerName || "",
+                    ownerName: d.generalData?.ownerName || "",
                     ownerAddress: d.generalData?.ownerAddress || "",
                     userInCharge: d.generalData?.userInCharge || ""
                 },
@@ -129,15 +122,41 @@ const forkliftServices = {
                     liftingHeightMeters: d.technicalData?.dimensionForkLiftingHeight || ""
                 },
                 inspectionResult: { visualCheck: {}, functionalTest: {} },
-                signature: { companyName: d.generalData?.ownerNamwe || d.generalData?.ownerName || "" }
             };
         },
+
         create: async (payload) => {
             const { laporanId } = payload;
-            const laporanDoc = await auditCollection.doc(laporanId).get();
+            if (!laporanId) {
+                throw Boom.badRequest('laporanId diperlukan untuk membuat BAP.');
+            }
+            const laporanRef = auditCollection.doc(laporanId);
+            const laporanDoc = await laporanRef.get();
             if (!laporanDoc.exists) {
                 throw Boom.notFound('Laporan Forklift tidak ditemukan.');
             }
+
+            // Sinkronisasi data dari BAP ke Laporan saat BAP dibuat
+            const dataToSync = {};
+            const p = payload;
+            if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+            if (p.inspectionDate !== undefined) dataToSync.inspectionDate = p.inspectionDate;
+            if (p.generalData?.ownerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.ownerName;
+            if (p.generalData?.ownerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.ownerAddress;
+            if (p.generalData?.userInCharge !== undefined) dataToSync['generalData.userInCharge'] = p.generalData.userInCharge;
+            
+            // Sinkronisasi data teknis dari BAP ke Laporan
+            if (p.technicalData?.brandType !== undefined) dataToSync['generalData.brandType'] = p.technicalData.brandType;
+            if (p.technicalData?.manufacturer !== undefined) dataToSync['generalData.manufacturer'] = p.technicalData.manufacturer;
+            if (p.technicalData?.locationAndYearOfManufacture !== undefined) dataToSync['generalData.locationAndYearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
+            if (p.technicalData?.serialNumberUnitNumber !== undefined) dataToSync['generalData.serialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
+            if (p.technicalData?.capacityWorkingLoad !== undefined) dataToSync['generalData.capacityWorkingLoad'] = p.technicalData.capacityWorkingLoad;
+            if (p.technicalData?.liftingHeightMeters !== undefined) dataToSync['technicalData.dimensionForkLiftingHeight'] = p.technicalData.liftingHeightMeters;
+
+            if (Object.keys(dataToSync).length > 0) {
+                await laporanRef.update(dataToSync);
+            }
+
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
             const dataToSave = { 
                 ...payload,
@@ -148,6 +167,7 @@ const forkliftServices = {
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
         },
+
         getAll: async () => {
             const snapshot = await auditCollection
                 .where('subInspectionType', '==', 'Forklift')
@@ -157,6 +177,7 @@ const forkliftServices = {
             if (snapshot.empty) return [];
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         },
+
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
             if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Forklift') {
@@ -165,33 +186,31 @@ const forkliftServices = {
             return { id: doc.id, ...doc.data() };
         },
         
-        /**
-         * FUNGSI UPDATE BAP YANG TELAH DISINKRONISASI
-         */
         updateById: async (id, payload) => {
             const bapRef = auditCollection.doc(id);
             const bapDoc = await bapRef.get();
-            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') {
+            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Forklift') {
                 return null;
             }
             
             // 1. Update BAP utama
             await bapRef.update(payload);
 
-            // 2. Ambil ID Laporan dari BAP
+            // 2. Ambil ID Laporan dari BAP dan sinkronkan data
             const { laporanId } = bapDoc.data();
             if (laporanId) {
                 const laporanRef = auditCollection.doc(laporanId);
                 const dataToSync = {};
                 const p = payload;
 
-                // Memeriksa setiap field sebelum menambahkannya ke objek sinkronisasi
+                // Sinkronisasi data umum
                 if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
-                if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
                 if (p.inspectionDate !== undefined) dataToSync.inspectionDate = p.inspectionDate;
                 if (p.generalData?.ownerName !== undefined) dataToSync['generalData.ownerName'] = p.generalData.ownerName;
                 if (p.generalData?.ownerAddress !== undefined) dataToSync['generalData.ownerAddress'] = p.generalData.ownerAddress;
                 if (p.generalData?.userInCharge !== undefined) dataToSync['generalData.userInCharge'] = p.generalData.userInCharge;
+                
+                // Sinkronisasi data teknis dari BAP ke Laporan
                 if (p.technicalData?.brandType !== undefined) dataToSync['generalData.brandType'] = p.technicalData.brandType;
                 if (p.technicalData?.manufacturer !== undefined) dataToSync['generalData.manufacturer'] = p.technicalData.manufacturer;
                 if (p.technicalData?.locationAndYearOfManufacture !== undefined) dataToSync['generalData.locationAndYearOfManufacture'] = p.technicalData.locationAndYearOfManufacture;
@@ -199,7 +218,6 @@ const forkliftServices = {
                 if (p.technicalData?.capacityWorkingLoad !== undefined) dataToSync['generalData.capacityWorkingLoad'] = p.technicalData.capacityWorkingLoad;
                 if (p.technicalData?.liftingHeightMeters !== undefined) dataToSync['technicalData.dimensionForkLiftingHeight'] = p.technicalData.liftingHeightMeters;
 
-                // Hanya update jika ada data yang perlu disinkronkan
                 if (Object.keys(dataToSync).length > 0) {
                     await laporanRef.update(dataToSync);
                 }
