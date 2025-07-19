@@ -293,8 +293,8 @@ const createLaporanElevator = async (data) => {
         frameTidakMemenuhi: getOppositeCheckmark(i.car?.frame?.status),
 
         bodyresult: i.car?.body?.result,
-        bodyMemenuhi: getCheckmark(i.car?.body?.status),
-        bodyTidakMemenuhi: getOppositeCheckmark(i.car?.body?.status),
+        bodyresultMemenuhi: getCheckmark(i.car?.body?.status),
+        bodyresultTidakMemenuhi: getOppositeCheckmark(i.car?.body?.status),
 
         wallHeightresult: i.car?.wallHeight?.result,
         wallHeightMemenuhi: getCheckmark(i.car?.wallHeight?.status),
