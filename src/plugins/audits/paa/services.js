@@ -256,25 +256,34 @@ const mobileCraneServices = {
 
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Laporan') return null;
+            if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Mobile Crane') {
+                return null;
+            }
             return { id: doc.id, ...doc.data() };
         },
 
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
             const laporanDoc = await laporanRef.get();
-            if (!laporanDoc.exists) return null;
+            if (!laporanDoc.exists) {
+                return null;
+            }
 
             await laporanRef.update(payload);
 
-            const bapQuery = await auditCollection.where('laporanId', '==', id).limit(1).get();
+            const bapQuery = await auditCollection
+                .where('laporanId', '==', id)
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+                .where('subInspectionType', '==', 'Mobile Crane')
+                .limit(1)
+                .get();
+            
             if (!bapQuery.empty) {
                 const bapRef = bapQuery.docs[0].ref;
                 const dataToSync = {};
                 const p = payload;
 
                 if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
-                if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
                 
                 if (p.generalData) {
                     if (p.generalData.generalDataInspectionDate !== undefined) dataToSync.inspectionDate = p.generalData.generalDataInspectionDate;
@@ -297,13 +306,7 @@ const mobileCraneServices = {
             }
 
             const updatedDoc = await laporanRef.get();
-            const data = updatedDoc.data();
-
-            if (data.createdAt && typeof data.createdAt.toDate === 'function') {
-                data.createdAt = data.createdAt.toDate().toISOString();
-            }
-
-            return { id: updatedDoc.id, ...data };
+            return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
         deleteById: async (id) => {
@@ -320,12 +323,13 @@ const mobileCraneServices = {
     bap: {
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
-            if (!laporanDoc.exists) return null;
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Mobile Crane') {
+                return null;
+            }
             const d = laporanDoc.data();
             return {
                 laporanId,
                 examinationType: d.examinationType || "",
-                subInspectionType: d.subInspectionType || "",
                 inspectionDate: d.generalData?.generalDataInspectionDate || "",
                 generalData: {
                     ownerName: d.generalData?.generalDataOwnerName || "",
@@ -338,8 +342,6 @@ const mobileCraneServices = {
                     serialNumberUnitNumber: d.generalData?.generalDataSerialNumberUnitNumber || "",
                     capacityWorkingLoad: d.generalData?.generalDataCapacityWorkingLoad || "",
                     maxLiftingHeight: d.technicalData?.technicalDataMaxLiftingHeight || "",
-                    materialCertificateNumber: "",
-                    liftingSpeedMpm: "",
                 },
                 inspectionResult: { visualCheck: {}, functionalTest: { loadTest: {}, ndtTest: {} } },
                 signature: { companyName: d.generalData?.generalDataOwnerName || "" },
@@ -357,7 +359,6 @@ const mobileCraneServices = {
             const p = payload;
             const dataToSync = {};
             if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
-            if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
             if (p.inspectionDate !== undefined) dataToSync['generalData.generalDataInspectionDate'] = p.inspectionDate;
             
             if (p.generalData) {
@@ -391,14 +392,14 @@ const mobileCraneServices = {
 
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') return null;
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Mobile Crane') return null;
             return { id: doc.id, ...doc.data() };
         },
 
         updateById: async (id, payload) => {
             const bapRef = auditCollection.doc(id);
             const bapDoc = await bapRef.get();
-            if (!bapDoc.exists) return null;
+            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Mobile Crane') return null;
             
             await bapRef.update(payload);
 
@@ -409,7 +410,6 @@ const mobileCraneServices = {
                 const dataToSync = {};
 
                 if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
-                if (p.subInspectionType !== undefined) dataToSync.subInspectionType = p.subInspectionType;
                 if (p.inspectionDate !== undefined) dataToSync['generalData.generalDataInspectionDate'] = p.inspectionDate;
                 
                 if (p.generalData) {
@@ -431,13 +431,7 @@ const mobileCraneServices = {
                 }
             }
             const updatedDoc = await bapRef.get();
-            const data = updatedDoc.data();
-
-            if (data.createdAt && typeof data.createdAt.toDate === 'function') {
-                data.createdAt = data.createdAt.toDate().toISOString();
-            }
-
-            return { id: updatedDoc.id, ...data };
+            return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
         deleteById: async (id) => {
