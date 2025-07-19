@@ -467,6 +467,7 @@ const gantryCraneServices = {
 
         updateById: async (id, payload) => {
             const laporanRef = auditCollection.doc(id);
+            const laporanDoc = await laporanRef.get();
             if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gantry Crane') {return null;}
             await laporanRef.update(payload);
 
