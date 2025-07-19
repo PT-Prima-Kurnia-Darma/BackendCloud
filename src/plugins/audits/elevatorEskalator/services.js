@@ -95,7 +95,7 @@ const elevatorServices = {
     bap: {
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
-            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan'  || laporanDoc.data().subInspectionType !== 'Elevator') {
                 return null;
             }
             const d = laporanDoc.data();
@@ -131,7 +131,7 @@ const elevatorServices = {
             const laporanRef = auditCollection.doc(laporanId);
             const laporanDoc = await laporanRef.get();
 
-            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Elevator') {
                 throw Boom.notFound('Laporan Elevator tidak ditemukan.');
             }
             
