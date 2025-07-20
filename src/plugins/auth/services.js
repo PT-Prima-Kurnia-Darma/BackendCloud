@@ -26,7 +26,8 @@ const register = async (firestore, payload) => {
   const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
   const userData = {
     name,
-    password: hashedPassword,
+    username,
+    passwordHash: hashedPassword,
     userId,
     createdAt,
   };
