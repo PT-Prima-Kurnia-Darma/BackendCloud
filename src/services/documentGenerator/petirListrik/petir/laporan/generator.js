@@ -65,7 +65,7 @@ const createLaporanPetir = async (data) => {
         testJointCount: tech.testJointCount,
         conductorDescription: tech.conductorDescription,
         groundingResistance: tech.groundingResistance,
-        installationYear: tech.installationYear,
+        spreadingResistance: tech.spreadingResistance,
         installer: tech.installer,
 
         // Physical Inspection

@@ -51,7 +51,7 @@ const laporanPetirPayload = Joi.object({
         testJointCount: Joi.number().allow('').optional(),
         conductorDescription: Joi.string().allow('').optional(),
         groundingResistance: Joi.string().allow('').optional(),
-        installationYear: Joi.string().allow('').optional(),
+        spreadingResistance: Joi.string().allow('').optional(),
         installer: Joi.string().allow('').optional()
     }).optional(),
 
