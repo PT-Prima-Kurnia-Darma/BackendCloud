@@ -11,6 +11,7 @@ const bapForkliftPayload = Joi.object({
     inspectionDate: Joi.string().allow('').optional(),
     createdAt: Joi.string().allow('').optional(),
     extraId: Joi.number().allow('').optional(),
+    inspectionType: Joi.string().allow('').optional(),
 
     // Data Umum
     generalData: Joi.object({

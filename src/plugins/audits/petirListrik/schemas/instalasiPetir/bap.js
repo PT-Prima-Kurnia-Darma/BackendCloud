@@ -5,6 +5,7 @@ const Joi = require('joi');
 const bapPetirPayload = Joi.object({
     laporanId: Joi.string().required(),
     examinationType: Joi.string().allow('').optional(),
+    inspectionType: Joi.string().allow('').optional(),
     inspectionDate: Joi.string().allow('').optional(),
     createdAt: Joi.string().allow('').optional(),
     extraId: Joi.number().allow('').optional(),

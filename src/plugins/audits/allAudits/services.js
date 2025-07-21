@@ -19,7 +19,7 @@ const fetchCollectionData = async (collectionName) => {
     // Menambahkan field `id` dan `tipeAudit` ke setiap dokumen.
     return snapshot.docs.map(doc => ({
       id: doc.id,
-      tipeAudit: collectionName,
+    //   tipeAudit: collectionName,
       ...doc.data()
     }));
   } catch (error) {
