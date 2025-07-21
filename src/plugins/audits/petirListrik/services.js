@@ -39,13 +39,55 @@ const petirListrikServices = {
         },
 
         updateById: async (id, payload) => {
-            const docRef = auditCollection.doc(id);
-            const doc = await docRef.get();
+            const laporanRef = auditCollection.doc(id);
+            const doc = await laporanRef.get();
             if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Instalasi Petir') {
                 return null;
             }
-            await docRef.update(payload);
-            const updatedDoc = await docRef.get();
+            // 1. Update Laporan
+            await laporanRef.update(payload);
+
+            // --- IMPLEMENTASI SINKRONISASI DARI LAPORAN KE BAP ---
+            const bapQuery = await auditCollection
+                .where('laporanId', '==', id)
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+                .limit(1)
+                .get();
+
+            if (!bapQuery.empty) {
+                const bapRef = bapQuery.docs[0].ref;
+                const dataToSync = {};
+                const p = payload;
+
+                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+
+                if (p.ownerData) {
+                    if (p.ownerData.inspectionDate !== undefined) dataToSync.inspectionDate = p.ownerData.inspectionDate;
+                    if (p.ownerData.companyName !== undefined) dataToSync['generalData.companyName'] = p.ownerData.companyName;
+                    if (p.ownerData.companyLocation !== undefined) {
+                        dataToSync['generalData.companyLocation'] = p.ownerData.companyLocation;
+                        dataToSync['generalData.addressUsageLocation'] = p.ownerData.companyLocation; // Asumsi sama
+                    }
+                    if (p.ownerData.usageLocation !== undefined) dataToSync['generalData.usageLocation'] = p.ownerData.usageLocation;
+                }
+
+                if (p.technicalData) {
+                    if (p.technicalData.conductorType !== undefined) dataToSync['technicalData.conductorType'] = p.technicalData.conductorType;
+                    if (p.technicalData.buildingHeight !== undefined) dataToSync['technicalData.buildingHeight'] = p.technicalData.buildingHeight;
+                    if (p.technicalData.buildingArea !== undefined) dataToSync['technicalData.buildingArea'] = p.technicalData.buildingArea;
+                    if (p.technicalData.receiverHeight !== undefined) dataToSync['technicalData.receiverHeight'] = p.technicalData.receiverHeight;
+                    if (p.technicalData.receiverCount !== undefined) dataToSync['technicalData.receiverCount'] = p.technicalData.receiverCount;
+                    if (p.technicalData.conductorDescription !== undefined) dataToSync['technicalData.conductorDescription'] = p.technicalData.conductorDescription;
+                    if (p.technicalData.installer !== undefined) dataToSync['technicalData.installer'] = p.technicalData.installer;
+                    if (p.technicalData.groundingResistance !== undefined) dataToSync['technicalData.groundingResistance'] = p.technicalData.groundingResistance;
+                }
+                
+                if (Object.keys(dataToSync).length > 0) {
+                    await bapRef.update(dataToSync);
+                }
+            }
+
+            const updatedDoc = await laporanRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
@@ -105,13 +147,29 @@ const petirListrikServices = {
                 throw Boom.notFound('Laporan Instalasi Petir tidak ditemukan.');
             }
             
-            // Sinkronisasi dari BAP ke Laporan saat BAP dibuat
+            // --- SINKRONISASI DARI BAP KE LAPORAN (DIPERLUAS) ---
             const dataToSync = {};
             const p = payload; 
 
             if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
             if (p.inspectionDate !== undefined) dataToSync['ownerData.inspectionDate'] = p.inspectionDate;
-            if (p.generalData?.companyName !== undefined) dataToSync['ownerData.companyName'] = p.generalData.companyName;
+
+            if (p.generalData) {
+                if (p.generalData.companyName !== undefined) dataToSync['ownerData.companyName'] = p.generalData.companyName;
+                if (p.generalData.companyLocation !== undefined) dataToSync['ownerData.companyLocation'] = p.generalData.companyLocation;
+                if (p.generalData.usageLocation !== undefined) dataToSync['ownerData.usageLocation'] = p.generalData.usageLocation;
+            }
+
+            if (p.technicalData) {
+                if (p.technicalData.conductorType !== undefined) dataToSync['technicalData.conductorType'] = p.technicalData.conductorType;
+                if (p.technicalData.buildingHeight !== undefined) dataToSync['technicalData.buildingHeight'] = p.technicalData.buildingHeight;
+                if (p.technicalData.buildingArea !== undefined) dataToSync['technicalData.buildingArea'] = p.technicalData.buildingArea;
+                if (p.technicalData.receiverHeight !== undefined) dataToSync['technicalData.receiverHeight'] = p.technicalData.receiverHeight;
+                if (p.technicalData.receiverCount !== undefined) dataToSync['technicalData.receiverCount'] = p.technicalData.receiverCount;
+                if (p.technicalData.conductorDescription !== undefined) dataToSync['technicalData.conductorDescription'] = p.technicalData.conductorDescription;
+                if (p.technicalData.installer !== undefined) dataToSync['technicalData.installer'] = p.technicalData.installer;
+                if (p.technicalData.groundingResistance !== undefined) dataToSync['technicalData.groundingResistance'] = p.technicalData.groundingResistance;
+            }
             
             if (Object.keys(dataToSync).length > 0) {
                 await laporanRef.update(dataToSync);
@@ -150,12 +208,29 @@ const petirListrikServices = {
             if (laporanId) {
                 const laporanRef = auditCollection.doc(laporanId);
                  if ((await laporanRef.get()).exists) {
+                    // --- SINKRONISASI DARI BAP KE LAPORAN (DIPERLUAS) ---
                     const dataToSync = {};
                     const p = payload;
 
                     if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
                     if (p.inspectionDate !== undefined) dataToSync['ownerData.inspectionDate'] = p.inspectionDate;
-                    if (p.generalData?.companyName !== undefined) dataToSync['ownerData.companyName'] = p.generalData.companyName;
+
+                    if (p.generalData) {
+                        if (p.generalData.companyName !== undefined) dataToSync['ownerData.companyName'] = p.generalData.companyName;
+                        if (p.generalData.companyLocation !== undefined) dataToSync['ownerData.companyLocation'] = p.generalData.companyLocation;
+                        if (p.generalData.usageLocation !== undefined) dataToSync['ownerData.usageLocation'] = p.generalData.usageLocation;
+                    }
+
+                    if (p.technicalData) {
+                        if (p.technicalData.conductorType !== undefined) dataToSync['technicalData.conductorType'] = p.technicalData.conductorType;
+                        if (p.technicalData.buildingHeight !== undefined) dataToSync['technicalData.buildingHeight'] = p.technicalData.buildingHeight;
+                        if (p.technicalData.buildingArea !== undefined) dataToSync['technicalData.buildingArea'] = p.technicalData.buildingArea;
+                        if (p.technicalData.receiverHeight !== undefined) dataToSync['technicalData.receiverHeight'] = p.technicalData.receiverHeight;
+                        if (p.technicalData.receiverCount !== undefined) dataToSync['technicalData.receiverCount'] = p.technicalData.receiverCount;
+                        if (p.technicalData.conductorDescription !== undefined) dataToSync['technicalData.conductorDescription'] = p.technicalData.conductorDescription;
+                        if (p.technicalData.installer !== undefined) dataToSync['technicalData.installer'] = p.technicalData.installer;
+                        if (p.technicalData.groundingResistance !== undefined) dataToSync['technicalData.groundingResistance'] = p.technicalData.groundingResistance;
+                    }
                     
                     if (Object.keys(dataToSync).length > 0) {
                         await laporanRef.update(dataToSync);
