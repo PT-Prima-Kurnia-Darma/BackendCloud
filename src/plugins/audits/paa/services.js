@@ -753,10 +753,7 @@ const gondolaServices = {
             const laporanRef = auditCollection.doc(payload.laporanId);
             const laporanDoc = await laporanRef.get();
             if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gondola') {
-                const error = new Error('Laporan Gondola tidak ditemukan.');
-                error.isBoom = true;
-                error.output = { statusCode: 404 };
-                throw error;
+                throw Boom.notFound('Laporan Mobile Crane tidak ditemukan.')
             }
 
             // --- LOGIKA SINKRONISASI (BAP -> Laporan) ---

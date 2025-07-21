@@ -532,7 +532,6 @@ const gondolaHandlers = {
                 const newBap = await gondolaServices.bap.create(request.payload);
                 return h.response({ status: 'success', message: 'BAP Gondola berhasil dibuat', data: { bap: newBap } }).code(201);
             } catch (error) {
-                console.error("Create Gondola BAP Error:", error);
                 if (error.isBoom) return error;
                 return Boom.badImplementation('Gagal membuat BAP Gondola.');
             }
