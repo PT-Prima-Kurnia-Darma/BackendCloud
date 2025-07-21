@@ -803,13 +803,13 @@ const gondolaServices = {
         updateById: async (id, payload) => {
             const bapRef = auditCollection.doc(id);
             const bapDoc = await bapRef.get();
-            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Gantry Crane') {
+            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Gondola') {
                 throw new NotFoundError('BAP Gondola tidak ditemukan');
             }
 
             const laporanRef = auditCollection.doc(payload.laporanId);
             const laporanDoc = await laporanRef.get();
-            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || laporanDoc.data().subInspectionType !== 'Gantry Crane') {
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gondola') {
                 throw new InvariantError('BAP gagal diupdate. Laporan Gondola tidak ditemukan');
             }
 
@@ -1050,7 +1050,7 @@ const overheadCraneServices = {
         updateById: async (id, payload) => {
             const bapRef = auditCollection.doc(id);
             const bapDoc = await bapRef.get();
-            if (!bapDoc.exists  || bapDoc.data().documentType !== 'Laporan' || bapDoc.data().subInspectionType !== 'Overhead Crane') {
+            if (!bapDoc.exists  || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Overhead Crane') {
                 return null;
             }
             await bapRef.update(payload);
