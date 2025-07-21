@@ -63,7 +63,7 @@ const petirListrikServices = {
     bap: {
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
-            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Instalasi Petir') {
                 return null;
             }
             const d = laporanDoc.data();
@@ -101,7 +101,7 @@ const petirListrikServices = {
             const laporanRef = auditCollection.doc(laporanId);
             const laporanDoc = await laporanRef.get();
 
-            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan') {
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Instalasi Petir') {
                 throw Boom.notFound('Laporan Instalasi Petir tidak ditemukan.');
             }
             
@@ -133,7 +133,7 @@ const petirListrikServices = {
         },
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') return null;
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Instalasi Petir') return null;
             return { id: doc.id, ...doc.data() };
         },
 
@@ -141,7 +141,7 @@ const petirListrikServices = {
             const bapRef = auditCollection.doc(id);
             const bapDoc = await bapRef.get();
 
-            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') {
+            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Instalasi Petir') {
                 return null; 
             }
             
@@ -171,7 +171,7 @@ const petirListrikServices = {
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
             const doc = await docRef.get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') return null;
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Instalasi Petir') return null;
             await docRef.delete();
             return id;
         },
