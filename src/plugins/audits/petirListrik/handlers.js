@@ -1,7 +1,7 @@
 'use strict';
 
 const Boom = require('@hapi/boom');
-const { petirListrikServices } = require('./services');
+const { petirServices } = require('./services');
 const { createLaporanPetir: generateLaporanPetirDoc } = require('../../../services/documentGenerator/petirListrik/petir/laporan/generator');
 const { createBapPetir: generateBapPetirDoc } = require('../../../services/documentGenerator/petirListrik/petir/bap/generator');
 
@@ -9,7 +9,7 @@ const petirHandlers = {
     laporan: {
         create: async (request, h) => {
             try {
-                const newLaporan = await petirListrikServices.laporan.create(request.payload);
+                const newLaporan = await petirServices.laporan.create(request.payload);
                 return h.response({ status: 'success', message: 'Laporan Instalasi Petir berhasil dibuat', data: { laporan: newLaporan } }).code(201);
             } catch (error) {
                 console.error('Error in createLaporanPetirHandler:', error);
@@ -18,7 +18,7 @@ const petirHandlers = {
         },
         getAll: async (request, h) => {
             try {
-                const allLaporan = await petirListrikServices.laporan.getAll();
+                const allLaporan = await petirServices.laporan.getAll();
                 return { status: 'success', message: 'Semua Laporan Instalasi Petir berhasil didapatkan', data: { laporan: allLaporan } };
             } catch (error) {
                 console.error('Error in getAllLaporanPetirHandler:', error);
@@ -27,7 +27,7 @@ const petirHandlers = {
         },
         getById: async (request, h) => {
             try {
-                const laporan = await petirListrikServices.laporan.getById(request.params.id);
+                const laporan = await petirServices.laporan.getById(request.params.id);
                 if (!laporan) {
                     return Boom.notFound('Laporan Instalasi Petir tidak ditemukan.');
                 }
@@ -39,7 +39,7 @@ const petirHandlers = {
         },
         update: async (request, h) => {
             try {
-                const updated = await petirListrikServices.laporan.updateById(request.params.id, request.payload);
+                const updated = await petirServices.laporan.updateById(request.params.id, request.payload);
                 if (!updated) {
                     return Boom.notFound('Gagal memperbarui, Laporan Instalasi Petir tidak ditemukan.');
                 }
@@ -51,7 +51,7 @@ const petirHandlers = {
         },
         delete: async (request, h) => {
             try {
-                const deletedId = await petirListrikServices.laporan.deleteById(request.params.id);
+                const deletedId = await petirServices.laporan.deleteById(request.params.id);
                 if (!deletedId) {
                     return Boom.notFound('Gagal menghapus, Laporan Instalasi Petir tidak ditemukan.');
                 }
@@ -63,7 +63,7 @@ const petirHandlers = {
         },
         download: async (request, h) => {
             try {
-                const laporanData = await petirListrikServices.laporan.getById(request.params.id);
+                const laporanData = await petirServices.laporan.getById(request.params.id);
                 if (!laporanData) {
                     return Boom.notFound('Gagal membuat dokumen, Laporan Instalasi Petir tidak ditemukan.');
                 }
@@ -85,7 +85,7 @@ const petirHandlers = {
         prefill: async (request, h) => {
             try {
                 const { laporanId } = request.params;
-                const prefilledData = await petirListrikServices.bap.getDataForPrefill(laporanId);
+                const prefilledData = await petirServices.bap.getDataForPrefill(laporanId);
                 if (!prefilledData) {
                     return Boom.notFound('Data Laporan Instalasi Petir tidak ditemukan.');
                 }
@@ -97,7 +97,7 @@ const petirHandlers = {
         },
         create: async (request, h) => {
             try {
-                const newBap = await petirListrikServices.bap.create(request.payload);
+                const newBap = await petirServices.bap.create(request.payload);
                 return h.response({ status: 'success', message: 'BAP Instalasi Petir berhasil dibuat', data: { bap: newBap } }).code(201);
             } catch (error) {
                 if(error.isBoom) return error;
@@ -106,7 +106,7 @@ const petirHandlers = {
         },
         getAll: async (request, h) => {
             try {
-                const allBap = await petirListrikServices.bap.getAll();
+                const allBap = await petirServices.bap.getAll();
                 return { status: 'success', message: 'Semua BAP Instalasi Petir berhasil didapatkan', data: { bap: allBap } };
             } catch (error) {
                 return Boom.badImplementation('Gagal mengambil daftar BAP Instalasi Petir.');
@@ -114,7 +114,7 @@ const petirHandlers = {
         },
         getById: async (request, h) => {
             try {
-                const bap = await petirListrikServices.bap.getById(request.params.id);
+                const bap = await petirServices.bap.getById(request.params.id);
                 if (!bap) return Boom.notFound('BAP Instalasi Petir tidak ditemukan.');
                 return { status: 'success', message: 'BAP Instalasi Petir berhasil didapatkan', data: { bap } };
             } catch (error) {
@@ -123,7 +123,7 @@ const petirHandlers = {
         },
         update: async (request, h) => {
             try {
-                const updated = await petirListrikServices.bap.updateById(request.params.id, request.payload);
+                const updated = await petirServices.bap.updateById(request.params.id, request.payload);
                 if (!updated) return Boom.notFound('Gagal memperbarui, BAP Instalasi Petir tidak ditemukan.');
                 return { status: 'success', message: 'BAP Instalasi Petir berhasil diperbarui', data: { bap: updated } };
             } catch (error) {
@@ -132,7 +132,7 @@ const petirHandlers = {
         },
         delete: async (request, h) => {
             try {
-                const deletedId = await petirListrikServices.bap.deleteById(request.params.id);
+                const deletedId = await petirServices.bap.deleteById(request.params.id);
                 if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Instalasi Petir tidak ditemukan.');
                 return { status: 'success', message: 'BAP Instalasi Petir berhasil dihapus' };
             } catch (error) {
@@ -141,7 +141,7 @@ const petirHandlers = {
         },
         download: async (request, h) => {
             try {
-                const bapData = await petirListrikServices.bap.getById(request.params.id);
+                const bapData = await petirServices.bap.getById(request.params.id);
                 if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Instalasi Petir tidak ditemukan.');
                 
                 const { docxBuffer, fileName } = await generateBapPetirDoc(bapData);
