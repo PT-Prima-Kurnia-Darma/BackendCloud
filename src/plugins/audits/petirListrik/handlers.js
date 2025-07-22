@@ -1,9 +1,10 @@
 'use strict';
 
 const Boom = require('@hapi/boom');
-const { petirServices } = require('./services');
+const { petirServices, listrikServices } = require('./services');
 const { createLaporanPetir: generateLaporanPetirDoc } = require('../../../services/documentGenerator/petirListrik/petir/laporan/generator');
 const { createBapPetir: generateBapPetirDoc } = require('../../../services/documentGenerator/petirListrik/petir/bap/generator');
+const { createLaporanListrik: generateLaporanListrikDoc } = require('../../../services/documentGenerator/petirListrik/listrik/laporan/generator');
 
 const petirHandlers = {
     laporan: {
@@ -158,6 +159,85 @@ const petirHandlers = {
     }
 };
 
+const listrikHandlers = {
+    laporan: {
+        create: async (request, h) => {
+            try {
+                const newLaporan = await listrikServices.laporan.create(request.payload);
+                return h.response({ status: 'success', message: 'Laporan Instalasi Listrik berhasil dibuat', data: { laporan: newLaporan } }).code(201);
+            } catch (error) {
+                console.error('Error in createLaporanListrikHandler:', error);
+                return Boom.badImplementation('Gagal membuat Laporan Instalasi Listrik.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allLaporan = await listrikServices.laporan.getAll();
+                return { status: 'success', message: 'Semua Laporan Instalasi Listrik berhasil didapatkan', data: { laporan: allLaporan } };
+            } catch (error) {
+                console.error('Error in getAllLaporanListrikHandler:', error);
+                return Boom.badImplementation('Gagal mengambil daftar Laporan Instalasi Listrik.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const laporan = await listrikServices.laporan.getById(request.params.id);
+                if (!laporan) {
+                    return Boom.notFound('Laporan Instalasi Listrik tidak ditemukan.');
+                }
+                return { status: 'success', message: 'Laporan Instalasi Listrik berhasil didapatkan', data: { laporan } };
+            } catch (error) {
+                console.error('Error in getLaporanListrikByIdHandler:', error);
+                return Boom.badImplementation('Gagal mengambil Laporan Instalasi Listrik.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await listrikServices.laporan.updateById(request.params.id, request.payload);
+                if (!updated) {
+                    return Boom.notFound('Gagal memperbarui, Laporan Instalasi Listrik tidak ditemukan.');
+                }
+                return { status: 'success', message: 'Laporan Instalasi Listrik berhasil diperbarui', data: { laporan: updated } };
+            } catch (error) {
+                console.error('Error in updateLaporanListrikHandler:', error);
+                return Boom.badImplementation('Gagal memperbarui Laporan Instalasi Listrik.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await listrikServices.laporan.deleteById(request.params.id);
+                if (!deletedId) {
+                    return Boom.notFound('Gagal menghapus, Laporan Instalasi Listrik tidak ditemukan.');
+                }
+                return { status: 'success', message: 'Laporan Instalasi Listrik berhasil dihapus' };
+            } catch (error) {
+                console.error('Error in deleteLaporanListrikHandler:', error);
+                return Boom.badImplementation('Gagal menghapus Laporan Instalasi Listrik.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const laporanData = await listrikServices.laporan.getById(request.params.id);
+                if (!laporanData) {
+                    return Boom.notFound('Gagal membuat dokumen, Laporan Instalasi Listrik tidak ditemukan.');
+                }
+                
+                const { docxBuffer, fileName } = await generateLaporanListrikDoc(laporanData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'Laporan Instalasi Listrik berhasil diunduh');
+            } catch (error) {
+                console.error('Error in downloadLaporanListrikHandler:', error);
+                return Boom.badImplementation('Gagal memproses dokumen Laporan Instalasi Listrik.');
+            }
+        },
+    }
+};
+
+
 module.exports = {
     petirHandlers,
+    listrikHandlers
 };

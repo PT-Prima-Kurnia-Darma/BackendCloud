@@ -1,12 +1,14 @@
 'use strict';
 
 const Joi = require('joi');
-const { petirHandlers } = require('./handlers');
+const { petirHandlers, listrikHandlers } = require('./handlers');
 const { laporanPetirPayload } = require('./schemas/instalasiPetir/laporan');
 const { bapPetirPayload } = require('./schemas/instalasiPetir/bap');
+const { laporanListrikPayload } = require('./schemas/instalasiListrik/laporan');
 
 const LAPORAN_PETIR_PREFIX = '/petirListrik/instalasiPetir/laporan';
 const BAP_PETIR_PREFIX = '/petirListrik/instalasiPetir/bap';
+const LAPORAN_LISTRIK_PREFIX = '/petirListrik/instalasiListrik/laporan';
 
 module.exports = [
     // ENDPOINT LAPORAN PETIR
@@ -137,6 +139,67 @@ module.exports = [
         options: { 
             auth: 'jwt', 
             tags: ['api', 'Petir Listrik - BAP'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+
+     // ENDPOINT LAPORAN LISTRIK
+    {
+        method: 'POST',
+        path: LAPORAN_LISTRIK_PREFIX,
+        handler: listrikHandlers.laporan.create,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'Petir Listrik - Laporan Listrik'],
+            validate: { payload: laporanListrikPayload }
+        },
+    },
+    {
+        method: 'GET',
+        path: LAPORAN_LISTRIK_PREFIX,
+        handler: listrikHandlers.laporan.getAll,
+        options: { auth: 'jwt', tags: ['api', 'Petir Listrik - Laporan Listrik'] },
+    },
+    {
+        method: 'GET',
+        path: `${LAPORAN_LISTRIK_PREFIX}/{id}`,
+        handler: listrikHandlers.laporan.getById,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'Petir Listrik - Laporan Listrik'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${LAPORAN_LISTRIK_PREFIX}/{id}`,
+        handler: listrikHandlers.laporan.update,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'Petir Listrik - Laporan Listrik'],
+            validate: { 
+                params: Joi.object({ id: Joi.string().required() }), 
+                payload: laporanListrikPayload
+            } 
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${LAPORAN_LISTRIK_PREFIX}/{id}`,
+        handler: listrikHandlers.laporan.delete,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'Petir Listrik - Laporan Listrik'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+    {
+        method: 'GET',
+        path: `${LAPORAN_LISTRIK_PREFIX}/download/{id}`,
+        handler: listrikHandlers.laporan.download,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'Petir Listrik - Laporan Listrik'],
             validate: { params: Joi.object({ id: Joi.string().required() }) } 
         },
     },
