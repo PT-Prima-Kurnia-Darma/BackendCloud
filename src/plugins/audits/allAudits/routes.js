@@ -5,12 +5,12 @@ const Joi = require('joi');
 const handlers = require('./handlers');
 
 // Definisikan path yang jelas dan tidak berkonflik.
-const ALL_AUDITS_PATH = '/audits/all';
+const ALL_AUDITS_PREFIX = '/audits/all';
 
 module.exports = [
   {
     method: 'GET',
-    path: ALL_AUDITS_PATH,
+    path: ALL_AUDITS_PREFIX,
     handler: handlers.getAllAuditsHandler,
     options: {
       // Sesuaikan autentikasi sesuai kebutuhan, 'jwt' jika perlu login.
