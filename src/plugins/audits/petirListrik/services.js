@@ -295,6 +295,40 @@ const listrikServices = {
                 return null;
             }
             await laporanRef.update(payload);
+
+            const bapQuery = await auditCollection
+                .where('laporanId', '==', id)
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+                .limit(1)
+                .get();
+
+            if (!bapQuery.empty) {
+                const bapRef = bapQuery.docs[0].ref;
+                const dataToSync = {};
+                const p = payload;
+
+                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+                if (p.equipmentType !== undefined) dataToSync.equipmentType = p.equipmentType;
+                if (p.generalData?.inspectionDate !== undefined) dataToSync.inspectionDate = p.generalData.inspectionDate;
+                if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
+                if (p.generalData?.companyAddress !== undefined) {
+                    dataToSync['generalData.companyLocation'] = p.generalData.companyAddress;
+                    dataToSync['generalData.addressUsageLocation'] = p.generalData.companyAddress;
+                }
+                if (p.generalData?.inspectionLocation !== undefined) dataToSync['generalData.usageLocation'] = p.generalData.inspectionLocation;
+
+                if (p.technicalData) {
+                    if (p.technicalData.plnPower !== undefined) dataToSync['technicalData.technicalDataPlnPower'] = p.technicalData.plnPower;
+                    if (p.technicalData.generatorPower !== undefined) dataToSync['technicalData.technicalDataGeneratorPower'] = p.technicalData.generatorPower;
+                    if (p.technicalData.lightingPower !== undefined) dataToSync['technicalData.technicalDataLightingPower'] = p.technicalData.lightingPower;
+                    if (p.technicalData.powerLoad !== undefined) dataToSync['technicalData.technicalDataPowerLoad'] = p.technicalData.powerLoad;
+                }
+                
+                if (Object.keys(dataToSync).length > 0) {
+                    await bapRef.update(dataToSync);
+                }
+            }
+
             const updatedDoc = await laporanRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };
         },
@@ -308,6 +342,138 @@ const listrikServices = {
             await docRef.delete();
             return id;
         },
+    },
+    
+    bap: {
+        getDataForPrefill: async (laporanId) => {
+            const laporanDoc = await auditCollection.doc(laporanId).get();
+            if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Instalasi Listrik') {
+                return null;
+            }
+            const d = laporanDoc.data();
+            
+            return {
+                laporanId,
+                examinationType: d.examinationType || "",
+                equipmentType: d.equipmentType || "",
+                inspectionDate: d.generalData?.inspectionDate || "",
+                generalData: {
+                    companyName: d.generalData?.companyName || "",
+                    companyLocation: d.generalData?.companyAddress || "",
+                    usageLocation: d.generalData?.inspectionLocation || "",
+                    addressUsageLocation: d.generalData?.companyAddress || ""
+                },
+                technicalData: {
+                    technicalDataPlnPower: d.technicalData?.plnPower || "",
+                    technicalDataGeneratorPower: d.technicalData?.generatorPower || "",
+                    technicalDataLightingPower: d.technicalData?.lightingPower || "",
+                    technicalDataPowerLoad: d.technicalData?.powerLoad || "",
+                    serialNumber: "" // Tidak ada di laporan
+                },
+                visualInspection: {},
+                testing: {}
+            };
+        },
+
+        create: async (payload) => {
+            const { laporanId } = payload;
+            const laporanRef = auditCollection.doc(laporanId);
+            const laporanDoc = await laporanRef.get();
+
+            if (!laporanDoc.exists) {
+                throw Boom.notFound('Laporan Instalasi Listrik tidak ditemukan.');
+            }
+
+            const dataToSync = {};
+            const p = payload;
+
+            if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+            if (p.equipmentType !== undefined) dataToSync.equipmentType = p.equipmentType;
+            if (p.inspectionDate !== undefined) dataToSync['generalData.inspectionDate'] = p.inspectionDate;
+            if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
+            if (p.generalData?.companyLocation !== undefined) dataToSync['generalData.companyAddress'] = p.generalData.companyLocation;
+            if (p.generalData?.usageLocation !== undefined) dataToSync['generalData.inspectionLocation'] = p.generalData.usageLocation;
+
+            if (p.technicalData) {
+                if (p.technicalData.technicalDataPlnPower !== undefined) dataToSync['technicalData.plnPower'] = p.technicalData.technicalDataPlnPower;
+                if (p.technicalData.technicalDataGeneratorPower !== undefined) dataToSync['technicalData.generatorPower'] = p.technicalData.technicalDataGeneratorPower;
+                if (p.technicalData.technicalDataLightingPower !== undefined) dataToSync['technicalData.lightingPower'] = p.technicalData.technicalDataLightingPower;
+                if (p.technicalData.technicalDataPowerLoad !== undefined) dataToSync['technicalData.powerLoad'] = p.technicalData.technicalDataPowerLoad;
+            }
+
+            if (Object.keys(dataToSync).length > 0) {
+                await laporanRef.update(dataToSync);
+            }
+            
+            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const dataToSave = { ...payload, subInspectionType: "Instalasi Listrik", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
+            const docRef = await auditCollection.add(dataToSave);
+            return { id: docRef.id, ...dataToSave };
+        },
+
+        getAll: async () => {
+            const snapshot = await auditCollection
+                .where('subInspectionType', '==', 'Instalasi Listrik')
+                .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
+                .orderBy('createdAt', 'desc')
+                .get();
+            if (snapshot.empty) return [];
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        },
+
+        getById: async (id) => {
+            const doc = await auditCollection.doc(id).get();
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Instalasi Listrik') return null;
+            return { id: doc.id, ...doc.data() };
+        },
+
+        updateById: async (id, payload) => {
+            const bapRef = auditCollection.doc(id);
+            const bapDoc = await bapRef.get();
+
+            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Instalasi Listrik') {
+                return null;
+            }
+
+            const { laporanId } = bapDoc.data();
+            if (laporanId) {
+                const laporanRef = auditCollection.doc(laporanId);
+                if ((await laporanRef.get()).exists) {
+                    const dataToSync = {};
+                    const p = payload;
+
+                    if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+                    if (p.equipmentType !== undefined) dataToSync.equipmentType = p.equipmentType;
+                    if (p.inspectionDate !== undefined) dataToSync['generalData.inspectionDate'] = p.inspectionDate;
+                    if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
+                    if (p.generalData?.companyLocation !== undefined) dataToSync['generalData.companyAddress'] = p.generalData.companyLocation;
+                    if (p.generalData?.usageLocation !== undefined) dataToSync['generalData.inspectionLocation'] = p.generalData.usageLocation;
+
+                    if (p.technicalData) {
+                        if (p.technicalData.technicalDataPlnPower !== undefined) dataToSync['technicalData.plnPower'] = p.technicalData.technicalDataPlnPower;
+                        if (p.technicalData.technicalDataGeneratorPower !== undefined) dataToSync['technicalData.generatorPower'] = p.technicalData.technicalDataGeneratorPower;
+                        if (p.technicalData.technicalDataLightingPower !== undefined) dataToSync['technicalData.lightingPower'] = p.technicalData.technicalDataLightingPower;
+                        if (p.technicalData.technicalDataPowerLoad !== undefined) dataToSync['technicalData.powerLoad'] = p.technicalData.technicalDataPowerLoad;
+                    }
+                    
+                    if (Object.keys(dataToSync).length > 0) {
+                        await laporanRef.update(dataToSync);
+                    }
+                }
+            }
+            
+            await bapRef.update(payload);
+            const updatedDoc = await bapRef.get();
+            return { id: updatedDoc.id, ...updatedDoc.data() };
+        },
+
+        deleteById: async (id) => {
+            const docRef = auditCollection.doc(id);
+            const doc = await docRef.get();
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Instalasi Listrik') return null;
+            await docRef.delete();
+            return id;
+        }
     }
 };
 

@@ -5,10 +5,12 @@ const { petirHandlers, listrikHandlers } = require('./handlers');
 const { laporanPetirPayload } = require('./schemas/instalasiPetir/laporan');
 const { bapPetirPayload } = require('./schemas/instalasiPetir/bap');
 const { laporanListrikPayload } = require('./schemas/instalasiListrik/laporan');
+const { bapListrikPayload } = require('./schemas/instalasiListrik/bap');
 
 const LAPORAN_PETIR_PREFIX = '/petirListrik/instalasiPetir/laporan';
 const BAP_PETIR_PREFIX = '/petirListrik/instalasiPetir/bap';
 const LAPORAN_LISTRIK_PREFIX = '/petirListrik/instalasiListrik/laporan';
+const BAP_LISTRIK_PREFIX = '/petirListrik/instalasiListrik/bap';
 
 module.exports = [
     // ENDPOINT LAPORAN PETIR
@@ -200,6 +202,77 @@ module.exports = [
         options: { 
             auth: 'jwt', 
             tags: ['api', 'Petir Listrik - Laporan Listrik'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+
+    // ENDPOINT BAP LISTRIK
+    {
+        method: 'GET',
+        path: `${BAP_LISTRIK_PREFIX}/prefill/{laporanId}`,
+        handler: listrikHandlers.bap.prefill,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'Petir Listrik - BAP Listrik'],
+            validate: { params: Joi.object({ laporanId: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'POST',
+        path: BAP_LISTRIK_PREFIX,
+        handler: listrikHandlers.bap.create,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'Petir Listrik - BAP Listrik'],
+            validate: { payload: bapListrikPayload }
+        },
+    },
+    {
+        method: 'GET',
+        path: BAP_LISTRIK_PREFIX,
+        handler: listrikHandlers.bap.getAll,
+        options: { auth: 'jwt', tags: ['api', 'Petir Listrik - BAP Listrik'] },
+    },
+    {
+        method: 'GET',
+        path: `${BAP_LISTRIK_PREFIX}/{id}`,
+        handler: listrikHandlers.bap.getById,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'Petir Listrik - BAP Listrik'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${BAP_LISTRIK_PREFIX}/{id}`,
+        handler: listrikHandlers.bap.update,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'Petir Listrik - BAP Listrik'],
+            validate: { 
+                params: Joi.object({ id: Joi.string().required() }), 
+                payload: bapListrikPayload 
+            } 
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${BAP_LISTRIK_PREFIX}/{id}`,
+        handler: listrikHandlers.bap.delete,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'Petir Listrik - BAP Listrik'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+    {
+        method: 'GET',
+        path: `${BAP_LISTRIK_PREFIX}/download/{id}`,
+        handler: listrikHandlers.bap.download,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'Petir Listrik - BAP Listrik'],
             validate: { params: Joi.object({ id: Joi.string().required() }) } 
         },
     },

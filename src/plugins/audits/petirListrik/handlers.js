@@ -5,6 +5,7 @@ const { petirServices, listrikServices } = require('./services');
 const { createLaporanPetir: generateLaporanPetirDoc } = require('../../../services/documentGenerator/petirListrik/petir/laporan/generator');
 const { createBapPetir: generateBapPetirDoc } = require('../../../services/documentGenerator/petirListrik/petir/bap/generator');
 const { createLaporanListrik: generateLaporanListrikDoc } = require('../../../services/documentGenerator/petirListrik/listrik/laporan/generator');
+const { createBapListrik: generateBapListrikDoc } = require('../../../services/documentGenerator/petirListrik/listrik/bap/generator');
 
 const petirHandlers = {
     laporan: {
@@ -231,6 +232,82 @@ const listrikHandlers = {
             } catch (error) {
                 console.error('Error in downloadLaporanListrikHandler:', error);
                 return Boom.badImplementation('Gagal memproses dokumen Laporan Instalasi Listrik.');
+            }
+        },
+    },
+
+    bap: {
+        prefill: async (request, h) => {
+            try {
+                const { laporanId } = request.params;
+                const prefilledData = await listrikServices.bap.getDataForPrefill(laporanId);
+                if (!prefilledData) {
+                    return Boom.notFound('Data Laporan Instalasi Listrik tidak ditemukan.');
+                }
+                return h.response({ status: 'success', message: 'Data BAP berhasil didapatkan', data: prefilledData });
+            } catch (error) {
+                console.error('Error in BAP prefill handler:', error);
+                return Boom.badImplementation('Gagal mengambil data untuk BAP.');
+            }
+        },
+        create: async (request, h) => {
+            try {
+                const newBap = await listrikServices.bap.create(request.payload);
+                return h.response({ status: 'success', message: 'BAP Instalasi Listrik berhasil dibuat', data: { bap: newBap } }).code(201);
+            } catch (error) {
+                if(error.isBoom) return error;
+                return Boom.badImplementation('Gagal membuat BAP Instalasi Listrik.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allBap = await listrikServices.bap.getAll();
+                return { status: 'success', message: 'Semua BAP Instalasi Listrik berhasil didapatkan', data: { bap: allBap } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil daftar BAP Instalasi Listrik.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const bap = await listrikServices.bap.getById(request.params.id);
+                if (!bap) return Boom.notFound('BAP Instalasi Listrik tidak ditemukan.');
+                return { status: 'success', message: 'BAP Instalasi Listrik berhasil didapatkan', data: { bap } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil BAP Instalasi Listrik.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await listrikServices.bap.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, BAP Instalasi Listrik tidak ditemukan.');
+                return { status: 'success', message: 'BAP Instalasi Listrik berhasil diperbarui', data: { bap: updated } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal memperbarui BAP Instalasi Listrik.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await listrikServices.bap.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Instalasi Listrik tidak ditemukan.');
+                return { status: 'success', message: 'BAP Instalasi Listrik berhasil dihapus' };
+            } catch (error) {
+                return Boom.badImplementation('Gagal menghapus BAP Instalasi Listrik.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const bapData = await listrikServices.bap.getById(request.params.id);
+                if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Instalasi Listrik tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateBapListrikDoc(bapData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'BAP Instalasi Listrik berhasil diunduh');
+            } catch (error) {
+                console.error('Error in BAP download handler:', error);
+                return Boom.badImplementation('Gagal memproses dokumen BAP Instalasi Listrik.');
             }
         },
     }
