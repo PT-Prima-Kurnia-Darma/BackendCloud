@@ -203,7 +203,6 @@ const Joi = require('joi');
         }).optional(),
         pumpFunctionTest: Joi.array().items(pumpFunctionTestItemSchema).optional(),
         hydrantOperationalTest: Joi.array().items(hydrantOperationalTestItemSchema).optional(),
-        summary: Joi.string().allow('').optional(),
         recommendations: Joi.string().allow('').optional(),
         conclusion: Joi.string().allow('').optional(),
 });

@@ -198,8 +198,8 @@ const createLaporanProteksiKebakaran = async (data) => {
             operationalHydrantStatus: item.status,
             operationalHydrantDesc: item.description,
         })),
-        recomendation: data.recommendations,
-        conclusion: data.summary,
+        recommendations: data.recommendations,
+        conclusion: data.conclusion,
     };
 
     doc.render(renderData);
