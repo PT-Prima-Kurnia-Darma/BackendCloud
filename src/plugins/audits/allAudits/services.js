@@ -7,7 +7,8 @@ const Boom = require('@hapi/boom');
 const AUDIT_COLLECTIONS = [
   'paa',
   'petirListrik',
-  'elevatorEskalator'
+  'elevatorEskalator',
+  'proteksiKebakaran'
 ];
 
 const fetchCollectionData = async (collectionName) => {
