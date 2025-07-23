@@ -2,19 +2,26 @@
 
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
-const { Storage } = require('@google-cloud/storage');
+const {
+    Storage
+} = require('@google-cloud/storage');
 const config = require('../../../../../config');
 
-// Inisialisasi GCS
+// Inisialisasi Google Cloud Storage
 let privateKey = config.FIRESTORE_PRIVATE_KEY.replace(/\\n/g, '\n');
 const storage = new Storage({
     projectId: config.FIRESTORE_PROJECT_ID,
-    credentials: { client_email: config.FIRESTORE_CLIENT_EMAIL, private_key: privateKey },
+    credentials: {
+        client_email: config.FIRESTORE_CLIENT_EMAIL,
+        private_key: privateKey
+    },
 });
-const BUCKET_NAME = 'tamplate-audit-riksauji';
+const BUCKET_NAME = 'tamplate-audit-riksauji'; // Pastikan nama bucket sudah benar
 
+// Helper untuk mengubah nilai boolean menjadi tanda centang '√' atau string kosong
 const getCheckmark = (status) => (status === true ? '√' : '');
 const getOppositeCheckmark = (status) => (status === false ? '√' : '');
+const getResultText = (item) => (item ? item.result : '');
 
 const createLaporanMobileCrane = async (data) => {
     const templatePath = 'paa/mobileCrane/laporanMobileCrane.docx';
@@ -23,79 +30,86 @@ const createLaporanMobileCrane = async (data) => {
     try {
         [content] = await storage.bucket(BUCKET_NAME).file(templatePath).download();
     } catch (error) {
-        console.error('Gagal mengunduh template Laporan Mobile Crane:', error);
-        throw new Error('Template dokumen Laporan Mobile Crane tidak dapat diakses.');
+        console.error(`Gagal mengunduh template dari GCS: gs://${BUCKET_NAME}/${templatePath}`, error);
+        throw new Error('Template dokumen tidak dapat diakses.');
     }
 
     const zip = new PizZip(content);
-    const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true, nullGetter: () => "" });
-    
+    const doc = new Docxtemplater(zip, {
+        paragraphLoop: true,
+        linebreaks: true,
+        nullGetter: () => "" // Mengganti nilai null/undefined menjadi string kosong
+    });
+
+    // Dekonstruksi data untuk kemudahan akses dan menghindari error
     const g = data.generalData || {};
     const t = data.technicalData || {};
     const i = data.inspectionAndTesting || {};
 
     const renderData = {
-        // === I. DATA UMUM ===
-        examinationType: data.examinationType || '',
-        inspectionType: data.inspectionType || '',
-        subInspectionType: data.subInspectionType || '',
-        ownerName: g.generalDataOwnerName || '',
-        ownerAddress: g.generalDataOwnerAddress || '',
-        userSubcontractorPersonInCharge: g.generalDataUserSubcontractorPersonInCharge || '',
-        userAddress: g.generalDataUserAddress || '',
-        unitLocation: g.generalDataUnitLocation || '',
-        operatorName: g.generalDataOperatorName || '',
-        equipmentType: data.equipmentType || '',
-        manufacturer: g.generalDataManufacturer || '',
-        brandType: g.generalDataBrandType || '',
-        locationAndYearOfManufacture: g.generalDataLocationAndYearOfManufacture || '',
-        serialNumberUnitNumber: g.generalDataSerialNumberUnitNumber || '',
-        capacityWorkingLoad: g.generalDataCapacityWorkingLoad || '',
-        intendedUse: g.generalDataIntendedUse || '',
-        usagePermitNumber: g.generalDataUsagePermitNumber || '',
-        operatorCertificate: g.generalDataOperatorCertificate || '',
-        equipmentHistory: g.generalDataEquipmentHistory || '',
-        inspectionDate: g.generalDataInspectionDate || '',
+        // I. DATA UMUM
+        examinationType: data.examinationType,
+        inspectionType: data.inspectionType,
+        subInspectionType: data.subInspectionType,
+        ownerName: g.generalDataOwnerName,
+        ownerAddress: g.generalDataOwnerAddress,
+        userSubcontractorPersonInCharge: g.generalDataUserSubcontractorPersonInCharge,
+        userAddress: g.generalDataUserAddress,
+        unitLocation: g.generalDataUnitLocation,
+        operatorName: g.generalDataOperatorName,
+        equipmentType: data.equipmentType,
+        manufacturer: g.generalDataManufacturer,
+        brandType: g.generalDataBrandType,
+        locationAndYearOfManufacture: g.generalDataLocationAndYearOfManufacture,
+        serialNumberUnitNumber: g.generalDataSerialNumberUnitNumber,
+        capacityWorkingLoad: g.generalDataCapacityWorkingLoad,
+        intendedUse: g.generalDataIntendedUse,
+        usagePermitNumber: g.generalDataUsagePermitNumber,
+        operatorCertificate: g.generalDataOperatorCertificate,
+        equipmentHistory: g.generalDataEquipmentHistory,
+        inspectionDate: g.generalDataInspectionDate,
 
-        // === II. DATA TEKNIK ===
-        maximumWorkingLoadCapacity: t.technicalDataMaximumWorkingLoadCapacity || '',
-        boomLength: t.technicalDataBoomLength || '',
-        maximumJibLength: t.technicalDataMaximumJibLength || '',
-        maximumJibWorkingLoad: t.technicalDataMaximumJibWorkingLoad || '',
-        maxBoomJibLength: t.technicalDataMaxBoomJibLength || '',
-        craneWeight: t.technicalDataCraneWeight || '',
-        maxLiftingHeight: t.technicalDataMaxLiftingHeight || '',
-        boomWorkingAngle: t.technicalDataBoomWorkingAngle || '',
-        engineNumber: t.technicalDataEngineNumber || '',
-        type: t.technicalDataType || '',
-        numberOfCylinders: t.technicalDataNumberOfCylinders || '',
-        netPower: t.technicalDataNetPower || '',
-        brandYearOfManufacture: t.technicalDataBrandYearOfManufacture || '',
-        mainHookType: t.technicalDataMainHookType || '',
-        mainHookCapacity: t.technicalDataMainHookCapacity || '',
-        mainHookMaterial: t.technicalDataMainHookMaterial || '',
-        mainHookSerialNumber: t.technicalDataMainHookSerialNumber || '',
-        auxiliaryHookType: t.technicalDataAuxiliaryHookType || '',
-        auxiliaryHookCapacity: t.technicalDataAuxiliaryHookCapacity || '',
-        auxiliaryHookMaterial: t.technicalDataAuxiliaryHookMaterial || '',
-        auxiliaryHookSerialNumber: t.technicalDataAuxiliaryHookSerialNumber || '',
-        wireRopeMainLoadHoistDrumDiameter: t.technicalDataWireRopeMainLoadHoistDrumDiameter || '',
-        wireRopeMainLoadHoistDrumType: t.technicalDataWireRopeMainLoadHoistDrumType || '',
-        wireRopeMainLoadHoistDrumConstruction: t.technicalDataWireRopeMainLoadHoistDrumConstruction || '',
-        wireRopeMainLoadHoistDrumBreakingStrength: t.technicalDataWireRopeMainLoadHoistDrumBreakingStrength || '',
-        wireRopeMainLoadHoistDrumLength: t.technicalDataWireRopeMainLoadHoistDrumLength || '',
-        wireRopeAuxiliaryLoadHoistDrumDiameter: t.technicalDataWireRopeAuxiliaryLoadHoistDrumDiameter || '',
-        wireRopeAuxiliaryLoadHoistDrumType: t.technicalDataWireRopeAuxiliaryLoadHoistDrumType || '',
-        wireRopeAuxiliaryLoadHoistDrumConstruction: t.technicalDataWireRopeAuxiliaryLoadHoistDrumConstruction || '',
-        wireRopeAuxiliaryLoadHoistDrumLength: t.technicalDataWireRopeAuxiliaryLoadHoistDrumLength || '',
-        wireRopeAuxiliaryLoadHoistDrumBreakingStrength: t.technicalDataWireRopeAuxiliaryLoadHoistDrumBreakingStrength || '',
-        wireRopeBoomHoistDrumDiameter: t.technicalDataWireRopeBoomHoistDrumDiameter || '',
-        wireRopeBoomHoistDrumType: t.technicalDataWireRopeBoomHoistDrumType || '',
-        wireRopeBoomHoistDrumConstruction: t.technicalDataWireRopeBoomHoistDrumConstruction || '',
-        wireRopeBoomHoistDrumLength: t.technicalDataWireRopeBoomHoistDrumLength || '',
-        wireRopeBoomHoistDrumBreakingStrength: t.technicalDataWireRopeBoomHoistDrumBreakingStrength || '',
-        
-        // === III. PEMERIKSAAN VISUAL (DENGAN NAMA KUNCI YANG BENAR) ===
+        // II. DATA TEKNIK
+        maximumWorkingLoadCapacity: t.technicalDataMaximumWorkingLoadCapacity,
+        boomLength: t.technicalDataBoomLength,
+        maximumJibLength: t.technicalDataMaximumJibLength,
+        maximumJibWorkingLoad: t.technicalDataMaximumJibWorkingLoad,
+        maxBoomJibLength: t.technicalDataMaxBoomJibLength,
+        craneWeight: t.technicalDataCraneWeight,
+        maxLiftingHeight: t.technicalDataMaxLiftingHeight,
+        boomWorkingAngle: t.technicalDataBoomWorkingAngle,
+        engineNumber: t.technicalDataEngineNumber,
+        type: t.technicalDataType,
+        numberOfCylinders: t.technicalDataNumberOfCylinders,
+        netPower: t.technicalDataNetPower,
+        brandYearOfManufacture: t.technicalDataBrandYearOfManufacture,
+        // Hook
+        mainHookType: t.technicalDataMainHookType,
+        mainHookCapacity: t.technicalDataMainHookCapacity,
+        mainHookMaterial: t.technicalDataMainHookMaterial,
+        mainHookSerialNumber: t.technicalDataMainHookSerialNumber,
+        auxiliaryHookType: t.technicalDataAuxiliaryHookType,
+        auxiliaryHookCapacity: t.technicalDataAuxiliaryHookCapacity,
+        auxiliaryHookMaterial: t.technicalDataAuxiliaryHookMaterial,
+        auxiliaryHookSerialNumber: t.technicalDataAuxiliaryHookSerialNumber,
+        // Wire Rope
+        wireRopeMainLoadHoistDrumDiameter: t.technicalDataWireRopeMainLoadHoistDrumDiameter,
+        wireRopeMainLoadHoistDrumType: t.technicalDataWireRopeMainLoadHoistDrumType,
+        wireRopeMainLoadHoistDrumConstruction: t.technicalDataWireRopeMainLoadHoistDrumConstruction,
+        wireRopeMainLoadHoistDrumBreakingStrength: t.technicalDataWireRopeMainLoadHoistDrumBreakingStrength,
+        wireRopeMainLoadHoistDrumLength: t.technicalDataWireRopeMainLoadHoistDrumLength,
+        wireRopeAuxiliaryLoadHoistDrumDiameter: t.technicalDataWireRopeAuxiliaryLoadHoistDrumDiameter,
+        wireRopeAuxiliaryLoadHoistDrumType: t.technicalDataWireRopeAuxiliaryLoadHoistDrumType,
+        wireRopeAuxiliaryLoadHoistDrumConstruction: t.technicalDataWireRopeAuxiliaryLoadHoistDrumConstruction,
+        wireRopeAuxiliaryLoadHoistDrumLength: t.technicalDataWireRopeAuxiliaryLoadHoistDrumLength,
+        wireRopeAuxiliaryLoadHoistDrumBreakingStrength: t.technicalDataWireRopeAuxiliaryLoadHoistDrumBreakingStrength,
+        wireRopeBoomHoistDrumDiameter: t.technicalDataWireRopeBoomHoistDrumDiameter,
+        wireRopeBoomHoistDrumType: t.technicalDataWireRopeBoomHoistDrumType,
+        wireRopeBoomHoistDrumConstruction: t.technicalDataWireRopeBoomHoistDrumConstruction,
+        wireRopeBoomHoistDrumLength: t.technicalDataWireRopeBoomHoistDrumLength,
+        wireRopeBoomHoistDrumBreakingStrength: t.technicalDataWireRopeBoomHoistDrumBreakingStrength,
+
+        // III. PEMERIKSAAN VISUAL (Lengkap)
         foundationAndBoltsCorrosionMemenuhi: getCheckmark(i.visualFoundationAndBoltsCorrosionResult?.status),
         foundationAndBoltsCorrosionTidakMemenuhi: getOppositeCheckmark(i.visualFoundationAndBoltsCorrosionResult?.status),
         foundationAndBoltsCorrosionResult: i.visualFoundationAndBoltsCorrosionResult?.result,
@@ -658,56 +672,36 @@ const createLaporanMobileCrane = async (data) => {
         safetyDevicesConverterLiftingHeightIndicatorTidakMemuhi: getOppositeCheckmark(i.visualSafetyDevicesConverterLiftingHeightIndicatorResult?.status),
         safetyDevicesConverterLiftingHeightIndicatorResult: i.visualSafetyDevicesConverterLiftingHeightIndicatorResult?.result,
 
-        // === IV. NDT ===
-        mainLoadHoistDrumSpecDiameter: i.ndtWireRopeMainLoadSpecDiameter,
-        mainLoadHoistDrumActualDiameter: i.ndtWireRopeMainLoadActualDiameter,
-        mainLoadHoistDrumConstruction: i.ndtWireRopeMainLoadConstruction,
-        mainLoadHoistDrumType: i.ndtWireRopeMainLoadType,
-        mainLoadHoistDrumLength: i.ndtWireRopeMainLoadLength,
-        mainLoadHoistDrumAge: i.ndtWireRopeMainLoadAge,
-        mainLoadHoistDrumDefectTrue: getCheckmark(i.ndtWireRopeMainLoadResult?.status),
-        mainLoadHoistDrumDefectFalse: getOppositeCheckmark(i.ndtWireRopeMainLoadResult?.status),
-        mainLoadHoistDrumResult: i.ndtWireRopeMainLoadResult?.result,
+        // IV. PEMERIKSAAN TIDAK MERUSAK (NDT)
+        // Tali Kawat Baja
+        steelWireRopeNdtType: i.steelWireRopeNdtType,
+        steelWireRopeItems: (i.ndtSteelWireRopes || []).map(item => ({
+            steelWireRopeAt: item.usageAt,
+            steelWireRopeSpec: item.specDiameter,
+            steelWireRopeActual: item.actualDiameter,
+            steelWireRopeConstruction: item.construction,
+            steelWireRopeType: item.type,
+            steelWireRopeLength: item.length,
+            steelWireRopeAge: item.age,
+            steelWireRopeTrue: getCheckmark(item.result?.status),
+            steelWireRopeFalse: getOppositeCheckmark(item.result?.status),
+            steelWireRopeResult: getResultText(item.result),
+        })),
 
-        auxiliaryLoadHoistDrumSpecDiameter: i.ndtWireRopeAuxiliaryLoadSpecDiameter,
-        auxiliaryLoadHoistDrumActualDiameter: i.ndtWireRopeAuxiliaryLoadActualDiameter,
-        auxiliaryLoadHoistDrumConstruction: i.ndtWireRopeAuxiliaryLoadConstruction,
-        auxiliaryLoadHoistDrumType: i.ndtWireRopeAuxiliaryLoadType,
-        auxiliaryLoadHoistDrumLength: i.ndtWireRopeAuxiliaryLoadLength,
-        auxiliaryLoadHoistDrumAge: i.ndtWireRopeAuxiliaryLoadAge,
-        auxiliaryLoadHoistDrumDefectTrue: getCheckmark(i.ndtWireRopeAuxiliaryLoadResult?.status),
-        auxiliaryLoadHoistDrumDefectFalse: getOppositeCheckmark(i.ndtWireRopeAuxiliaryLoadResult?.status),
-        auxiliaryLoadHoistDrumResult: i.ndtWireRopeAuxiliaryLoadResult?.result,
-
-        boomHoistDrumSpecDiameter: i.ndtWireRopeBoomHoistSpecDiameter,
-        boomHoistDrumActualDiameter: i.ndtWireRopeBoomHoistActualDiameter,
-        boomHoistDrumConstruction: i.ndtWireRopeBoomHoistConstruction,
-        boomHoistDrumType: i.ndtWireRopeBoomHoistType,
-        boomHoistDrumLength: i.ndtWireRopeBoomHoistLength,
-        boomHoistDrumAge: i.ndtWireRopeBoomHoistAge,
-        boomHoistDrumDefectTrue: getCheckmark(i.ndtWireRopeBoomHoistResult?.status),
-        boomHoistDrumDefectFalse: getOppositeCheckmark(i.ndtWireRopeBoomHoistResult?.status),
-        boomHoistDrumResult: i.ndtWireRopeBoomHoistResult?.result,
-        
+        // Boom
         boomType: i.ndtBoomType,
-        ndtType: i.ndtBoomNdtType,
-        boomPart1: i.ndtBoomInspection1Part,
-        boomLocation1: i.ndtBoomInspection1Location,
-        boomDefectTrue1: getCheckmark(i.ndtBoomInspection1Result?.status),
-        boomDefectFalse1: getOppositeCheckmark(i.ndtBoomInspection1Result?.status),
-        boomResult1: i.ndtBoomInspection1Result?.result,
-        boomPart2: i.ndtBoomInspection2Part,
-        boomLocation2: i.ndtBoomInspection2Location,
-        boomDefectTrue2: getCheckmark(i.ndtBoomInspection2Result?.status),
-        boomDefectFalse2: getOppositeCheckmark(i.ndtBoomInspection2Result?.status),
-        boomResult2: i.ndtBoomInspection2Result?.result,
-        boomPart3: i.ndtBoomInspection3Part,
-        boomLocation3: i.ndtBoomInspection3Location,
-        boomDefectTrue3: getCheckmark(i.ndtBoomInspection3Result?.status),
-        boomDefectFalse3: getOppositeCheckmark(i.ndtBoomInspection3Result?.status),
-        boomResult3: i.ndtBoomInspection3Result?.result,
+        boomNdtType: i.boomNdtType,
+        boomItems: (i.ndtBoomInspections || []).map(item => ({
+            boomPart: item.part,
+            boomLocation: item.location,
+            boomDefectTrue: getCheckmark(item.result?.status),
+            boomDefectFalse: getOppositeCheckmark(item.result?.status),
+            boomResult: getResultText(item.result),
+        })),
 
-        mainHookNdtType: i.ndtMainHookNdtType,
+        // Kait Utama
+        mainHookNdtType: i.mainHookNdtType,
+        capacityMainHook: i.capacityMainHook,
         mainHookSpecificationA: i.ndtMainHookSpecificationA,
         mainHookSpecificationB: i.ndtMainHookSpecificationB,
         mainHookSpecificationC: i.ndtMainHookSpecificationC,
@@ -718,7 +712,7 @@ const createLaporanMobileCrane = async (data) => {
         mainHookSpecificationH: i.ndtMainHookSpecificationH,
         mainHookSpecificationTrue: getCheckmark(i.ndtMainHookSpecificationResult?.status),
         mainHookSpecificationFalse: getOppositeCheckmark(i.ndtMainHookSpecificationResult?.status),
-        mainHookSpecificationResult: i.ndtMainHookSpecificationResult?.result,
+        mainHookSpecificationResult: getResultText(i.ndtMainHookSpecificationResult),
         mainHookMeasurementResultsA: i.ndtMainHookMeasurementResultsA,
         mainHookMeasurementResultsB: i.ndtMainHookMeasurementResultsB,
         mainHookMeasurementResultsC: i.ndtMainHookMeasurementResultsC,
@@ -729,7 +723,7 @@ const createLaporanMobileCrane = async (data) => {
         mainHookMeasurementResultsH: i.ndtMainHookMeasurementResultsH,
         mainHookMeasurementResultsTrue: getCheckmark(i.ndtMainHookMeasurementResultsResult?.status),
         mainHookMeasurementResultsFalse: getOppositeCheckmark(i.ndtMainHookMeasurementResultsResult?.status),
-        mainHookMeasurementResultsResult: i.ndtMainHookMeasurementResultsResult?.result,
+        mainHookMeasurementResultsResult: getResultText(i.ndtMainHookMeasurementResultsResult),
         mainHookToleranceMeasureA: i.ndtMainHookToleranceMeasureA,
         mainHookToleranceMeasureB: i.ndtMainHookToleranceMeasureB,
         mainHookToleranceMeasureC: i.ndtMainHookToleranceMeasureC,
@@ -740,9 +734,11 @@ const createLaporanMobileCrane = async (data) => {
         mainHookToleranceMeasureH: i.ndtMainHookToleranceMeasureH,
         mainHookToleranceMeasureTrue: getCheckmark(i.ndtMainHookToleranceMeasureResult?.status),
         mainHookToleranceMeasureFalse: getOppositeCheckmark(i.ndtMainHookToleranceMeasureResult?.status),
-        mainHookToleranceMeasureResult: i.ndtMainHookToleranceMeasureResult?.result,
+        mainHookToleranceMeasureResult: getResultText(i.ndtMainHookToleranceMeasureResult),
 
-        auxiliaryHookNdtType: i.ndtAuxiliaryHookNdtType,
+        // Kait Tambahan
+        auxiliaryHookNdtType: i.auxiliaryHookNdtType,
+        capacityOptionalHook: i.capacityOptionalHook,
         auxiliaryHookSpecificationA: i.ndtAuxiliaryHookSpecificationA,
         auxiliaryHookSpecificationB: i.ndtAuxiliaryHookSpecificationB,
         auxiliaryHookSpecificationC: i.ndtAuxiliaryHookSpecificationC,
@@ -753,7 +749,7 @@ const createLaporanMobileCrane = async (data) => {
         auxiliaryHookSpecificationH: i.ndtAuxiliaryHookSpecificationH,
         auxiliaryHookSpecificationTrue: getCheckmark(i.ndtAuxiliaryHookSpecificationResult?.status),
         auxiliaryHookSpecificationFalse: getOppositeCheckmark(i.ndtAuxiliaryHookSpecificationResult?.status),
-        auxiliaryHookSpecificationResult: i.ndtAuxiliaryHookSpecificationResult?.result,
+        auxiliaryHookSpecificationResult: getResultText(i.ndtAuxiliaryHookSpecificationResult),
         auxiliaryHookMeasurementResultsA: i.ndtAuxiliaryHookMeasurementResultsA,
         auxiliaryHookMeasurementResultsB: i.ndtAuxiliaryHookMeasurementResultsB,
         auxiliaryHookMeasurementResultsC: i.ndtAuxiliaryHookMeasurementResultsC,
@@ -764,7 +760,7 @@ const createLaporanMobileCrane = async (data) => {
         auxiliaryHookMeasurementResultsH: i.ndtAuxiliaryHookMeasurementResultsH,
         auxiliaryHookMeasurementResultsTrue: getCheckmark(i.ndtAuxiliaryHookMeasurementResultsResult?.status),
         auxiliaryHookMeasurementResultsFalse: getOppositeCheckmark(i.ndtAuxiliaryHookMeasurementResultsResult?.status),
-        auxiliaryHookMeasurementResultsResult: i.ndtAuxiliaryHookMeasurementResultsResult?.result,
+        auxiliaryHookMeasurementResultsResult: getResultText(i.ndtAuxiliaryHookMeasurementResultsResult),
         auxiliaryHookToleranceMeasureA: i.ndtAuxiliaryHookToleranceMeasureA,
         auxiliaryHookToleranceMeasureB: i.ndtAuxiliaryHookToleranceMeasureB,
         auxiliaryHookToleranceMeasureC: i.ndtAuxiliaryHookToleranceMeasureC,
@@ -775,9 +771,11 @@ const createLaporanMobileCrane = async (data) => {
         auxiliaryHookToleranceMeasureH: i.ndtAuxiliaryHookToleranceMeasureH,
         auxiliaryHookToleranceMeasureTrue: getCheckmark(i.ndtAuxiliaryHookToleranceMeasureResult?.status),
         auxiliaryHookToleranceMeasureFalse: getOppositeCheckmark(i.ndtAuxiliaryHookToleranceMeasureResult?.status),
-        auxiliaryHookToleranceMeasureResult: i.ndtAuxiliaryHookToleranceMeasureResult?.result,
+        auxiliaryHookToleranceMeasureResult: getResultText(i.ndtAuxiliaryHookToleranceMeasureResult),
 
-        mainDrumNdtType: i.ndtMainDrumNdtType,
+
+        // Drum Utama
+        mainDrumNdtType: i.mainDrumNdtType,
         mainDrumSpecificationA: i.ndtMainDrumSpecificationA,
         mainDrumSpecificationB: i.ndtMainDrumSpecificationB,
         mainDrumSpecificationC: i.ndtMainDrumSpecificationC,
@@ -787,7 +785,7 @@ const createLaporanMobileCrane = async (data) => {
         mainDrumSpecificationG: i.ndtMainDrumSpecificationG,
         mainDrumSpecificationTrue: getCheckmark(i.ndtMainDrumSpecificationResult?.status),
         mainDrumSpecificationFalse: getOppositeCheckmark(i.ndtMainDrumSpecificationResult?.status),
-        mainDrumSpecificationResult: i.ndtMainDrumSpecificationResult?.result,
+        mainDrumSpecificationResult: getResultText(i.ndtMainDrumSpecificationResult),
         mainDrumMeasurementResultsA: i.ndtMainDrumMeasurementResultsA,
         mainDrumMeasurementResultsB: i.ndtMainDrumMeasurementResultsB,
         mainDrumMeasurementResultsC: i.ndtMainDrumMeasurementResultsC,
@@ -797,9 +795,10 @@ const createLaporanMobileCrane = async (data) => {
         mainDrumMeasurementResultsG: i.ndtMainDrumMeasurementResultsG,
         mainDrumMeasurementResultsTrue: getCheckmark(i.ndtMainDrumMeasurementResultsResult?.status),
         mainDrumMeasurementResultsFalse: getOppositeCheckmark(i.ndtMainDrumMeasurementResultsResult?.status),
-        mainDrumMeasurementResultsResult: i.ndtMainDrumMeasurementResultsResult?.result,
+        mainDrumMeasurementResultsResult: getResultText(i.ndtMainDrumMeasurementResultsResult),
 
-        auxiliaryDrumNdtType: i.ndtAuxiliaryDrumNdtType,
+        // Drum Tambahan
+        auxiliaryDrumNdtType: i.auxiliaryDrumNdtType,
         auxiliaryDrumSpecificationA: i.ndtAuxiliaryDrumSpecificationA,
         auxiliaryDrumSpecificationB: i.ndtAuxiliaryDrumSpecificationB,
         auxiliaryDrumSpecificationC: i.ndtAuxiliaryDrumSpecificationC,
@@ -809,7 +808,7 @@ const createLaporanMobileCrane = async (data) => {
         auxiliaryDrumSpecificationG: i.ndtAuxiliaryDrumSpecificationG,
         auxiliaryDrumSpecificationTrue: getCheckmark(i.ndtAuxiliaryDrumSpecificationResult?.status),
         auxiliaryDrumSpecificationFalse: getOppositeCheckmark(i.ndtAuxiliaryDrumSpecificationResult?.status),
-        auxiliaryDrumSpecificationResult: i.ndtAuxiliaryDrumSpecificationResult?.result,
+        auxiliaryDrumSpecificationResult: getResultText(i.ndtAuxiliaryDrumSpecificationResult),
         auxiliaryDrumMeasurementResultsA: i.ndtAuxiliaryDrumMeasurementResultsA,
         auxiliaryDrumMeasurementResultsB: i.ndtAuxiliaryDrumMeasurementResultsB,
         auxiliaryDrumMeasurementResultsC: i.ndtAuxiliaryDrumMeasurementResultsC,
@@ -819,8 +818,10 @@ const createLaporanMobileCrane = async (data) => {
         auxiliaryDrumMeasurementResultsG: i.ndtAuxiliaryDrumMeasurementResultsG,
         auxiliaryDrumMeasurementResultsTrue: getCheckmark(i.ndtAuxiliaryDrumMeasurementResultsResult?.status),
         auxiliaryDrumMeasurementResultsFalse: getOppositeCheckmark(i.ndtAuxiliaryDrumMeasurementResultsResult?.status),
-        auxiliaryDrumMeasurementResultsResult: i.ndtAuxiliaryDrumMeasurementResultsResult?.result,
+        auxiliaryDrumMeasurementResultsResult: getResultText(i.ndtAuxiliaryDrumMeasurementResultsResult),
 
+        // Puli Utama
+        puliNdtType: i.puliNdtType,
         mainPulleySpecificationA: i.ndtMainPulleySpecificationA,
         mainPulleySpecificationB: i.ndtMainPulleySpecificationB,
         mainPulleySpecificationC: i.ndtMainPulleySpecificationC,
@@ -828,7 +829,7 @@ const createLaporanMobileCrane = async (data) => {
         mainPulleySpecificationE: i.ndtMainPulleySpecificationE,
         mainPulleySpecificationTrue: getCheckmark(i.ndtMainPulleySpecificationResult?.status),
         mainPulleySpecificationFalse: getOppositeCheckmark(i.ndtMainPulleySpecificationResult?.status),
-        mainPulleySpecificationResult: i.ndtMainPulleySpecificationResult?.result,
+        mainPulleySpecificationResult: getResultText(i.ndtMainPulleySpecificationResult),
         mainPulleyMeasurementResultsA: i.ndtMainPulleyMeasurementResultsA,
         mainPulleyMeasurementResultsB: i.ndtMainPulleyMeasurementResultsB,
         mainPulleyMeasurementResultsC: i.ndtMainPulleyMeasurementResultsC,
@@ -836,8 +837,10 @@ const createLaporanMobileCrane = async (data) => {
         mainPulleyMeasurementResultsE: i.ndtMainPulleyMeasurementResultsE,
         mainPulleyMeasurementResultsTrue: getCheckmark(i.ndtMainPulleyMeasurementResultsResult?.status),
         mainPulleyMeasurementResultsFalse: getOppositeCheckmark(i.ndtMainPulleyMeasurementResultsResult?.status),
-        mainPulleyMeasurementResultsResult: i.ndtMainPulleyMeasurementResultsResult?.result,
+        mainPulleyMeasurementResultsResult: getResultText(i.ndtMainPulleyMeasurementResultsResult),
 
+        // Puli Tambahan
+        puliOptionalType: i.puliOptionalType,
         auxiliaryPulleySpecificationA: i.ndtAuxiliaryPulleySpecificationA,
         auxiliaryPulleySpecificationB: i.ndtAuxiliaryPulleySpecificationB,
         auxiliaryPulleySpecificationC: i.ndtAuxiliaryPulleySpecificationC,
@@ -845,7 +848,7 @@ const createLaporanMobileCrane = async (data) => {
         auxiliaryPulleySpecificationE: i.ndtAuxiliaryPulleySpecificationE,
         auxiliaryPulleySpecificationTrue: getCheckmark(i.ndtAuxiliaryPulleySpecificationResult?.status),
         auxiliaryPulleySpecificationFalse: getOppositeCheckmark(i.ndtAuxiliaryPulleySpecificationResult?.status),
-        auxiliaryPulleySpecificationResult: i.ndtAuxiliaryPulleySpecificationResult?.result,
+        auxiliaryPulleySpecificationResult: getResultText(i.ndtAuxiliaryPulleySpecificationResult),
         auxiliaryPulleyMeasurementResultsA: i.ndtAuxiliaryPulleyMeasurementResultsA,
         auxiliaryPulleyMeasurementResultsB: i.ndtAuxiliaryPulleyMeasurementResultsB,
         auxiliaryPulleyMeasurementResultsC: i.ndtAuxiliaryPulleyMeasurementResultsC,
@@ -853,100 +856,101 @@ const createLaporanMobileCrane = async (data) => {
         auxiliaryPulleyMeasurementResultsE: i.ndtAuxiliaryPulleyMeasurementResultsE,
         auxiliaryPulleyMeasurementResultsTrue: getCheckmark(i.ndtAuxiliaryPulleyMeasurementResultsResult?.status),
         auxiliaryPulleyMeasurementResultsFalse: getOppositeCheckmark(i.ndtAuxiliaryPulleyMeasurementResultsResult?.status),
-        auxiliaryPulleyMeasurementResultsResult: i.ndtAuxiliaryPulleyMeasurementResultsResult?.result,
-        
-        // === V. PENGUJIAN ===
+        auxiliaryPulleyMeasurementResultsResult: getResultText(i.ndtAuxiliaryPulleyMeasurementResultsResult),
+
+
+        // V. PENGUJIAN FUNGSI
         hoistingLoweringConditionTrue: getCheckmark(i.testingFunctionHoistingLoweringResult?.status),
         hoistingLoweringConditionFalse: getOppositeCheckmark(i.testingFunctionHoistingLoweringResult?.status),
-        hoistingLoweringResult: i.testingFunctionHoistingLoweringResult?.result,
+        hoistingLoweringResult: getResultText(i.testingFunctionHoistingLoweringResult),
         extendedRectractedBoomConditionTrue: getCheckmark(i.testingFunctionExtendedRectractedBoomResult?.status),
         extendedRectractedBoomConditionFalse: getOppositeCheckmark(i.testingFunctionExtendedRectractedBoomResult?.status),
-        extendedRectractedBoomResult: i.testingFunctionExtendedRectractedBoomResult?.result,
+        extendedRectractedBoomConditionResult: getResultText(i.testingFunctionExtendedRectractedBoomResult),
         extendedRectractedOutriggerConditionTrue: getCheckmark(i.testingFunctionExtendedRectractedOutriggerResult?.status),
         extendedRectractedOutriggerConditionFalse: getOppositeCheckmark(i.testingFunctionExtendedRectractedOutriggerResult?.status),
-        extendedRectractedOutriggerResult: i.testingFunctionExtendedRectractedOutriggerResult?.result,
-        swingSlewingConditionTrue: getCheckmark(i.testingFunctionSwingSlewingResult?.status),
-        swingSlewingConditionFalse: getOppositeCheckmark(i.testingFunctionSwingSlewingResult?.status),
-        swingSlewingResult: i.testingFunctionSwingSlewingResult?.result,
+        extendedRectractedOutriggerResult: getResultText(i.testingFunctionExtendedRectractedOutriggerResult),
+        SwingSlweingConditionTrue: getCheckmark(i.testingFunctionSwingSlewingResult?.status),
+        SwingSlweingConditionFalse: getOppositeCheckmark(i.testingFunctionSwingSlewingResult?.status),
+        SwingSlweingConditionResult: getResultText(i.testingFunctionSwingSlewingResult),
         antiTwoBlockTrue: getCheckmark(i.testingFunctionAntiTwoBlockResult?.status),
         antiTwoBlockFalse: getOppositeCheckmark(i.testingFunctionAntiTwoBlockResult?.status),
-        antiTwoBlockResult: i.testingFunctionAntiTwoBlockResult?.result,
+        antiTwoBlockResult: getResultText(i.testingFunctionAntiTwoBlockResult),
         boomStopTrue: getCheckmark(i.testingFunctionBoomStopResult?.status),
         boomStopFalse: getOppositeCheckmark(i.testingFunctionBoomStopResult?.status),
-        boomStopResult: i.testingFunctionBoomStopResult?.result,
+        boomStopResult: getResultText(i.testingFunctionBoomStopResult),
         anemometerWindSpeedTrue: getCheckmark(i.testingFunctionAnemometerWindSpeedResult?.status),
         anemometerWindSpeedFalse: getOppositeCheckmark(i.testingFunctionAnemometerWindSpeedResult?.status),
-        anemometerWindSpeedResult: i.testingFunctionAnemometerWindSpeedResult?.result,
+        anemometerWindSpeedResult: getResultText(i.testingFunctionAnemometerWindSpeedResult),
         brakeLockingDeviceTrue: getCheckmark(i.testingFunctionBrakeLockingDeviceResult?.status),
         brakeLockingDeviceFalse: getOppositeCheckmark(i.testingFunctionBrakeLockingDeviceResult?.status),
-        brakeLockingDeviceResult: i.testingFunctionBrakeLockingDeviceResult?.result,
+        brakeLockingDeviceResult: getResultText(i.testingFunctionBrakeLockingDeviceResult),
         loadMomentIndicatorConditionTrue: getCheckmark(i.testingFunctionLoadMomentIndicatorResult?.status),
         loadMomentIndicatorConditionFalse: getOppositeCheckmark(i.testingFunctionLoadMomentIndicatorResult?.status),
-        loadMomentIndicatorConditionResult: i.testingFunctionLoadMomentIndicatorResult?.result,
+        loadMomentIndicatorConditionResult: getResultText(i.testingFunctionLoadMomentIndicatorResult),
         turnSignalTrue: getCheckmark(i.testingFunctionTurnSignalResult?.status),
         turnSignalFalse: getOppositeCheckmark(i.testingFunctionTurnSignalResult?.status),
-        turnSignalResult: i.testingFunctionTurnSignalResult?.result,
+        turnSignalResult: getResultText(i.testingFunctionTurnSignalResult),
         drivingLightsTrue: getCheckmark(i.testingFunctionDrivingLightsResult?.status),
         drivingLightsFalse: getOppositeCheckmark(i.testingFunctionDrivingLightsResult?.status),
-        drivingLightsResult: i.testingFunctionDrivingLightsResult?.result,
+        drivingLightsResult: getResultText(i.testingFunctionDrivingLightsResult),
         loadIndicatorLightTrue: getCheckmark(i.testingFunctionLoadIndicatorLightResult?.status),
         loadIndicatorLightFalse: getOppositeCheckmark(i.testingFunctionLoadIndicatorLightResult?.status),
-        loadIndicatorLightResult: i.testingFunctionLoadIndicatorLightResult?.result,
+        loadIndicatorLightResult: getResultText(i.testingFunctionLoadIndicatorLightResult),
         rotaryLampTrue: getCheckmark(i.testingFunctionRotaryLampResult?.status),
         rotaryLampFalse: getOppositeCheckmark(i.testingFunctionRotaryLampResult?.status),
-        rotaryLampResult: i.testingFunctionRotaryLampResult?.result,
+        rotaryLampResult: getResultText(i.testingFunctionRotaryLampResult),
         hornTrue: getCheckmark(i.testingFunctionHornResult?.status),
         hornFalse: getOppositeCheckmark(i.testingFunctionHornResult?.status),
-        hornResult: i.testingFunctionHornResult?.result,
+        hornResult: getResultText(i.testingFunctionHornResult),
         swingAlarmTrue: getCheckmark(i.testingFunctionSwingAlarmResult?.status),
         swingAlarmFalse: getOppositeCheckmark(i.testingFunctionSwingAlarmResult?.status),
-        swingAlarmResult: i.testingFunctionSwingAlarmResult?.result,
+        swingAlarmResult: getResultText(i.testingFunctionSwingAlarmResult),
         reverseAlarmTrue: getCheckmark(i.testingFunctionReverseAlarmResult?.status),
         reverseAlarmFalse: getOppositeCheckmark(i.testingFunctionReverseAlarmResult?.status),
-        reverseAlarmResult: i.testingFunctionReverseAlarmResult?.result,
+        reverseAlarmResult: getResultText(i.testingFunctionReverseAlarmResult),
         overloadAlarmTrue: getCheckmark(i.testingFunctionOverloadAlarmResult?.status),
         overloadAlarmFalse: getOppositeCheckmark(i.testingFunctionOverloadAlarmResult?.status),
-        overloadAlarmResult: i.testingFunctionOverloadAlarmResult?.result,
-        
-        dynamicMainHook: i.dynamicMainHookTests || [],
-        dynamicAuxiliaryHook: i.dynamicAuxiliaryHookTests || [],
-        staticMainHook: i.staticMainHookTests || [],
-        staticAuxiliaryHook: i.staticAuxiliaryHookTests || [],
-        
-        // === KESIMPULAN & SARAN ===
-        conclusion: data.conclusion || '',
-        recomendation: data.recommendation || '',
+        overloadAlarmResult: getResultText(i.testingFunctionOverloadAlarmResult),
+
+        // V.2 PENGUJIAN BEBAN (DINAMIS & STATIS)
+        dynamicMainHook: i.dynamicMainHookTests,
+        dynamicAuxiliaryHook: i.dynamicAuxiliaryHookTests,
+        staticMainHook: i.staticMainHookTests,
+        staticAuxiliaryHook: i.staticAuxiliaryHookTests,
+
+        // KESIMPULAN & SARAN
+        conclusion: data.conclusion,
+        recomendation: data.recommendation,
     };
 
-    // Gabungkan semua objek data menjadi satu untuk dirender
-    // Objek yang lebih akhir akan menimpa kunci yang sama dari objek sebelumnya
-    const fullRenderData = { 
-        ...data, 
-        ...g, 
-        ...t, 
-        ...i,
-        ...renderData // Pastikan renderData yang sudah diproses ada di akhir untuk menimpa jika perlu
-    };
-    
     try {
-        doc.render(fullRenderData);
+        doc.render(renderData);
     } catch (error) {
-        console.error("GAGAL RENDER DOKUMEN:", error.message);
+        // Menangkap dan log error dari docxtemplater untuk debugging
+        console.error("GAGAL SAAT RENDER DOKUMEN:", error.message);
         const e = {
             message: error.message,
             name: error.name,
             stack: error.stack,
             properties: error.properties,
         };
-        console.log(JSON.stringify({error: e}));
+        console.log(JSON.stringify({
+            error: e
+        }));
         throw error;
     }
 
-    const docxBuffer = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
+    const docxBuffer = doc.getZip().generate({
+        type: 'nodebuffer',
+        compression: 'DEFLATE'
+    });
     const ownerName = (g.generalDataOwnerName || 'UnknownOwner').replace(/[^\w.-]/g, '_');
-    const fileName = `Laporan-MobileCrane-${ownerName}-${data.id}.docx`;
+    const fileName = `Laporan-MobileCrane-${ownerName}-${data.id || 'new'}.docx`;
 
-    return { docxBuffer, fileName };
+    return {
+        docxBuffer,
+        fileName
+    };
 };
 
 module.exports = {
