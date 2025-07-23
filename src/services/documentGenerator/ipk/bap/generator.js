@@ -56,22 +56,22 @@ const createBapProteksiKebakaran = async (data) => {
 
         // HASIL RIKSA UJI
         // PEMERIKSAAN VISUAL
-        visualInspectionAparStatusAvailable: formatBooleanToText(v.isAparAvailable, { true: 'Tersedia', false: 'Tidak Tersedia' }),
-        visualInspectionAparStatusGoodCondition: formatBooleanToText(v.isAparInGoodCondition, { true: 'Baik', false: 'Tidak Baik' }),
+        visualInspectionaparStatusisAvailable: formatBooleanToText(v.isAparAvailable, { true: 'Tersedia', false: 'Tidak Tersedia' }),
+        visualInspectionaparStatusisGoodCondition: formatBooleanToText(v.isAparInGoodCondition, { true: 'Baik', false: 'Tidak Baik' }),
         isHydrantPanelGoodCondition: formatBooleanToText(v.isHydrantPanelInGoodCondition, { true: 'Baik', false: 'Tidak Baik' }),
-        visualInspectionPumpStatusAvailable: formatBooleanToText(v.arePumpsAvailable, { true: 'Tersedia', false: 'Tidak Tersedia' }),
-        visualInspectionPumpStatusGoodCondition: formatBooleanToText(v.arePumpsInGoodCondition, { true: 'Baik', false: 'Tidak Baik' }),
-        sprinklerSystemStatusAvailable: formatBooleanToText(v.isSprinklerSystemAvailable, { true: 'Tersedia', false: 'Tidak Tersedia' }),
-        sprinklerSystemStatusGoodCondition: formatBooleanToText(v.isSprinklerSystemInGoodCondition, { true: 'Baik', false: 'Tidak Baik' }),
-        detectorSystemStatusAvailable: formatBooleanToText(v.isDetectorSystemAvailable, { true: 'Tersedia', false: 'Tidak Tersedia' }),
-        detectorSystemStatusGoodCondition: formatBooleanToText(v.isDetectorSystemInGoodCondition, { true: 'Baik', false: 'Tidak Baik' }),
+        isAvailable: formatBooleanToText(v.isPumpsAvailable, { true: 'Tersedia', false: 'Tidak Tersedia' }),
+        isGoodCondition: formatBooleanToText(v.isPumpsInGoodCondition, { true: 'Baik', false: 'Tidak Baik' }),
+        sprinklerSystemStatusisAvailable: formatBooleanToText(v.isSprinklerSystemAvailable, { true: 'Tersedia', false: 'Tidak Tersedia' }),
+        sprinklerSystemStatusisGoodCondition: formatBooleanToText(v.isSprinklerSystemInGoodCondition, { true: 'Baik', false: 'Tidak Baik' }),
+        detectorSystemStatusisAvailable: formatBooleanToText(v.isDetectorSystemAvailable, { true: 'Tersedia', false: 'Tidak Tersedia' }),
+        detectorSystemStatusisGoodCondition: formatBooleanToText(v.isDetectorSystemInGoodCondition, { true: 'Baik', false: 'Tidak Baik' }),
 
         // PENGUJIAN
         testingisAparFunctional: formatBooleanToText(f.isAparFunctional, { true: 'Berfungsi', false: 'Tidak Berfungsi' }),
         pumpTestResults: formatBooleanToText(f.arePumpsFunctional, { true: 'Berfungsi', false: 'Tidak Berfungsi' }),
         isSprinklerFunctional: formatBooleanToText(f.isSprinklerFunctional, { true: 'Berfungsi', false: 'Tidak Berfungsi' }),
-        detectorTestResultsIsFunctional: formatBooleanToText(f.isDetectorFunctional, { true: 'Berfungsi', false: 'Tidak Berfungsi' }),
-        detectorTestResultsIsConnectedToMcfa: formatBooleanToText(f.isDetectorConnectedToMcfa, { true: 'Terkoneksi', false: 'Tidak Terkoneksi' })
+        detectorTestResultsisFunctional: formatBooleanToText(f.isDetectorFunctional, { true: 'Berfungsi', false: 'Tidak Berfungsi' }),
+        detectorTestResultsisConnectedToMcfa: formatBooleanToText(f.isDetectorConnectedToMcfa, { true: 'Terkoneksi', false: 'Tidak Terkoneksi' })
     };
 
     doc.render(renderData);
