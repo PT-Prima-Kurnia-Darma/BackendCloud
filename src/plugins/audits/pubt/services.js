@@ -188,7 +188,7 @@ const pubtServices = {
         updateById: async (id, payload) => {
             const bapRef = auditCollection.doc(id);
             const bapDoc = await bapRef.get();
-            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') {
+            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Pesawat Uap dan Bejana Tekan') {
                 return null;
             }
 
@@ -242,7 +242,7 @@ const pubtServices = {
 
         getById: async (id) => {
             const doc = await auditCollection.doc(id).get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') {
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Pesawat Uap dan Bejana Tekan') {
                 return null;
             }
             return { id: doc.id, ...doc.data() };
@@ -251,7 +251,7 @@ const pubtServices = {
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
             const doc = await docRef.get();
-            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') {
+            if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Pesawat Uap dan Bejana Tekan') {
                 return null;
             }
             await docRef.delete();
