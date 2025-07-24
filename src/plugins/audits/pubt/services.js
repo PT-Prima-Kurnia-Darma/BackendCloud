@@ -2,17 +2,17 @@
 
 const db = require('../../../utils/firestore');
 const Boom = require('@hapi/boom');
-const auditCollection = db.collection('pubt'); 
+const auditCollection = db.collection('pubt');
 
 const pubtServices = {
     laporan: {
         create: async (payload) => {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
-            const dataToSave = { 
-                ...payload, 
-                subInspectionType: "Pesawat Uap dan Bejana Tekan", 
-                documentType: "Laporan", 
-                createdAt 
+            const dataToSave = {
+                ...payload,
+                subInspectionType: "Pesawat Uap dan Bejana Tekan",
+                documentType: "Laporan",
+                createdAt
             };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -44,10 +44,10 @@ const pubtServices = {
             if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Pesawat Uap dan Bejana Tekan') {
                 return null;
             }
-            
+
             await laporanRef.update(payload);
 
-            // Sinkronisasi dari Laporan ke BAP
+            // --- SINKRONISASI DARI LAPORAN KE BAP (LENGKAP) ---
             const bapQuery = await auditCollection
                 .where('laporanId', '==', id)
                 .where('documentType', '==', 'Berita Acara dan Pemeriksaan Pengujian')
@@ -57,15 +57,28 @@ const pubtServices = {
             if (!bapQuery.empty) {
                 const bapRef = bapQuery.docs[0].ref;
                 const dataToSync = {};
-                const p = payload;
+                const p = payload; 
 
-                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
-                if (p.inspectionType !== undefined) dataToSync.inspectionType = p.inspectionType;
-                if (p.generalData?.inspectionDate !== undefined) dataToSync.inspectionDate = p.generalData.inspectionDate;
+                // Data Umum Laporan -> Data Umum BAP
                 if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
                 if (p.generalData?.companyLocation !== undefined) dataToSync['generalData.companyLocation'] = p.generalData.companyLocation;
                 if (p.generalData?.userUsage !== undefined) dataToSync['generalData.userUsage'] = p.generalData.userUsage;
                 if (p.generalData?.userAddress !== undefined) dataToSync['generalData.userAddress'] = p.generalData.userAddress;
+
+                // Data Umum Laporan -> Data Teknis BAP
+                if (p.generalData?.brandType !== undefined) dataToSync['technicalData.brandType'] = p.generalData.brandType;
+                if (p.generalData?.manufacturer !== undefined) dataToSync['technicalData.manufacturer'] = p.generalData.manufacturer;
+                if (p.generalData?.countryAndYearOfManufacture !== undefined) dataToSync['technicalData.countryAndYearOfManufacture'] = p.generalData.countryAndYearOfManufacture;
+                if (p.generalData?.serialNumberUnitNumber !== undefined) dataToSync['technicalData.serialNumberUnitNumber'] = p.generalData.serialNumberUnitNumber;
+                if (p.generalData?.fuelType !== undefined) dataToSync['technicalData.fuelType'] = p.generalData.fuelType;
+                if (p.generalData?.operatingPressure !== undefined) dataToSync['technicalData.operatingPressure'] = String(p.generalData.operatingPressure);
+                if (p.generalData?.maxAllowableWorkingPressure !== undefined) dataToSync['technicalData.maxAllowableWorkingPressure'] = p.generalData.maxAllowableWorkingPressure;
+                
+                // Data level atas
+                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+                if (p.inspectionType !== undefined) dataToSync.inspectionType = p.inspectionType;
+                if (p.generalData?.inspectionDate !== undefined) dataToSync.inspectionDate = p.generalData.inspectionDate;
+
 
                 if (Object.keys(dataToSync).length > 0) {
                     await bapRef.update(dataToSync);
@@ -94,30 +107,31 @@ const pubtServices = {
                 return null;
             }
             const d = laporanDoc.data();
+            const g = d.generalData || {};
 
             return {
                 laporanId,
                 examinationType: d.examinationType || "",
                 inspectionType: d.inspectionType || "",
-                inspectionDate: d.generalData?.inspectionDate || "",
+                inspectionDate: g.inspectionDate || "",
                 generalData: {
-                    companyName: d.generalData?.companyName || "",
-                    companyLocation: d.generalData?.companyLocation || "",
-                    userUsage: d.generalData?.userUsage || "",
-                    userAddress: d.generalData?.userAddress || "",
+                    companyName: g.companyName || "",
+                    companyLocation: g.companyLocation || "",
+                    userUsage: g.userUsage || "",
+                    userAddress: g.userAddress || "",
                 },
                 technicalData: {
-                    brandType: d.generalData?.brandType || "",
-                    manufacturer: d.generalData?.manufacturer || "",
-                    countryAndYearOfManufacture: d.generalData?.countryAndYearOfManufacture || "",
-                    serialNumberUnitNumber: d.generalData?.serialNumberUnitNumber || "",
-                    fuelType: d.generalData?.fuelType || "",
-                    operatingPressure: d.generalData?.operatingPressure ? String(d.generalData.operatingPressure) : "",
-                    designPressureKgCm2: d.generalData?.designPressure || null,
-                    maxAllowableWorkingPressure: d.generalData?.maxAllowableWorkingPressure || null,
+                    brandType: g.brandType || "",
+                    manufacturer: g.manufacturer || "",
+                    countryAndYearOfManufacture: g.countryAndYearOfManufacture || "",
+                    serialNumberUnitNumber: g.serialNumberUnitNumber || "",
+                    fuelType: g.fuelType || "",
+                    operatingPressure: g.operatingPressure ? String(g.operatingPressure) : "",
+                    designPressureKgCm2: d.generalData?.designPressure || null, // Tetap dari designPressure laporan
+                    maxAllowableWorkingPressure: g.maxAllowableWorkingPressure || null,
                     technicalDataShellMaterial: d.technicalData?.shell?.material || "",
-                    safetyValveType: "", // Tidak ada di laporan
-                    volumeLiters: null // Tidak ada di laporan
+                    safetyValveType: "",
+                    volumeLiters: null
                 },
                 visualInspection: {},
                 testing: {}
@@ -132,28 +146,88 @@ const pubtServices = {
             const laporanDoc = await laporanRef.get();
             if (!laporanDoc.exists) throw Boom.notFound('Laporan PUBT tidak ditemukan.');
 
-            // Sinkronisasi dari BAP ke Laporan
+            // --- SINKRONISASI DARI BAP KE LAPORAN (LENGKAP) ---
             const dataToSync = {};
-            const p = payload;
+            const p = payload; // Payload dari BAP yang baru dibuat
 
+            // Data Umum BAP -> Data Umum Laporan
+            if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
+            if (p.generalData?.companyLocation !== undefined) dataToSync['generalData.companyLocation'] = p.generalData.companyLocation;
+            if (p.generalData?.userUsage !== undefined) dataToSync['generalData.userUsage'] = p.generalData.userUsage;
+            if (p.generalData?.userAddress !== undefined) dataToSync['generalData.userAddress'] = p.generalData.userAddress;
+
+            // Data Teknis BAP -> Data Umum Laporan
+            if (p.technicalData?.brandType !== undefined) dataToSync['generalData.brandType'] = p.technicalData.brandType;
+            if (p.technicalData?.manufacturer !== undefined) dataToSync['generalData.manufacturer'] = p.technicalData.manufacturer;
+            if (p.technicalData?.countryAndYearOfManufacture !== undefined) dataToSync['generalData.countryAndYearOfManufacture'] = p.technicalData.countryAndYearOfManufacture;
+            if (p.technicalData?.serialNumberUnitNumber !== undefined) dataToSync['generalData.serialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
+            if (p.technicalData?.fuelType !== undefined) dataToSync['generalData.fuelType'] = p.technicalData.fuelType;
+            if (p.technicalData?.operatingPressure !== undefined) dataToSync['generalData.operatingPressure'] = Number(p.technicalData.operatingPressure) || 0;
+            if (p.technicalData?.maxAllowableWorkingPressure !== undefined) dataToSync['generalData.maxAllowableWorkingPressure'] = p.technicalData.maxAllowableWorkingPressure;
+
+            // Data level atas
             if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
             if (p.inspectionType !== undefined) dataToSync.inspectionType = p.inspectionType;
             if (p.inspectionDate !== undefined) dataToSync['generalData.inspectionDate'] = p.inspectionDate;
-            if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
-            
+
             if (Object.keys(dataToSync).length > 0) {
                 await laporanRef.update(dataToSync);
             }
 
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
-            const dataToSave = { 
+            const dataToSave = {
                 ...payload,
                 subInspectionType: "Pesawat Uap dan Bejana Tekan",
-                documentType: "Berita Acara dan Pemeriksaan Pengujian", 
-                createdAt 
+                documentType: "Berita Acara dan Pemeriksaan Pengujian",
+                createdAt
             };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
+        },
+        
+        updateById: async (id, payload) => {
+            const bapRef = auditCollection.doc(id);
+            const bapDoc = await bapRef.get();
+            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') {
+                return null;
+            }
+
+            await bapRef.update(payload);
+
+            const { laporanId } = bapDoc.data();
+            if (laporanId) {
+                const laporanRef = auditCollection.doc(laporanId);
+                // --- SINKRONISASI DARI BAP KE LAPORAN (LENGKAP) ---
+                const dataToSync = {};
+                const p = payload; 
+
+                // Data Umum BAP -> Data Umum Laporan
+                if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
+                if (p.generalData?.companyLocation !== undefined) dataToSync['generalData.companyLocation'] = p.generalData.companyLocation;
+                if (p.generalData?.userUsage !== undefined) dataToSync['generalData.userUsage'] = p.generalData.userUsage;
+                if (p.generalData?.userAddress !== undefined) dataToSync['generalData.userAddress'] = p.generalData.userAddress;
+    
+                // Data Teknis BAP -> Data Umum Laporan
+                if (p.technicalData?.brandType !== undefined) dataToSync['generalData.brandType'] = p.technicalData.brandType;
+                if (p.technicalData?.manufacturer !== undefined) dataToSync['generalData.manufacturer'] = p.technicalData.manufacturer;
+                if (p.technicalData?.countryAndYearOfManufacture !== undefined) dataToSync['generalData.countryAndYearOfManufacture'] = p.technicalData.countryAndYearOfManufacture;
+                if (p.technicalData?.serialNumberUnitNumber !== undefined) dataToSync['generalData.serialNumberUnitNumber'] = p.technicalData.serialNumberUnitNumber;
+                if (p.technicalData?.fuelType !== undefined) dataToSync['generalData.fuelType'] = p.technicalData.fuelType;
+                if (p.technicalData?.operatingPressure !== undefined) dataToSync['generalData.operatingPressure'] = Number(p.technicalData.operatingPressure) || 0;
+                if (p.technicalData?.maxAllowableWorkingPressure !== undefined) dataToSync['generalData.maxAllowableWorkingPressure'] = p.technicalData.maxAllowableWorkingPressure;
+    
+                // Data level atas
+                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
+                if (p.inspectionType !== undefined) dataToSync.inspectionType = p.inspectionType;
+                if (p.inspectionDate !== undefined) dataToSync['generalData.inspectionDate'] = p.inspectionDate;
+
+                if (Object.keys(dataToSync).length > 0) {
+                    await laporanRef.update(dataToSync);
+                }
+            }
+
+            const updatedDoc = await bapRef.get();
+            return { id: updatedDoc.id, ...updatedDoc.data() };
         },
 
         getAll: async () => {
@@ -173,35 +247,6 @@ const pubtServices = {
             }
             return { id: doc.id, ...doc.data() };
         },
-        
-        updateById: async (id, payload) => {
-            const bapRef = auditCollection.doc(id);
-            const bapDoc = await bapRef.get();
-            if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') {
-                return null;
-            }
-            
-            await bapRef.update(payload);
-
-            const { laporanId } = bapDoc.data();
-            if (laporanId) {
-                const laporanRef = auditCollection.doc(laporanId);
-                const dataToSync = {};
-                const p = payload;
-
-                if (p.examinationType !== undefined) dataToSync.examinationType = p.examinationType;
-                if (p.inspectionType !== undefined) dataToSync.inspectionType = p.inspectionType;
-                if (p.inspectionDate !== undefined) dataToSync['generalData.inspectionDate'] = p.inspectionDate;
-                if (p.generalData?.companyName !== undefined) dataToSync['generalData.companyName'] = p.generalData.companyName;
-
-                if (Object.keys(dataToSync).length > 0) {
-                    await laporanRef.update(dataToSync);
-                }
-            }
-
-            const updatedDoc = await bapRef.get();
-            return { id: updatedDoc.id, ...updatedDoc.data() };
-        },
 
         deleteById: async (id) => {
             const docRef = auditCollection.doc(id);
@@ -211,7 +256,7 @@ const pubtServices = {
             }
             await docRef.delete();
             return id;
-        }
+        },
     }
 };
 
