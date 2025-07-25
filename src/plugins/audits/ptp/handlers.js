@@ -2,8 +2,8 @@
 
 const Boom = require('@hapi/boom');
 const { motorDieselServices } = require('./services');
-const { createLaporanPtpDiesel: generateLaporanDoc } = require('../../../services/documentGenerator/ptp/motorDiesel/laporan/generator');
-const { createBapPtpDiesel: generateBapDoc } = require('../../../services/documentGenerator/ptp/motorDiesel/bap/generator');
+const { createLaporanPtpDiesel: generateLaporanMotorDieselDoc } = require('../../../services/documentGenerator/ptp/motorDiesel/laporan/generator');
+const { createBapPtpDiesel: generateBapMotorDieselDoc } = require('../../../services/documentGenerator/ptp/motorDiesel/bap/generator');
 
 const motorDieselHandlers = {
     laporan: {
@@ -56,7 +56,7 @@ const motorDieselHandlers = {
                 const laporanData = await motorDieselServices.laporan.getById(request.params.id);
                 if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan Motor Diesel tidak ditemukan.');
                 
-                const { docxBuffer, fileName } = await generateLaporanDoc(laporanData);
+                const { docxBuffer, fileName } = await generateLaporanMotorDieselDoc(laporanData);
 
                 return h.response(docxBuffer)
                     .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
@@ -130,7 +130,7 @@ const motorDieselHandlers = {
                 const bapData = await motorDieselServices.bap.getById(request.params.id);
                 if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Motor Diesel tidak ditemukan.');
                 
-                const { docxBuffer, fileName } = await generateBapDoc(bapData);
+                const { docxBuffer, fileName } = await generateBapMotorDieselDoc(bapData);
 
                 return h.response(docxBuffer)
                     .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
