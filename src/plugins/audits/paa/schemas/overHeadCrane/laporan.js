@@ -58,7 +58,6 @@ const laporanOverheadCranePayload = Joi.object({
         yearOfManufacture: Joi.string().allow('', null).optional(),
         serialNumberUnitNumber: Joi.string().allow('', null).optional(),
         capacityWorkingLoadKg: Joi.string().allow(null).optional(),
-        legalBasis: Joi.string().allow('', null).optional(),
         intendedUse: Joi.string().allow('', null).optional(),
         usagePermitNumber: Joi.string().allow('', null).optional(),
         operatorCertificate: Joi.string().allow('', null).optional(),
