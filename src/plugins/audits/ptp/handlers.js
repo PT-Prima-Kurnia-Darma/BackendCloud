@@ -78,6 +78,80 @@ const motorDieselHandlers = {
                 return Boom.badImplementation('Gagal memproses dokumen Laporan Motor Diesel.');
             }
         },
+    },
+
+    bap: {
+        prefill: async (request, h) => {
+            try {
+                const { laporanId } = request.params;
+                const prefilledData = await motorDieselServices.bap.getDataForPrefill(laporanId);
+                if (!prefilledData) {
+                    return Boom.notFound('Data Laporan asal tidak ditemukan untuk prefill BAP.');
+                }
+                return h.response({ status: 'success', message: 'Data untuk BAP berhasil disiapkan', data: prefilledData });
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil data untuk BAP.');
+            }
+        },
+        create: async (request, h) => {
+            try {
+                const newBap = await motorDieselServices.bap.create(request.payload);
+                return h.response({ status: 'success', message: 'BAP Motor Diesel berhasil dibuat', data: { bap: newBap } }).code(201);
+            } catch (error) {
+                if(error.isBoom) return error;
+                return Boom.badImplementation('Gagal membuat BAP Motor Diesel.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allBap = await motorDieselServices.bap.getAll();
+                return { status: 'success', message: 'Semua BAP Motor Diesel berhasil didapatkan', data: { bap: allBap } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil daftar BAP Motor Diesel.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const bap = await motorDieselServices.bap.getById(request.params.id);
+                if (!bap) return Boom.notFound('BAP Motor Diesel tidak ditemukan.');
+                return { status: 'success', message: 'BAP Motor Diesel berhasil didapatkan', data: { bap } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil BAP Motor Diesel.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await motorDieselServices.bap.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, BAP Motor Diesel tidak ditemukan.');
+                return { status: 'success', message: 'BAP Motor Diesel berhasil diperbarui', data: { bap: updated } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal memperbarui BAP Motor Diesel.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await motorDieselServices.bap.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, BAP Motor Diesel tidak ditemukan.');
+                return { status: 'success', message: 'BAP Motor Diesel berhasil dihapus' };
+            } catch (error) {
+                return Boom.badImplementation('Gagal menghapus BAP Motor Diesel.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const bapData = await motorDieselServices.bap.getById(request.params.id);
+                if (!bapData) return Boom.notFound('Gagal membuat dokumen, BAP Motor Diesel tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateBapDoc(bapData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'BAP Motor Diesel berhasil diunduh');
+            } catch (error) {
+                return Boom.badImplementation('Gagal memproses dokumen BAP Motor Diesel.');
+            }
+        },
     }
 };
 
