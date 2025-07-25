@@ -149,61 +149,61 @@ const mesinHandlers = {
         create: async (request, h) => {
             try {
                 const newLaporan = await mesinServices.laporan.create(request.payload);
-                return h.response({ status: 'success', message: 'Laporan Mesin berhasil dibuat', data: { laporan: newLaporan } }).code(201);
+                return h.response({ status: 'success', message: 'Laporan PTP Mesin berhasil dibuat', data: { laporan: newLaporan } }).code(201);
             } catch (error) {
-                console.error('Error creating Laporan Mesin:', error);
-                return Boom.badImplementation('Gagal membuat Laporan Mesin.');
+                console.error('Error creating Laporan PTP Mesin:', error);
+                return Boom.badImplementation('Gagal membuat Laporan PTP Mesin.');
             }
         },
         getAll: async (request, h) => {
             try {
                 const allLaporan = await mesinServices.laporan.getAll();
-                return { status: 'success', message: 'Laporan Mesin berhasil didapatkan', data: { laporan: allLaporan } };
+                return { status: 'success', message: 'Laporan PTP Mesin berhasil didapatkan', data: { laporan: allLaporan } };
             } catch (error) {
-                return Boom.badImplementation('Gagal mengambil daftar Laporan Mesin.');
+                return Boom.badImplementation('Gagal mengambil daftar Laporan PTP Mesin.');
             }
         },
         getById: async (request, h) => {
             try {
                 const laporan = await mesinServices.laporan.getById(request.params.id);
-                if (!laporan) return Boom.notFound('Laporan Mesin tidak ditemukan.');
-                return { status: 'success', message: 'Laporan Mesin berhasil didapatkan', data: { laporan } };
+                if (!laporan) return Boom.notFound('Laporan PTP Mesin tidak ditemukan.');
+                return { status: 'success', message: 'Laporan PTP Mesin berhasil didapatkan', data: { laporan } };
             } catch (error) {
-                return Boom.badImplementation('Gagal mengambil Laporan Mesin.');
+                return Boom.badImplementation('Gagal mengambil Laporan PTP Mesin.');
             }
         },
         update: async (request, h) => {
             try {
                 const updated = await mesinServices.laporan.updateById(request.params.id, request.payload);
-                if (!updated) return Boom.notFound('Gagal memperbarui, Laporan Mesin tidak ditemukan.');
-                return { status: 'success', message: 'Laporan Mesin berhasil diperbarui', data: { laporan: updated } };
+                if (!updated) return Boom.notFound('Gagal memperbarui, Laporan PTP Mesin tidak ditemukan.');
+                return { status: 'success', message: 'Laporan PTP Mesin berhasil diperbarui', data: { laporan: updated } };
             } catch (error) {
-                return Boom.badImplementation('Gagal memperbarui Laporan Mesin.');
+                return Boom.badImplementation('Gagal memperbarui Laporan PTP Mesin.');
             }
         },
         delete: async (request, h) => {
             try {
                 const deletedId = await mesinServices.laporan.deleteById(request.params.id);
-                if (!deletedId) return Boom.notFound('Gagal menghapus, Laporan Mesin tidak ditemukan.');
-                return { status: 'success', message: 'Laporan Mesin berhasil dihapus' };
+                if (!deletedId) return Boom.notFound('Gagal menghapus, Laporan PTP Mesin tidak ditemukan.');
+                return { status: 'success', message: 'Laporan PTP Mesin berhasil dihapus' };
             } catch (error) {
-                return Boom.badImplementation('Gagal menghapus Laporan Mesin.');
+                return Boom.badImplementation('Gagal menghapus Laporan PTP Mesin.');
             }
         },
         download: async (request, h) => {
             try {
                 const laporanData = await mesinServices.laporan.getById(request.params.id);
-                if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan Mesin tidak ditemukan.');
+                if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan PTP Mesin tidak ditemukan.');
                 
                 const { docxBuffer, fileName } = await generateLaporanMesinDoc(laporanData);
 
                 return h.response(docxBuffer)
                     .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
                     .header('Content-Disposition', `attachment; filename="${fileName}"`)
-                    .header('message', 'Laporan Mesin berhasil diunduh');
+                    .header('message', 'Laporan PTP Mesin berhasil diunduh');
             } catch (error) {
                 console.error('Download error:', error);
-                return Boom.badImplementation('Gagal memproses dokumen Laporan Mesin.');
+                return Boom.badImplementation('Gagal memproses dokumen Laporan PTP Mesin.');
             }
         },
     }
