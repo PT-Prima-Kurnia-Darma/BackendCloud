@@ -44,6 +44,10 @@ const motorDieselServices = {
                 return null;
             }
 
+            delete payload.subInspectionType;
+            delete payload.documentType;
+            delete payload.createdAt;
+
             await laporanRef.update(payload);
             const updatedDoc = await laporanRef.get();
             return { id: updatedDoc.id, ...updatedDoc.data() };

@@ -21,7 +21,7 @@ const getRemarksText = (item) => (item ? item.remarks : '');
 
 const createLaporanPtpDiesel = async (data) => {
     // Nama file template harus sesuai dengan yang diunggah
-    const templatePath = 'ptp/laporanPtpDiesel.docx';
+    const templatePath = 'ptp//laporanPtpDiesel.docx';
 
     let content;
     try {
