@@ -24,7 +24,8 @@ const init = async () => {
     require('./src/plugins/audits/paa'),
     require('./src/plugins/audits/petirListrik'),
     require('./src/plugins/audits/ipk'),
-    require('./src/plugins/audits/pubt')
+    require('./src/plugins/audits/pubt'),
+    require('./src/plugins/audits/ptp'),
   ]);
 
   // Logging sederhana
