@@ -2,7 +2,7 @@
 
 const Joi = require('joi');
 const { motorDieselHandlers } = require('./handlers');
-const { laporanPtpDieselPayload } = require('./schemas/laporan');
+const { laporanPtpDieselPayload } = require('./schemas/motorDiesel/laporan');
 
 const LAPORAN_PTP_DIESEL_PREFIX = '/ptp/motorDiesel/laporan';
 

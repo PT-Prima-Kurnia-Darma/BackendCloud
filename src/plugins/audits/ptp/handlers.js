@@ -2,7 +2,7 @@
 
 const Boom = require('@hapi/boom');
 const { motorDieselServices } = require('./services');
-const { createLaporanPtpDiesel: generateLaporanDoc } = require('../../../services/documentGenerator/ptp/laporan/generator');
+const { createLaporanPtpDiesel: generateLaporanDoc } = require('../../../services/documentGenerator/ptp/motorDiesel/laporan/generator');
 
 const motorDieselHandlers = {
     laporan: {
