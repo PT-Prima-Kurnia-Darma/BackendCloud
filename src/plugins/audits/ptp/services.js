@@ -95,7 +95,7 @@ const motorDieselServices = {
         },
     },
 
-        bap: {
+    bap: {
         getDataForPrefill: async (laporanId) => {
             const laporanDoc = await auditCollection.doc(laporanId).get();
             if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Motor Diesel') {

@@ -3,7 +3,7 @@
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
 const { Storage } = require('@google-cloud/storage');
-const config = require('../../../../config');
+const config = require('../../../../../config');
 
 let privateKey = config.FIRESTORE_PRIVATE_KEY.replace(/\\n/g, '\n');
 const storage = new Storage({
