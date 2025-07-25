@@ -54,10 +54,6 @@ const bapMobileCranePayload = Joi.object({
         }).optional(),
     }).optional(),
 
-    signature: Joi.object({
-        companyName: Joi.string().allow('').optional(),
-    }).optional(),
-
 }).min(1).unknown(false);
 
 module.exports = {
