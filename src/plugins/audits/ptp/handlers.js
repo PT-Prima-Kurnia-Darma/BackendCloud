@@ -1,9 +1,10 @@
 'use strict';
 
 const Boom = require('@hapi/boom');
-const { motorDieselServices } = require('./services');
+const { motorDieselServices, mesinServices } = require('./services');
 const { createLaporanPtpDiesel: generateLaporanMotorDieselDoc } = require('../../../services/documentGenerator/ptp/motorDiesel/laporan/generator');
 const { createBapPtpDiesel: generateBapMotorDieselDoc } = require('../../../services/documentGenerator/ptp/motorDiesel/bap/generator');
+const { createLaporanPtpMesin: generateLaporanMesinDoc } = require('../../../services/documentGenerator/ptp/mesin/laporan/generator');
 
 const motorDieselHandlers = {
     laporan: {
@@ -143,6 +144,72 @@ const motorDieselHandlers = {
     }
 };
 
+const mesinHandlers = {
+    laporan: {
+        create: async (request, h) => {
+            try {
+                const newLaporan = await mesinServices.laporan.create(request.payload);
+                return h.response({ status: 'success', message: 'Laporan Mesin berhasil dibuat', data: { laporan: newLaporan } }).code(201);
+            } catch (error) {
+                console.error('Error creating Laporan Mesin:', error);
+                return Boom.badImplementation('Gagal membuat Laporan Mesin.');
+            }
+        },
+        getAll: async (request, h) => {
+            try {
+                const allLaporan = await mesinServices.laporan.getAll();
+                return { status: 'success', message: 'Laporan Mesin berhasil didapatkan', data: { laporan: allLaporan } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil daftar Laporan Mesin.');
+            }
+        },
+        getById: async (request, h) => {
+            try {
+                const laporan = await mesinServices.laporan.getById(request.params.id);
+                if (!laporan) return Boom.notFound('Laporan Mesin tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Mesin berhasil didapatkan', data: { laporan } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal mengambil Laporan Mesin.');
+            }
+        },
+        update: async (request, h) => {
+            try {
+                const updated = await mesinServices.laporan.updateById(request.params.id, request.payload);
+                if (!updated) return Boom.notFound('Gagal memperbarui, Laporan Mesin tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Mesin berhasil diperbarui', data: { laporan: updated } };
+            } catch (error) {
+                return Boom.badImplementation('Gagal memperbarui Laporan Mesin.');
+            }
+        },
+        delete: async (request, h) => {
+            try {
+                const deletedId = await mesinServices.laporan.deleteById(request.params.id);
+                if (!deletedId) return Boom.notFound('Gagal menghapus, Laporan Mesin tidak ditemukan.');
+                return { status: 'success', message: 'Laporan Mesin berhasil dihapus' };
+            } catch (error) {
+                return Boom.badImplementation('Gagal menghapus Laporan Mesin.');
+            }
+        },
+        download: async (request, h) => {
+            try {
+                const laporanData = await mesinServices.laporan.getById(request.params.id);
+                if (!laporanData) return Boom.notFound('Gagal membuat dokumen, Laporan Mesin tidak ditemukan.');
+                
+                const { docxBuffer, fileName } = await generateLaporanMesinDoc(laporanData);
+
+                return h.response(docxBuffer)
+                    .header('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    .header('Content-Disposition', `attachment; filename="${fileName}"`)
+                    .header('message', 'Laporan Mesin berhasil diunduh');
+            } catch (error) {
+                console.error('Download error:', error);
+                return Boom.badImplementation('Gagal memproses dokumen Laporan Mesin.');
+            }
+        },
+    }
+};
+
 module.exports = {
     motorDieselHandlers,
+    mesinHandlers
 };
