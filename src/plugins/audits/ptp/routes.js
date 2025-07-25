@@ -1,7 +1,7 @@
 'use strict';
 
 const Joi = require('joi');
-const { motorDieselHandlers } = require('./handlers');
+const { motorDieselHandlers, mesinHandlers } = require('./handlers');
 const { laporanPtpDieselPayload } = require('./schemas/motorDiesel/laporan');
 const { bapPtpMotorDieselPayload } = require('./schemas/motorDiesel/bap');
 const { laporanPtpMesinPayload } = require('./schemas/mesin/laporan');
