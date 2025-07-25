@@ -240,7 +240,7 @@ const mesinServices = {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
             const dataToSave = {
                 ...payload,
-                subInspectionType: "Mesin", // Penanda khusus
+                subInspectionType: "Mesin",
                 documentType: "Laporan",
                 createdAt
             };

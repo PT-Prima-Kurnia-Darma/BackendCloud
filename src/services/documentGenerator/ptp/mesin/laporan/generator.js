@@ -16,7 +16,7 @@ const getCheckmark = (status) => (status === true ? '√' : '');
 const getOppositeCheckmark = (status) => (status === false ? '√' : '');
 
 const createLaporanPtpMesin = async (data) => {
-    const templatePath = 'laporanPtpMesin.docx'; // Nama file template Anda
+    const templatePath = 'ptp/mesin/laporanPtpMesin.docx';
 
     let content;
     try {
