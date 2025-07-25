@@ -16,7 +16,6 @@ const testResultSchema = Joi.object({
 
 const laporanPtpDieselPayload = Joi.object({
     examinationType: Joi.string().allow('').optional(),
-    subInspectionType: Joi.string().valid('MOTOR DIESEL').required(),
     extraId: Joi.number().allow(null).optional(),
     createdAt: Joi.string().allow('').optional(),
     inspectionType: Joi.string().allow('').optional(),

@@ -108,7 +108,6 @@ const motorDieselServices = {
             return {
                 laporanId,
                 examinationType: d.examinationType || "",
-                subInspectionType: "MOTOR DIESEL",
                 inspectionDate: d.inspectionDate || "",
                 generalData: {
                     companyName: d.generalData?.companyName || "",
