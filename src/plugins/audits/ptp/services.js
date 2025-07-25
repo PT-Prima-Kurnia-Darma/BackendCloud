@@ -1,16 +1,15 @@
 'use strict';
 
 const db = require('../../../utils/firestore');
-const Boom = require('@hapi/boom');
-const auditCollection = db.collection('ptp'); // Koleksi baru untuk PTP
+const auditCollection = db.collection('ptp');
 
-const ptpServices = {
+const motorDieselServices = {
     laporan: {
         create: async (payload) => {
             const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
             const dataToSave = {
                 ...payload,
-                subInspectionType: "Motor Diesel", // Hardcoded untuk memastikan tipe yang benar
+                subInspectionType: "Motor Diesel",
                 documentType: "Laporan",
                 createdAt
             };
@@ -63,5 +62,5 @@ const ptpServices = {
 };
 
 module.exports = {
-    ptpServices,
+    motorDieselServices,
 };

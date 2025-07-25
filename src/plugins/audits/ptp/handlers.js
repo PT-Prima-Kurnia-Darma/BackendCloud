@@ -1,14 +1,14 @@
 'use strict';
 
 const Boom = require('@hapi/boom');
-const { ptpServices } = require('./services');
+const { motorDieselServices } = require('./services');
 const { createLaporanPtpDiesel: generateLaporanDoc } = require('../../../services/documentGenerator/ptp/laporan/generator');
 
-const ptpHandlers = {
+const motorDieselHandlers = {
     laporan: {
         create: async (request, h) => {
             try {
-                const newLaporan = await ptpServices.laporan.create(request.payload);
+                const newLaporan = await motorDieselServices.laporan.create(request.payload);
                 return h.response({ status: 'success', message: 'Laporan Motor Diesel berhasil dibuat', data: { laporan: newLaporan } }).code(201);
             } catch (error) {
                 console.error('Error in createLaporanPtpDieselHandler:', error);
@@ -17,8 +17,8 @@ const ptpHandlers = {
         },
         getAll: async (request, h) => {
             try {
-                const allLaporan = await ptpServices.laporan.getAll();
-                return { status: 'success', message: 'Semua Laporan Motor Diesel berhasil didapatkan', data: { laporan: allLaporan } };
+                const allLaporan = await motorDieselServices.laporan.getAll();
+                return { status: 'success', message: 'Laporan Motor Diesel berhasil didapatkan', data: { laporan: allLaporan } };
             } catch (error) {
                 console.error('Error in getAllLaporanPtpDieselHandler:', error);
                 return Boom.badImplementation('Gagal mengambil daftar Laporan Motor Diesel.');
@@ -26,7 +26,7 @@ const ptpHandlers = {
         },
         getById: async (request, h) => {
             try {
-                const laporan = await ptpServices.laporan.getById(request.params.id);
+                const laporan = await motorDieselServices.laporan.getById(request.params.id);
                 if (!laporan) {
                     return Boom.notFound('Laporan Motor Diesel tidak ditemukan.');
                 }
@@ -38,7 +38,7 @@ const ptpHandlers = {
         },
         update: async (request, h) => {
             try {
-                const updated = await ptpServices.laporan.updateById(request.params.id, request.payload);
+                const updated = await motorDieselServices.laporan.updateById(request.params.id, request.payload);
                 if (!updated) {
                     return Boom.notFound('Gagal memperbarui, Laporan Motor Diesel tidak ditemukan.');
                 }
@@ -50,7 +50,7 @@ const ptpHandlers = {
         },
         delete: async (request, h) => {
             try {
-                const deletedId = await ptpServices.laporan.deleteById(request.params.id);
+                const deletedId = await motorDieselServices.laporan.deleteById(request.params.id);
                 if (!deletedId) {
                     return Boom.notFound('Gagal menghapus, Laporan Motor Diesel tidak ditemukan.');
                 }
@@ -62,7 +62,7 @@ const ptpHandlers = {
         },
         download: async (request, h) => {
             try {
-                const laporanData = await ptpServices.laporan.getById(request.params.id);
+                const laporanData = await motorDieselServices.laporan.getById(request.params.id);
                 if (!laporanData) {
                     return Boom.notFound('Gagal membuat dokumen, Laporan Motor Diesel tidak ditemukan.');
                 }
@@ -82,5 +82,5 @@ const ptpHandlers = {
 };
 
 module.exports = {
-    ptpHandlers,
+    motorDieselHandlers,
 };

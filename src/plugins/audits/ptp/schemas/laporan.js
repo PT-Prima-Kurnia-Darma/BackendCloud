@@ -19,6 +19,7 @@ const laporanPtpDieselPayload = Joi.object({
     subInspectionType: Joi.string().valid('MOTOR DIESEL').required(),
     extraId: Joi.number().allow(null).optional(),
     createdAt: Joi.string().allow('').optional(),
+    inspectionType: Joi.string().allow('').optional(),
 
     generalData: Joi.object({
         companyName: Joi.string().allow('').optional(),

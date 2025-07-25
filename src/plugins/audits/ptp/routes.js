@@ -1,7 +1,7 @@
 'use strict';
 
 const Joi = require('joi');
-const { ptpHandlers } = require('./handlers');
+const { motorDieselHandlers } = require('./handlers');
 const { laporanPtpDieselPayload } = require('./schemas/laporan');
 
 const LAPORAN_PTP_DIESEL_PREFIX = '/ptp/motorDiesel/laporan';
@@ -11,7 +11,7 @@ module.exports = [
     {
         method: 'POST',
         path: LAPORAN_PTP_DIESEL_PREFIX,
-        handler: ptpHandlers.laporan.create,
+        handler: motorDieselHandlers.laporan.create,
         options: {
             auth: 'jwt',
             tags: ['api', 'PTP - Laporan Motor Diesel'],
@@ -21,13 +21,13 @@ module.exports = [
     {
         method: 'GET',
         path: LAPORAN_PTP_DIESEL_PREFIX,
-        handler: ptpHandlers.laporan.getAll,
+        handler: motorDieselHandlers.laporan.getAll,
         options: { auth: 'jwt', tags: ['api', 'PTP - Laporan Motor Diesel'] },
     },
     {
         method: 'GET',
         path: `${LAPORAN_PTP_DIESEL_PREFIX}/{id}`,
-        handler: ptpHandlers.laporan.getById,
+        handler: motorDieselHandlers.laporan.getById,
         options: { 
             auth: 'jwt', 
             tags: ['api', 'PTP - Laporan Motor Diesel'],
@@ -37,7 +37,7 @@ module.exports = [
     {
         method: 'PUT',
         path: `${LAPORAN_PTP_DIESEL_PREFIX}/{id}`,
-        handler: ptpHandlers.laporan.update,
+        handler: motorDieselHandlers.laporan.update,
         options: { 
             auth: 'jwt', 
             tags: ['api', 'PTP - Laporan Motor Diesel'],
@@ -50,7 +50,7 @@ module.exports = [
     {
         method: 'DELETE',
         path: `${LAPORAN_PTP_DIESEL_PREFIX}/{id}`,
-        handler: ptpHandlers.laporan.delete,
+        handler: motorDieselHandlers.laporan.delete,
         options: { 
             auth: 'jwt', 
             tags: ['api', 'PTP - Laporan Motor Diesel'],
@@ -60,7 +60,7 @@ module.exports = [
     {
         method: 'GET',
         path: `${LAPORAN_PTP_DIESEL_PREFIX}/download/{id}`,
-        handler: ptpHandlers.laporan.download,
+        handler: motorDieselHandlers.laporan.download,
         options: { 
             auth: 'jwt', 
             tags: ['api', 'PTP - Laporan Motor Diesel'],
