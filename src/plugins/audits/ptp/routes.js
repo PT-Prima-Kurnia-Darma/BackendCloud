@@ -5,10 +5,12 @@ const { motorDieselHandlers, mesinHandlers } = require('./handlers');
 const { laporanPtpDieselPayload } = require('./schemas/motorDiesel/laporan');
 const { bapPtpMotorDieselPayload } = require('./schemas/motorDiesel/bap');
 const { laporanPtpMesinPayload } = require('./schemas/mesin/laporan');
+const { bapPtpMesinPayload } = require('./schemas/mesin/bap');
 
 const LAPORAN_PTP_DIESEL_PREFIX = '/ptp/motorDiesel/laporan';
 const BAP_PTP_DIESEL_PREFIX = '/ptp/motorDiesel/bap';
 const LAPORAN_PTP_MESIN_PREFIX = '/ptp/mesin/laporan'; 
+const BAP_PTP_MESIN_PREFIX = '/ptp/mesin/bap';
 
 module.exports = [
     // ENDPOINT LAPORAN MOTOR DIESEL
@@ -200,6 +202,77 @@ module.exports = [
         options: { 
             auth: 'jwt', 
             tags: ['api', 'PTP - Laporan Mesin'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+
+    // --- BAP MESIN ROUTES ---
+    {
+        method: 'GET',
+        path: `${BAP_PTP_MESIN_PREFIX}/prefill/{laporanId}`,
+        handler: mesinHandlers.bap.prefill,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PTP - BAP Mesin'],
+            validate: { params: Joi.object({ laporanId: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'POST',
+        path: BAP_PTP_MESIN_PREFIX,
+        handler: mesinHandlers.bap.create,
+        options: {
+            auth: 'jwt',
+            tags: ['api', 'PTP - BAP Mesin'],
+            validate: { payload: bapPtpMesinPayload }
+        },
+    },
+    {
+        method: 'GET',
+        path: BAP_PTP_MESIN_PREFIX,
+        handler: mesinHandlers.bap.getAll,
+        options: { auth: 'jwt', tags: ['api', 'PTP - BAP Mesin'] },
+    },
+    {
+        method: 'GET',
+        path: `${BAP_PTP_MESIN_PREFIX}/{id}`,
+        handler: mesinHandlers.bap.getById,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PTP - BAP Mesin'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) }
+        },
+    },
+    {
+        method: 'PUT',
+        path: `${BAP_PTP_MESIN_PREFIX}/{id}`,
+        handler: mesinHandlers.bap.update,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PTP - BAP Mesin'],
+            validate: { 
+                params: Joi.object({ id: Joi.string().required() }), 
+                payload: bapPtpMesinPayload
+            } 
+        },
+    },
+    {
+        method: 'DELETE',
+        path: `${BAP_PTP_MESIN_PREFIX}/{id}`,
+        handler: mesinHandlers.bap.delete,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PTP - BAP Mesin'],
+            validate: { params: Joi.object({ id: Joi.string().required() }) } 
+        },
+    },
+    {
+        method: 'GET',
+        path: `${BAP_PTP_MESIN_PREFIX}/download/{id}`,
+        handler: mesinHandlers.bap.download,
+        options: { 
+            auth: 'jwt', 
+            tags: ['api', 'PTP - BAP Mesin'],
             validate: { params: Joi.object({ id: Joi.string().required() }) } 
         },
     },
