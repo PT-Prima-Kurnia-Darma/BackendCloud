@@ -1,0 +1,62 @@
+# Nama alur kerja (workflow) yang akan muncul di tab "Actions" GitHub
+name: Deploy to Cloud Run
+
+# Pemicu: Alur kerja ini akan berjalan setiap kali ada 'push' ke cabang 'production'
+on:
+  push:
+    branches:
+      - production
+
+# Variabel lingkungan yang akan digunakan di seluruh alur kerja
+env:
+  PROJECT_ID: server-backend-464006
+  REGION: asia-southeast2
+  SERVICE_NAME: nakersolutions
+  
+jobs:
+  deploy:
+    # Menggunakan environment terbaru yang disediakan GitHub
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Langkah 1: Mengunduh kode dari repositori
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Langkah 2: Autentikasi ke Google Cloud
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      # Langkah 3: Menyiapkan Google Cloud SDK (gcloud CLI)
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # LANGKAH BARU: Membuat repositori Artifact Registry jika belum ada
+      - name: Create Artifact Registry repository
+        run: |-
+          gcloud artifacts repositories create ${{ env.SERVICE_NAME }} \
+            --repository-format=docker \
+            --location=${{ env.REGION }} \
+            --description="Docker repository for ${{ env.SERVICE_NAME }}" || echo "Repository already exists"
+
+      # Langkah 5: Mengonfigurasi Docker untuk bisa 'push' image
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      # Langkah 6: Membangun dan mengunggah Docker image
+      - name: Build and push Docker image
+        run: |-
+          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+
+      # Langkah 7: Menerapkan image baru ke Cloud Run
+      - name: Deploy to Cloud Run
+        run: |-
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --min-instances=0 \
+            --allow-unauthenticated
