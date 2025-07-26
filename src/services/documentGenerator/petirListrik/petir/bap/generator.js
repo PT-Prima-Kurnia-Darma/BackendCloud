@@ -10,7 +10,7 @@ const storage = new Storage({
     projectId: config.FIRESTORE_PROJECT_ID,
     credentials: { client_email: config.FIRESTORE_CLIENT_EMAIL, private_key: privateKey },
 });
-const BUCKET_NAME = 'tamplate-audit-riksauji';
+const BUCKET_NAME = 'audit-riksauji';
 
 // Helper function to convert boolean to specific Indonesian text
 const formatBooleanToText = (value, trueText, falseText) => {

@@ -11,7 +11,7 @@ const storage = new Storage({
     projectId: config.FIRESTORE_PROJECT_ID,
     credentials: { client_email: config.FIRESTORE_CLIENT_EMAIL, private_key: privateKey },
 });
-const BUCKET_NAME = 'tamplate-audit-riksauji';
+const BUCKET_NAME = 'audit-riksauji';
 
 // Helper untuk mengubah boolean menjadi teks yang sesuai untuk BAP
 const formatBooleanToText = (status, trueText, falseText) => {

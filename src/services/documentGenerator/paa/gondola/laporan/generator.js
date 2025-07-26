@@ -14,7 +14,7 @@ const storage = new Storage({
     },
 });
 
-const BUCKET_NAME = 'tamplate-audit-riksauji'; // Pastikan nama bucket Anda benar
+const BUCKET_NAME = 'audit-riksauji'; // Pastikan nama bucket Anda benar
 
 const getCheckmark = (status) => (status ? '√' : '');
 

@@ -18,7 +18,7 @@ const storage = new Storage({
     },
 });
 
-const bucketName = 'tamplate-audit-riksauji';
+const bucketName = 'audit-riksauji';
 
 function getCheckmark(status) {
     if (status === true) return '✓';

@@ -16,7 +16,7 @@ const storage = new Storage({
         private_key: privateKey
     },
 });
-const BUCKET_NAME = 'tamplate-audit-riksauji'; // Pastikan nama bucket sudah benar
+const BUCKET_NAME = 'audit-riksauji'; // Pastikan nama bucket sudah benar
 
 // Helper untuk mengubah nilai boolean menjadi tanda centang '√' atau string kosong
 const getCheckmark = (status) => (status === true ? '√' : '');

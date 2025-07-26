@@ -19,7 +19,7 @@ const storage = new Storage({
     },
 });
 
-const BUCKET_NAME = 'tamplate-audit-riksauji';
+const BUCKET_NAME = 'audit-riksauji';
 
 function getCheckmark(status) {
     if (status === true) return '✓';

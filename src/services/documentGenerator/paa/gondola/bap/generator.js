@@ -13,7 +13,7 @@ const storage = new Storage({
     },
 });
 
-const BUCKET_NAME = 'tamplate-audit-riksauji';
+const BUCKET_NAME = 'audit-riksauji';
 
 const getChoice = (condition, choices) => (condition ? choices[0] : choices[1]);
 

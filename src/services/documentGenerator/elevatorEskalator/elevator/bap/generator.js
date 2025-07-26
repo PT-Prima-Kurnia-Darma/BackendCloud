@@ -18,7 +18,7 @@ const storage = new Storage({
     },
 });
 
-const bucketName = 'tamplate-audit-riksauji';
+const bucketName = 'audit-riksauji';
 
 const formatBoolean = (status, trueText, falseText, defaultText) => {
     if (status === true) return trueText;

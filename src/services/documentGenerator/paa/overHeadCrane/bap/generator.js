@@ -12,7 +12,7 @@ const storage = new Storage({
       private_key: config.FIRESTORE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     },
 });
-const BUCKET_NAME = 'tamplate-audit-riksauji';
+const BUCKET_NAME = 'audit-riksauji';
 
 const formatBooleanToText = (status, trueText, falseText) => {
     if (status === true) return trueText;
