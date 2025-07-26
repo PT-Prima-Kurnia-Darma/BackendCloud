@@ -221,7 +221,7 @@ const mesinHandlers = {
                 return h.response({ status: 'success', message: 'Data BAP PTP Mesin berhasil didapat', data: prefilledData });
             } catch (error) {
                 console.error('Error in BAP prefill handler:', error);
-                return Boom.badImplementation('Gagal mengambil data untuk BAP.');
+                return Boom.badImplementation('Gagal mengambil data untuk BAP PTP Mesin.');
             }
         },
         create: async (request, h) => {

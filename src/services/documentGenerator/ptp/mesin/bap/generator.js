@@ -19,7 +19,7 @@ const formatCondition = (status, choices) => {
 };
 
 const createBapPtpMesin = async (data) => {
-    const templatePath = 'ptp/mesin/bapPtpMesin.docx'; // Anda perlu menyiapkan template ini di GCS
+    const templatePath = 'ptp/mesin/bapPtp.docx';
 
     let content;
     try {
