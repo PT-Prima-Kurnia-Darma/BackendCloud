@@ -58,7 +58,7 @@ jobs:
             --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --platform managed \
-            --set-env-vars "NODE_ENV=production" \
+            --set-env-vars "NODE_ENV=production,JWT_SECRET=${{ secrets.JWT_SECRET }}" \
             --no-traffic \
             --min-instances=0 \
             --allow-unauthenticated
