@@ -1,4 +1,4 @@
-// server.js (setelah diubah)
+// server.js
 'use strict';
 
 require('dotenv').config();
