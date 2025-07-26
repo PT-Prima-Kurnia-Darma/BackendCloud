@@ -58,5 +58,6 @@ jobs:
             --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
             --region ${{ env.REGION }} \
             --platform managed \
+            --set-env-vars "NODE_ENV=production" \
             --min-instances=0 \
             --allow-unauthenticated
