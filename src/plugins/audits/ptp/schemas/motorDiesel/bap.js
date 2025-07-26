@@ -29,7 +29,7 @@ const bapPtpMotorDieselPayload = Joi.object({
         technicalDataGeneratorFrequency: Joi.string().allow('').optional(),
         technicalDataGeneratorCurrent: Joi.string().allow('').optional(),
         machineWeightKg: Joi.string().allow('').optional(),
-        areSafetyFeaturesInstalled: Joi.string().allow('').optional()
+        areSafetyFeaturesInstalled: Joi.boolean().allow(null).optional()
     }).optional(),
 
     visualChecks: Joi.object({

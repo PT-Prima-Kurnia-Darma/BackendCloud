@@ -60,7 +60,7 @@ const createBapPtpDiesel = async (data) => {
         technicalDataGeneratorFrequency: t.technicalDataGeneratorFrequency,
         technicalDataGeneratorCurrent: t.technicalDataGeneratorCurrent,
         machineWeightKg: t.machineWeightKg,
-        areSafetyFeaturesInstalled: t.areSafetyFeaturesInstalled,
+        areSafetyFeaturesInstalled: formatCondition(t.areSafetyFeaturesInstalled, ['terpasang lengkap', 'tidak terpasang']),
 
         // PEMERIKSAAN VISUAL
         isMachineGoodCondition: formatCondition(v.isMachineGoodCondition, ['baik', 'tidak']),
