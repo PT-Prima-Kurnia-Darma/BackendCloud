@@ -10,7 +10,7 @@ Sistem ini menggunakan **Node.js** dengan framework **Hapi.js** serta database *
 - Delete Pengguna
 - Modifikasi Data Pengguna
 - Validasi JWT
-- CRUD Elevator dan Eskalator (Laporan dan BAP)
+- CRUD dan Download Laporan dan BAP Riskauji
 
 ## Start Project
 
