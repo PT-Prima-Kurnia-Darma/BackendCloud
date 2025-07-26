@@ -2,7 +2,7 @@
 require('dotenv').config();
 
 const {
-  PORT = 3000,
+  PORT = process.env.PORT || 3000,
   HOST = '0.0.0.0',
   FIRESTORE_PROJECT_ID,
   FIRESTORE_CLIENT_EMAIL,

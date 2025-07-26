@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # 6. Buka port yang digunakan oleh aplikasi Hapi.js Anda
-EXPOSE 3000
+EXPOSE 8080
 
 # 7. Perintah untuk menjalankan aplikasi saat container dimulai
 CMD [ "npm", "start" ]
