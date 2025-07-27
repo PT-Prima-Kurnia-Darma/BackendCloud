@@ -2,23 +2,7 @@
 
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
-const { Storage } = require('@google-cloud/storage');
-const config = require('../../../../../config');
-
-let privateKey = config.FIRESTORE_PRIVATE_KEY;
-if (privateKey && privateKey.includes('\\n')) {
-  privateKey = privateKey.replace(/\\n/g, '\n');
-}
-
-const storage = new Storage({
-    projectId: config.FIRESTORE_PROJECT_ID,
-    credentials: {
-      client_email: config.FIRESTORE_CLIENT_EMAIL,
-      private_key: privateKey,
-    },
-});
-
-const bucketName = 'audit-riksauji';
+const { storage, BUCKET_NAME } = require('../../../../../utils/storage');
 
 const formatBoolean = (status, trueText, falseText, defaultText) => {
     if (status === true) return trueText;
@@ -31,8 +15,8 @@ const createBapElevator = async (data) => {
 
     let content;
     try {
-        console.log(`Mengunduh template BAP: gs://${bucketName}/${templatePathInBucket}`);
-        const [fileBuffer] = await storage.bucket(bucketName).file(templatePathInBucket).download();
+        console.log(`Mengunduh template BAP: gs://${BUCKET_NAME}/${templatePathInBucket}`);
+        const [fileBuffer] = await storage.bucket(BUCKET_NAME).file(templatePathInBucket).download();
         content = fileBuffer;
         console.log('Template BAP berhasil diunduh.');
     } catch (error) {
