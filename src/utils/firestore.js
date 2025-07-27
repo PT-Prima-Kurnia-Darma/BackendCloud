@@ -1,4 +1,4 @@
-// src/utils/firestore.js
+
 'use strict';
 
 const { Firestore } = require('@google-cloud/firestore');
