@@ -60,41 +60,6 @@ const init = async () => {
     },
   });
 
-  //  —— Endpoint untuk DEBUGGING JWT_SECRET ——
-  server.route({
-    method: 'GET',
-    path: '/debug-secret',
-    handler: (request, h) => {
-      const jwtSecret = config.JWT_SECRET;
-      
-      if (!jwtSecret) {
-        console.error('DEBUG: JWT_SECRET tidak terdefinisi atau kosong!');
-        return h.response({ status: 'error', message: 'JWT_SECRET is not defined' }).code(500);
-      }
-
-      // Kita hanya akan log beberapa karakter untuk keamanan
-      const firstChars = jwtSecret.substring(0, 4);
-      const lastChars = jwtSecret.substring(jwtSecret.length - 4);
-      const secretLength = jwtSecret.length;
-
-      const debugInfo = `DEBUG: JWT_SECRET diterima. Panjang: ${secretLength}, Awal: ${firstChars}, Akhir: ${lastChars}`;
-      
-      // Cetak ke log Cloud Run
-      console.log(debugInfo);
-
-      // Kirim respons ke Postman
-      return h.response({ status: 'success', data: {
-        length: secretLength,
-        start: firstChars,
-        end: lastChars,
-      }});
-    },
-    options: {
-      auth: false, // TIDAK perlu token untuk mengakses ini
-      tags: ['api', 'debug'],
-    },
-  });
-
   // Global error formatting (404, Boom errors)
   server.ext('onPreResponse', (request, h) => {
     const response = request.response;
