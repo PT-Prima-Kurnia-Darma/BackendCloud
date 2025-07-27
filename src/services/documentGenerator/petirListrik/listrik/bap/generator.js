@@ -11,7 +11,7 @@ const formatBooleanToText = (value, trueText, falseText) => {
 };
 
 const createBapListrik = async (data) => {
-    const templatePath = 'petirListrik/InstalasiListrik/bapListrik.docx';
+    const templatePath = 'petirListrik/instalasiListrik/bapListrik.docx';
 
     let content;
     try {

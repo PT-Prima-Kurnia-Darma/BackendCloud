@@ -12,7 +12,7 @@ const formatBooleanToText = (value, trueText, falseText) => {
 };
 
 const createBapPetir = async (data) => {
-    const templatePath = 'petirListrik/InstalasiPetir/bapPetir.docx';
+    const templatePath = 'petirListrik/instalasiPetir/bapPetir.docx';
 
     let content;
     try {

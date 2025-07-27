@@ -12,7 +12,7 @@ const getResultText = (value, trueText = 'Ada', falseText = 'Tidak Ada') => {
 };
 
 const createLaporanListrik = async (data) => {
-    const templatePath = 'petirListrik/InstalasiListrik/laporanListrik.docx'; // pastikan path ini benar
+    const templatePath = 'petirListrik/instalasiListrik/laporanListrik.docx'; // pastikan path ini benar
 
     let content;
     try {

@@ -7,7 +7,7 @@ const { storage, BUCKET_NAME } = require('../../../../../utils/storage');
 const getCheckmark = (value) => (value ? '✓' : '');
 
 const createLaporanPetir = async (data) => {
-    const templatePath = 'petirListrik/InstalasiPetir/laporanPetir.docx';
+    const templatePath = 'petirListrik/instalasiPetir/laporanPetir.docx';
 
     let content;
     try {
