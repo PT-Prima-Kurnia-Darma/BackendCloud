@@ -44,7 +44,7 @@ const init = async () => {
       try {
         await request.server.app.firestore.listCollections();
         return h
-          .response({ status: 'success', message: 'Server is up and running' })
+          .response({ status: 'success', message: 'Server Berjalan Dengan Baik' })
           .code(200);
       } catch (err) {
         console.error('Health-check failed:', err);
