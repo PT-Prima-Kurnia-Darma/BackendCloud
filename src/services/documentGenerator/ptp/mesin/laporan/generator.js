@@ -2,15 +2,7 @@
 
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
-const { Storage } = require('@google-cloud/storage');
-const config = require('../../../../../config');
-
-let privateKey = config.FIRESTORE_PRIVATE_KEY.replace(/\\n/g, '\n');
-const storage = new Storage({
-    projectId: config.FIRESTORE_PROJECT_ID,
-    credentials: { client_email: config.FIRESTORE_CLIENT_EMAIL, private_key: privateKey },
-});
-const BUCKET_NAME = 'audit-riksauji';
+const { storage, BUCKET_NAME } = require('../../../../../utils/storage');
 
 const getCheckmark = (status) => (status === true ? '√' : '');
 const getOppositeCheckmark = (status) => (status === false ? '√' : '');

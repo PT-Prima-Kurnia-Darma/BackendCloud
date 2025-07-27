@@ -2,38 +2,16 @@
 
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
-const { Storage } = require('@google-cloud/storage');
-const config = require('../../../../../config');
+const { storage, BUCKET_NAME } = require('../../../../../utils/storage');
 
-// Inisialisasi GCS
-let privateKey = config.FIRESTORE_PRIVATE_KEY;
-if (privateKey && privateKey.includes('\\n')) {
-  privateKey = privateKey.replace(/\\n/g, '\n');
-}
-const storage = new Storage({
-    projectId: config.FIRESTORE_PROJECT_ID,
-    credentials: { client_email: config.FIRESTORE_CLIENT_EMAIL, private_key: privateKey },
-});
-const BUCKET_NAME = 'audit-riksauji';
 
-/**
- * Helper untuk mengubah boolean menjadi teks yang sesuai untuk BAP.
- * @param {boolean} status - Nilai boolean.
- * @param {string} trueText - Teks jika true.
- * @param {string} falseText - Teks jika false.
- * @returns {string}
- */
 const formatBooleanToText = (status, trueText, falseText) => {
     if (status === true) return trueText;
     if (status === false) return falseText;
     return `${trueText} / ${falseText}`; // Default jika null/undefined
 };
 
-/**
- * Membuat dokumen BAP Eskalator dari data.
- * @param {object} data - Data BAP lengkap dari Firestore.
- * @returns {Promise<{docxBuffer: Buffer, fileName: string}>}
- */
+
 const createBapEskalator = async (data) => {
     const templatePath = 'elevatorEskalator/eskalator/bapEskalator.docx';
     

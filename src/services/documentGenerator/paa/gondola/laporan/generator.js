@@ -2,19 +2,7 @@
 
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
-const { Storage } = require('@google-cloud/storage');
-const config = require('../../../../../config');
-
-// Inisialisasi Google Cloud Storage
-const storage = new Storage({
-    projectId: config.FIRESTORE_PROJECT_ID,
-    credentials: {
-      client_email: config.FIRESTORE_CLIENT_EMAIL,
-      private_key: config.FIRESTORE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    },
-});
-
-const BUCKET_NAME = 'audit-riksauji'; // Pastikan nama bucket Anda benar
+const { storage, BUCKET_NAME } = require('../../../../../utils/storage');
 
 const getCheckmark = (status) => (status ? '√' : '');
 

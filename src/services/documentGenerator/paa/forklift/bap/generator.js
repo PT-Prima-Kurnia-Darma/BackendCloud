@@ -2,25 +2,9 @@
 
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
-const { Storage } = require('@google-cloud/storage');
-const config = require('../../../../../config');
+const { storage, BUCKET_NAME } = require('../../../../../utils/storage');
 
-// Inisialisasi GCS (tetap sama)
-// Inisialisasi GCS
-let privateKey = config.FIRESTORE_PRIVATE_KEY.replace(/\\n/g, '\n');
-const storage = new Storage({
-    projectId: config.FIRESTORE_PROJECT_ID,
-    credentials: { client_email: config.FIRESTORE_CLIENT_EMAIL, private_key: privateKey },
-});
-const BUCKET_NAME = 'audit-riksauji';
 
-/**
- * Helper untuk mengubah boolean menjadi teks deskriptif sesuai template BAP.
- * @param {boolean} status - Nilai boolean dari database.
- * @param {string} trueText - Teks jika true.
- * @param {string} falseText - Teks jika false.
- * @returns {string}
- */
 const formatBooleanToText = (status, trueText, falseText) => {
     if (status === true) return trueText;
     if (status === false) return falseText;
