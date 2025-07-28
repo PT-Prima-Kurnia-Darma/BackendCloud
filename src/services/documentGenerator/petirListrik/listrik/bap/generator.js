@@ -62,8 +62,8 @@ const createBapListrik = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const companyName = g.companyName?.replace(/\s+/g, '-') || 'UnknownCompany';
-    const fileName = `BAP-Instalasi-Listrik-${companyName}-${data.id || 'new'}.docx`;
+    const companyName = g.companyName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Instalasi Listrik-${companyName}-${data.id || 'new'}.docx`;
 
     return { docxBuffer, fileName };
 };

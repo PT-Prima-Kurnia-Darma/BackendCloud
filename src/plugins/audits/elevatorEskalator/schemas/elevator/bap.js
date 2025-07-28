@@ -4,54 +4,54 @@ const Joi = require('joi');
 
 const bapElevatorPayload = Joi.object({
     // Menyimpan ID laporan asal untuk keterhubungan data
-    laporanId: Joi.string().allow('').required(),
+    laporanId: Joi.string().required(),
     
     // Field-field utama dari BAP
-    inspectionDate: Joi.string().allow('').optional(),
-    examinationType: Joi.string().allow('').optional(),
-    equipmentType: Joi.string().allow('').optional(),
-    createdAt: Joi.string().allow('').optional(),
-    extraId: Joi.number().allow('').optional(),
-    inspectionType: Joi.string().allow('').optional(),
+    inspectionDate: Joi.string().allow('').required(),
+    examinationType: Joi.string().allow('').required(),
+    equipmentType: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
+    extraId: Joi.number().required(),
+    inspectionType: Joi.string().allow('').required(),
 
     generalData: Joi.object({
-        ownerName: Joi.string().allow('').optional(),
-        ownerAddress: Joi.string().allow('').optional(),
-        nameUsageLocation: Joi.string().allow('').optional(),
-        addressUsageLocation: Joi.string().allow('').optional(),
-    }).optional(),
+        ownerName: Joi.string().allow('').required(),
+        ownerAddress: Joi.string().allow('').required(),
+        nameUsageLocation: Joi.string().allow('').required(),
+        addressUsageLocation: Joi.string().allow('').required(),
+    }).required(),
 
     technicalData: Joi.object({
-        elevatorType: Joi.string().allow('').optional(),
-        manufacturerOrInstaller: Joi.string().allow('').optional(),
-        brandOrType: Joi.string().allow('').optional(),
-        countryAndYear: Joi.string().allow('').optional(),
-        serialNumber: Joi.string().allow('').optional(),
-        capacity: Joi.string().allow('').optional(),
-        speed: Joi.string().allow('').optional(),
-        floorsServed: Joi.string().allow('').optional(),
-    }).optional(),
+        elevatorType: Joi.string().allow('').required(),
+        manufacturerOrInstaller: Joi.string().allow('').required(),
+        brandOrType: Joi.string().allow('').required(),
+        countryAndYear: Joi.string().allow('').required(),
+        serialNumber: Joi.string().allow('').required(),
+        capacity: Joi.string().allow('').required(),
+        speed: Joi.string().allow('').required(),
+        floorsServed: Joi.string().allow('').required(),
+    }).required(),
 
     visualInspection: Joi.object({
-        isMachineRoomConditionAcceptable: Joi.boolean().optional(),
-        isPanelGoodCondition: Joi.boolean().optional(),
-        isAparAvailableInPanelRoom: Joi.boolean().optional(),
-        lightingCondition: Joi.boolean().optional(), // Merepresentasikan kondisi baik/tidak baik
-        isPitLadderAvailable: Joi.boolean().optional(),
-    }).optional(),
+        isMachineRoomConditionAcceptable: Joi.boolean().allow(true, false).allow(true, false).required(),
+        isPanelGoodCondition: Joi.boolean().allow(true, false).required(),
+        isAparAvailableInPanelRoom: Joi.boolean().allow(true, false).required(),
+        lightingCondition: Joi.boolean().allow(true, false).required(),
+        isPitLadderAvailable: Joi.boolean().allow(true, false).required(),
+    }).required(),
 
     testing: Joi.object({
-        isNdtThermographPanelOk: Joi.boolean().optional(),
-        isArdFunctional: Joi.boolean().optional(),
-        isGovernorFunctional: Joi.boolean().optional(),
-        isSlingConditionOkByTester: Joi.boolean().optional(),
-        limitSwitchTest: Joi.boolean().optional(), // Merepresentasikan berfungsi/tidak berfungsi
-        isDoorSwitchFunctional: Joi.boolean().optional(),
-        pitEmergencyStopStatus: Joi.boolean().optional(), // Merepresentasikan tersedia & berfungsi / tidak
-        isIntercomFunctional: Joi.boolean().optional(),
-        isFiremanSwitchFunctional: Joi.boolean().optional(),
-    }).optional()
-}).unknown(false).min(1);
+        isNdtThermographPanelOk: Joi.boolean().allow(true, false).required(),
+        isArdFunctional: Joi.boolean().allow(true, false).required(),
+        isGovernorFunctional: Joi.boolean().allow(true, false).required(),
+        isSlingConditionOkByTester: Joi.boolean().allow(true, false).required(),
+        limitSwitchTest: Joi.boolean().allow(true, false).required(),
+        isDoorSwitchFunctional: Joi.boolean().allow(true, false).required(),
+        pitEmergencyStopStatus: Joi.boolean().allow(true, false).required(),
+        isIntercomFunctional: Joi.boolean().allow(true, false).required(),
+        isFiremanSwitchFunctional: Joi.boolean().allow(true, false).required(),
+    }).required()
+});
 
 module.exports = {
     bapElevatorPayload,

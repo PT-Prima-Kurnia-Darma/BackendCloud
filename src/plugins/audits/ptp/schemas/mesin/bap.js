@@ -4,61 +4,61 @@ const Joi = require('joi');
 
 const bapPtpMesinPayload = Joi.object({
     laporanId: Joi.string().required(),
-    examinationType: Joi.string().allow('').optional(),
-    inspectionDate: Joi.string().allow('').optional(),
-    createdAt: Joi.string().allow('').optional(),
-    extraId: Joi.number().allow(null, '').optional(),
+    examinationType: Joi.string().allow('').required(),
+    inspectionDate: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
+    extraId: Joi.number().required(),
 
     generalData: Joi.object({
-        companyName: Joi.string().allow('').optional(),
-        companyLocation: Joi.string().allow('').optional(),
-        unitLocation: Joi.string().allow('').optional(),
-        userAddressInCharge: Joi.string().allow('').optional()
-    }).optional(),
+        companyName: Joi.string().allow('').required(),
+        companyLocation: Joi.string().allow('').required(),
+        unitLocation: Joi.string().allow('').required(),
+        userAddressInCharge: Joi.string().allow('').required()
+    }).required(),
 
     technicalData: Joi.object({
-        brandType: Joi.string().allow('').optional(),
-        manufacturer: Joi.string().allow('').optional(),
-        locationAndYearOfManufacture: Joi.string().allow('').optional(),
-        serialNumberUnitNumber: Joi.string().allow('').optional(),
-        capacityWorkingLoad: Joi.string().allow('').optional(),
-        technicalDataDieselMotorPowerRpm: Joi.string().allow('').optional(),
-        specialSpecification: Joi.string().allow('').optional(),
-        dimensionsDescription: Joi.string().allow('').optional(),
-        rotationRpm: Joi.string().allow('').optional(),
-        technicalDataGeneratorFrequency: Joi.string().allow('').optional(),
-        technicalDataGeneratorCurrent: Joi.string().allow('').optional(),
-        machineWeightKg: Joi.string().allow('').optional(),
-        areSafetyFeaturesInstalled: Joi.boolean().allow(null).optional()
-    }).optional(),
+        brandType: Joi.string().allow('').required(),
+        manufacturer: Joi.string().allow('').required(),
+        locationAndYearOfManufacture: Joi.string().allow('').required(),
+        serialNumberUnitNumber: Joi.string().allow('').required(),
+        capacityWorkingLoad: Joi.string().allow('').required(),
+        technicalDataDieselMotorPowerRpm: Joi.string().allow('').required(),
+        specialSpecification: Joi.string().allow('').required(),
+        dimensionsDescription: Joi.string().allow('').required(),
+        rotationRpm: Joi.string().allow('').required(),
+        technicalDataGeneratorFrequency: Joi.string().allow('').required(),
+        technicalDataGeneratorCurrent: Joi.string().allow('').required(),
+        machineWeightKg: Joi.string().allow('').required(),
+        areSafetyFeaturesInstalled: Joi.boolean().allow(true, false).required()
+    }).required(),
 
     visualChecks: Joi.object({
-        isMachineGoodCondition: Joi.boolean().allow(null).optional(),
-        areElectricalIndicatorsGood: Joi.boolean().allow(null).optional(),
-        isAparAvailable: Joi.boolean().allow(null).optional(),
-        isPpeAvailable: Joi.boolean().allow(null).optional(),
-        isGroundingInstalled: Joi.boolean().allow(null).optional(),
-        isBatteryGoodCondition: Joi.boolean().allow(null).optional(),
-        hasLubricationLeak: Joi.boolean().allow(null).optional(),
-        isFoundationGoodCondition: Joi.boolean().allow(null).optional(),
-        hasHydraulicLeak: Joi.boolean().allow(null).optional()
-    }).optional(),
+        isMachineGoodCondition: Joi.boolean().allow(true, false).required(),
+        areElectricalIndicatorsGood: Joi.boolean().allow(true, false).required(),
+        isAparAvailable: Joi.boolean().allow(true, false).required(),
+        isPpeAvailable: Joi.boolean().allow(true, false).required(),
+        isGroundingInstalled: Joi.boolean().allow(true, false).required(),
+        isBatteryGoodCondition: Joi.boolean().allow(true, false).required(),
+        hasLubricationLeak: Joi.boolean().allow(true, false).required(),
+        isFoundationGoodCondition: Joi.boolean().allow(true, false).required(),
+        hasHydraulicLeak: Joi.boolean().allow(true, false).required()
+    }).required(),
 
     functionalTests: Joi.object({
-        isLightingCompliant: Joi.boolean().allow(null).optional(),
-        isNoiseLevelCompliant: Joi.boolean().allow(null).optional(),
-        isEmergencyStopFunctional: Joi.boolean().allow(null).optional(),
-        isMachineFunctional: Joi.boolean().allow(null).optional(),
-        isVibrationLevelCompliant: Joi.boolean().allow(null).optional(),
-        isInsulationResistanceOk: Joi.boolean().allow(null).optional(),
-        isShaftRotationCompliant: Joi.boolean().allow(null).optional(),
-        isGroundingResistanceCompliant: Joi.boolean().allow(null).optional(),
-        isNdtWeldTestOk: Joi.boolean().allow(null).optional(),
-        isVoltageBetweenPhasesNormal: Joi.boolean().allow(null).optional(),
-        isPhaseLoadBalanced: Joi.boolean().allow(null).optional()
-    }).optional()
+        isLightingCompliant: Joi.boolean().allow(true, false).required(),
+        isNoiseLevelCompliant: Joi.boolean().allow(true, false).required(),
+        isEmergencyStopFunctional: Joi.boolean().allow(true, false).required(),
+        isMachineFunctional: Joi.boolean().allow(true, false).required(),
+        isVibrationLevelCompliant: Joi.boolean().allow(true, false).required(),
+        isInsulationResistanceOk: Joi.boolean().allow(true, false).required(),
+        isShaftRotationCompliant: Joi.boolean().allow(true, false).required(),
+        isGroundingResistanceCompliant: Joi.boolean().allow(true, false).required(),
+        isNdtWeldTestOk: Joi.boolean().allow(true, false).required(),
+        isVoltageBetweenPhasesNormal: Joi.boolean().allow(true, false).required(),
+        isPhaseLoadBalanced: Joi.boolean().allow(true, false).required()
+    }).required()
 
-}).min(1).unknown(false);
+});
 
 module.exports = {
     bapPtpMesinPayload,

@@ -3,104 +3,104 @@
 const Joi = require('joi');
 
 const inspectionItemSchema = Joi.object({
-    status: Joi.boolean().allow(null),
-    result: Joi.string().allow('', null).optional()
+    status: Joi.boolean().allow(true, false),
+    result: Joi.string().allow('').required()
 });
 
 const laporanPubtPayload = Joi.object({
-    examinationType: Joi.string().allow('').optional(),
-    inspectionType: Joi.string().allow('').optional(),
-    createdAt: Joi.string().allow('').optional(),
-    extraId: Joi.string().allow('').optional(),
+    examinationType: Joi.string().allow('').required(),
+    inspectionType: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
+    extraId: Joi.number().required(),
 
     generalData: Joi.object({
-        companyName: Joi.string().allow('').optional(),
-        companyLocation: Joi.string().allow('').optional(),
-        userUsage: Joi.string().allow('').optional(),
-        userAddress: Joi.string().allow('').optional(),
-        operatorName: Joi.string().allow('').optional(),
-        equipmentType: Joi.string().allow('').optional(),
-        manufacturer: Joi.string().allow('').optional(),
-        brandType: Joi.string().allow('').optional(),
-        countryAndYearOfManufacture: Joi.string().allow('').optional(),
-        serialNumberUnitNumber: Joi.string().allow('').optional(),
-        designPressure: Joi.number().allow(null).optional(),
-        maxAllowableWorkingPressure: Joi.number().allow(null).optional(),
-        capacityWorkingLoad: Joi.number().allow(null).optional(),
-        steamTemperature: Joi.string().allow('').optional(),
-        operatingPressure: Joi.number().allow(null).optional(),
-        fuelType: Joi.string().allow('').optional(),
-        intendedUse: Joi.string().allow('').optional(),
-        permitNumber: Joi.string().allow('').optional(),
-        operatorCertificate: Joi.string().allow('').optional(),
-        equipmentHistory: Joi.string().allow('').optional(),
-        inspectionDate: Joi.string().allow('').optional()
-    }).optional(),
+        companyName: Joi.string().allow('').required(),
+        companyLocation: Joi.string().allow('').required(),
+        userUsage: Joi.string().allow('').required(),
+        userAddress: Joi.string().allow('').required(),
+        operatorName: Joi.string().allow('').required(),
+        equipmentType: Joi.string().allow('').required(),
+        manufacturer: Joi.string().allow('').required(),
+        brandType: Joi.string().allow('').required(),
+        countryAndYearOfManufacture: Joi.string().allow('').required(),
+        serialNumberUnitNumber: Joi.string().allow('').required(),
+        designPressure: Joi.string().allow('').required(),
+        maxAllowableWorkingPressure: Joi.string().allow('').required(),
+        capacityWorkingLoad: Joi.string().allow('').required(),
+        steamTemperature: Joi.string().allow('').required(),
+        operatingPressure: Joi.string().allow('').required(),
+        fuelType: Joi.string().allow('').required(),
+        intendedUse: Joi.string().allow('').required(),
+        permitNumber: Joi.string().allow('').required(),
+        operatorCertificate: Joi.string().allow('').required(),
+        equipmentHistory: Joi.string().allow('').required(),
+        inspectionDate: Joi.string().allow('').required()
+    }).required(),
 
     technicalData: Joi.object({
         shell: Joi.object({
-            numberOfRounds: Joi.any().allow(null).optional(),
-            connectionMethod: Joi.string().allow('').optional(),
-            material: Joi.string().allow('').optional(),
-            pipeDiameter: Joi.any().allow(null).optional(),
-            thickness: Joi.number().allow(null).optional(),
-            bodyLength: Joi.number().allow(null).optional(),
+            numberOfRounds: Joi.string().allow('').required(),
+            connectionMethod: Joi.string().allow('').required(),
+            material: Joi.string().allow('').required(),
+            pipeDiameter: Joi.string().allow('').required(),
+            thickness: Joi.string().allow('').required(),
+            bodyLength: Joi.string().allow('').required(),
             heads: Joi.object({
                 top: Joi.object({
-                    diameter: Joi.number().allow(null).optional(),
-                    thickness: Joi.number().allow(null).optional()
-                }).optional(),
+                    diameter: Joi.string().allow('').required(),
+                    thickness: Joi.string().allow('').required()
+                }).required(),
                 rear: Joi.object({
-                    diameter: Joi.number().allow(null).optional(),
-                    thickness: Joi.number().allow(null).optional()
-                }).optional()
-            }).optional(),
+                    diameter: Joi.string().allow('').required(),
+                    thickness: Joi.string().allow('').required()
+                }).required()
+            }).required(),
             tubePlate: Joi.object({
                 front: Joi.object({
-                    dim1: Joi.string().allow('').optional(),
-                    dim2: Joi.string().allow('').optional()
-                }).optional(),
+                    dim1: Joi.string().allow('').required(),
+                    dim2: Joi.string().allow('').required()
+                }).required(),
                 rear: Joi.object({
-                    dim1: Joi.string().allow('').optional(),
-                    dim2: Joi.string().allow('').optional()
-                }).optional()
-            }).optional()
-        }).optional(),
+                    dim1: Joi.string().allow('').required(),
+                    dim2: Joi.string().allow('').required()
+                }).required()
+            }).required()
+        }).required(),
         furnace: Joi.object({
-            type: Joi.string().allow('').optional(),
-            material: Joi.string().allow('').optional(),
-            outerDiameter: Joi.any().allow(null).optional(),
-            innerDiameter: Joi.any().allow(null).optional(),
-            thickness: Joi.any().allow(null).optional()
-        }).optional(),
+            type: Joi.string().allow('').required(),
+            material: Joi.string().allow('').required(),
+            outerDiameter: Joi.string().allow('').required(),
+            innerDiameter: Joi.string().allow('').required(),
+            thickness: Joi.string().allow('').required()
+        }).required(),
         waterTubes: Joi.object({
             firstPass: Joi.object({
-                diameter: Joi.number().allow(null).optional(),
-                thickness: Joi.number().allow(null).optional(),
-                length: Joi.number().allow(null).optional(),
-                quantity: Joi.number().allow(null).optional()
-            }).optional(),
+                diameter: Joi.string().allow('').required(),
+                thickness: Joi.string().allow('').required(),
+                length: Joi.string().allow('').required(),
+                quantity: Joi.string().allow('').required()
+            }).required(),
             secondPass: Joi.object({
-                diameter: Joi.any().allow(null).optional(),
-                thickness: Joi.any().allow(null).optional(),
-                length: Joi.any().allow(null).optional(),
-                quantity: Joi.any().allow(null).optional()
-            }).optional(),
+                diameter: Joi.string().allow('').required(),
+                thickness: Joi.string().allow('').required(),
+                length: Joi.string().allow('').required(),
+                quantity: Joi.string().allow('').required()
+            }).required(),
             stayTube: Joi.object({
-                diameter: Joi.any().allow(null).optional(),
-                thickness: Joi.any().allow(null).optional(),
-                length: Joi.any().allow(null).optional(),
-                quantity: Joi.any().allow(null).optional()
-            }).optional(),
+                diameter: Joi.string().allow('').required(),
+                thickness: Joi.string().allow('').required(),
+                length: Joi.string().allow('').required(),
+                quantity: Joi.string().allow('').required()
+            }).required(),
             material: Joi.object({
-                diameter: Joi.any().allow(null).optional(),
-                thickness: Joi.any().allow(null).optional(),
-                length: Joi.any().allow(null).optional(),
-                quantity: Joi.any().allow(null).optional()
-            }).optional()
-        }).optional(),
-        tubePlateSplicing: Joi.string().allow('').optional()
-    }).optional(),
+                diameter: Joi.string().allow('').required(),
+                thickness: Joi.string().allow('').required(),
+                length: Joi.string().allow('').required(),
+                quantity: Joi.string().allow('').required()
+            }).required()
+        }).required(),
+        tubePlateSplicing: Joi.string().allow('').required()
+    }).required(),
 
     inspectionAndMeasurement: Joi.object({
         visualChecks: Joi.object({
@@ -115,7 +115,7 @@ const laporanPubtPayload = Joi.object({
                 superHeater: inspectionItemSchema,
                 reheater: inspectionItemSchema,
                 economizer: inspectionItemSchema
-            }).optional(),
+            }).required(),
             boilerDetails: Joi.object({
                 grate: inspectionItemSchema,
                 burner: inspectionItemSchema,
@@ -128,7 +128,7 @@ const laporanPubtPayload = Joi.object({
                 chimney: inspectionItemSchema,
                 stairs: inspectionItemSchema,
                 insulation: inspectionItemSchema
-            }).optional(),
+            }).required(),
             safetyDevices: Joi.object({
                 safetyValveRing: inspectionItemSchema,
                 safetyValvePipe: inspectionItemSchema,
@@ -155,202 +155,202 @@ const laporanPubtPayload = Joi.object({
                 idMarkNameplate: inspectionItemSchema,
                 idMarkDataMatch: inspectionItemSchema,
                 idMarkForm9Stamp: inspectionItemSchema
-            }).optional()
-        }).optional(),
+            }).required()
+        }).required(),
         materialThickness: Joi.object({
             bodyShell: Joi.object({
-                thickness: Joi.string().allow('').optional(),
-                diameter: Joi.string().allow('').optional(),
-                thicknessResult: Joi.string().allow('').optional(),
-                diameterResult: Joi.string().allow('').optional()
-            }).optional(),
+                thickness: Joi.string().allow('').required(),
+                diameter: Joi.string().allow('').required(),
+                thicknessResult: Joi.string().allow('').required(),
+                diameterResult: Joi.string().allow('').required()
+            }).required(),
             vaporReceiverHeader: Joi.object({
-                thickness: Joi.string().allow('').optional(),
-                diameter: Joi.string().allow('').optional(),
-                length: Joi.string().allow('').optional(),
-                thicknessResult: Joi.string().allow('').optional(),
-                diameterResult: Joi.string().allow('').optional(),
-                lengthResult: Joi.string().allow('').optional()
-            }).optional(),
+                thickness: Joi.string().allow('').required(),
+                diameter: Joi.string().allow('').required(),
+                length: Joi.string().allow('').required(),
+                thicknessResult: Joi.string().allow('').required(),
+                diameterResult: Joi.string().allow('').required(),
+                lengthResult: Joi.string().allow('').required()
+            }).required(),
             fireHallFurnance1: Joi.object({
-                thickness: Joi.string().allow('').optional(),
-                diameter: Joi.string().allow('').optional(),
-                length: Joi.string().allow('').optional(),
-                thicknessResult: Joi.string().allow('').optional(),
-                diameterResult: Joi.string().allow('').optional(),
-                lengthResult: Joi.string().allow('').optional()
-            }).optional(),
+                thickness: Joi.string().allow('').required(),
+                diameter: Joi.string().allow('').required(),
+                length: Joi.string().allow('').required(),
+                thicknessResult: Joi.string().allow('').required(),
+                diameterResult: Joi.string().allow('').required(),
+                lengthResult: Joi.string().allow('').required()
+            }).required(),
              fireHallFurnance2: Joi.object({
-                thickness: Joi.string().allow('').optional(),
-                diameter: Joi.string().allow('').optional(),
-                length: Joi.string().allow('').optional(),
-                thicknessResult: Joi.string().allow('').optional(),
-                diameterResult: Joi.string().allow('').optional(),
-                lengthResult: Joi.string().allow('').optional()
-            }).optional()
-        }).optional(),
+                thickness: Joi.string().allow('').required(),
+                diameter: Joi.string().allow('').required(),
+                length: Joi.string().allow('').required(),
+                thicknessResult: Joi.string().allow('').required(),
+                diameterResult: Joi.string().allow('').required(),
+                lengthResult: Joi.string().allow('').required()
+            }).required()
+        }).required(),
         thicknessMeasurementSetup: Joi.object({
-            owner: Joi.string().allow('').optional(),
-            inspectionDate: Joi.string().allow('').optional(),
-            project: Joi.string().allow('').optional(),
-            objectType: Joi.string().allow('').optional(),
-            workOrderNo: Joi.string().allow('').optional(),
-            equipmentUsed: Joi.string().allow('').optional(),
-            methodUsed: Joi.string().allow('').optional(),
-            probeType: Joi.string().allow('').optional(),
-            materialType: Joi.string().allow('').optional(),
-            probeStyle: Joi.string().allow('').optional(),
-            operatingTemp: Joi.string().allow('').optional(),
-            surfaceCondition: Joi.string().allow('').optional(),
-            weldingProcess: Joi.string().allow('').optional(),
-            laminatingCheck: Joi.string().allow('').optional(),
-            couplantUsed: Joi.string().allow('').optional()
-        }).optional(),
+            owner: Joi.string().allow('').required(),
+            inspectionDate: Joi.string().allow('').required(),
+            project: Joi.string().allow('').required(),
+            objectType: Joi.string().allow('').required(),
+            workOrderNo: Joi.string().allow('').required(),
+            equipmentUsed: Joi.string().allow('').required(),
+            methodUsed: Joi.string().allow('').required(),
+            probeType: Joi.string().allow('').required(),
+            materialType: Joi.string().allow('').required(),
+            probeStyle: Joi.string().allow('').required(),
+            operatingTemp: Joi.string().allow('').required(),
+            surfaceCondition: Joi.string().allow('').required(),
+            weldingProcess: Joi.string().allow('').required(),
+            laminatingCheck: Joi.string().allow('').required(),
+            couplantUsed: Joi.string().allow('').required()
+        }).required(),
         measurementResults: Joi.object({
             topHead: Joi.object({
-                nominal: Joi.any().allow(null).optional(),
-                point1: Joi.number().allow(null).optional(),
-                point2: Joi.number().allow(null).optional(),
-                point3: Joi.number().allow(null).optional(),
-                minimum: Joi.number().allow(null).optional(),
-                maximum: Joi.any().allow(null).optional()
-            }).optional(),
+                nominal: Joi.string().allow('').required(),
+                point1: Joi.string().allow('').required(),
+                point2: Joi.string().allow('').required(),
+                point3: Joi.string().allow('').required(),
+                minimum: Joi.string().allow('').required(),
+                maximum: Joi.string().allow('').required()
+            }).required(),
             shell: Joi.object({
-                nominal: Joi.any().allow(null).optional(),
-                point1: Joi.number().allow(null).optional(),
-                point2: Joi.number().allow(null).optional(),
-                point3: Joi.number().allow(null).optional(),
-                minimum: Joi.number().allow(null).optional(),
-                maximum: Joi.any().allow(null).optional()
-            }).optional(),
+                nominal: Joi.string().allow('').required(),
+                point1: Joi.string().allow('').required(),
+                point2: Joi.string().allow('').required(),
+                point3: Joi.string().allow('').required(),
+                minimum: Joi.string().allow('').required(),
+                maximum: Joi.string().allow('').required()
+            }).required(),
             buttonHead: Joi.object({
-                nominal: Joi.any().allow(null).optional(),
-                point1: Joi.number().allow(null).optional(),
-                point2: Joi.number().allow(null).optional(),
-                point3: Joi.number().allow(null).optional(),
-                minimum: Joi.number().allow(null).optional(),
-                maximum: Joi.any().allow(null).optional()
-            }).optional()
-        }).optional(),
+                nominal: Joi.string().allow('').required(),
+                point1: Joi.string().allow('').required(),
+                point2: Joi.string().allow('').required(),
+                point3: Joi.string().allow('').required(),
+                minimum: Joi.string().allow('').required(),
+                maximum: Joi.string().allow('').required()
+            }).required()
+        }).required(),
         ndt: Joi.object({
             shell: Joi.object({
-                testMethod: Joi.string().allow('').optional(),
+                testMethod: Joi.string().allow('').required(),
                 longitudinalWeldJoint: Joi.object({
-                    location: Joi.string().allow('').optional(),
-                    status: Joi.boolean().allow(null).optional(),
-                    result: Joi.string().allow('').optional()
-                }).optional(),
+                    location: Joi.string().allow('').required(),
+                    status: Joi.boolean().allow(true, false).required(),
+                    result: Joi.string().allow('').required()
+                }).required(),
                 circumferentialWeldJoint: Joi.object({
-                    location: Joi.string().allow('').optional(),
-                    status: Joi.boolean().allow(null).optional(),
-                    result: Joi.string().allow('').optional()
-                }).optional()
-            }).optional(),
+                    location: Joi.string().allow('').required(),
+                    status: Joi.boolean().allow(true, false).required(),
+                    result: Joi.string().allow('').required()
+                }).required()
+            }).required(),
             furnace: Joi.object({
-                testMethod: Joi.string().allow('').optional(),
+                testMethod: Joi.string().allow('').required(),
                 longitudinalWeldJoint: Joi.object({
-                    location: Joi.string().allow('').optional(),
-                    status: Joi.boolean().allow(null).optional(),
-                    result: Joi.string().allow('').optional()
-                }).optional(),
+                    location: Joi.string().allow('').required(),
+                    status: Joi.boolean().allow(true, false).required(),
+                    result: Joi.string().allow('').required()
+                }).required(),
                 circumferentialWeldJoint: Joi.object({
-                    location: Joi.string().allow('').optional(),
-                    status: Joi.boolean().allow(null).optional(),
-                    result: Joi.string().allow('').optional()
-                }).optional()
-            }).optional(),
+                    location: Joi.string().allow('').required(),
+                    status: Joi.boolean().allow(true, false).required(),
+                    result: Joi.string().allow('').required()
+                }).required()
+            }).required(),
             fireTubes: Joi.object({
-                testMethod: Joi.string().allow('').optional(),
+                testMethod: Joi.string().allow('').required(),
                 weldJointFront: Joi.object({
-                    location: Joi.string().allow('').optional(),
-                    status: Joi.boolean().allow(null).optional(),
-                    result: Joi.string().allow('').optional()
-                }).optional(),
+                    location: Joi.string().allow('').required(),
+                    status: Joi.boolean().allow(true, false).required(),
+                    result: Joi.string().allow('').required()
+                }).required(),
                 weldJointRear: Joi.object({
-                    location: Joi.string().allow('').optional(),
-                    status: Joi.boolean().allow(null).optional(),
-                    result: Joi.string().allow('').optional()
-                }).optional()
-            }).optional()
-        }).optional(),
+                    location: Joi.string().allow('').required(),
+                    status: Joi.boolean().allow(true, false).required(),
+                    result: Joi.string().allow('').required()
+                }).required()
+            }).required()
+        }).required(),
         hydrotest: Joi.object({
-            testPressure: Joi.number().allow(null).optional(),
-            mawp: Joi.number().allow(null).optional(),
-            testMedium: Joi.string().allow('').optional(),
-            testDate: Joi.string().allow('').optional(),
-            testResult: Joi.string().allow('').optional()
-        }).optional(),
+            testPressure: Joi.string().allow('').required(),
+            mawp: Joi.string().allow('').required(),
+            testMedium: Joi.string().allow('').required(),
+            testDate: Joi.string().allow('').required(),
+            testResult: Joi.string().allow('').required()
+        }).required(),
         appendagesCheck: Joi.object({
             workingPressureGauge: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             manHole: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             safetyValveFullOpen: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             mainSteamValve: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             levelGlassIndicator: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             blowdownValve: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             feedwaterStopValve: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             feedwaterInletValve: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             steamDrier: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             waterPump: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             controlPanel: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required(),
             nameplate: Joi.object({
-                quantity: Joi.number().allow(null).optional(),
-                status: Joi.boolean().allow(null).optional(),
-                result: Joi.string().allow('').optional()
-            }).optional()
-        }).optional(),
+                quantity: Joi.string().allow('').required(),
+                status: Joi.boolean().allow(true, false).required(),
+                result: Joi.string().allow('').required()
+            }).required()
+        }).required(),
         safetyValveTest: Joi.object({
-            header: Joi.string().allow('').optional(),
-            startsToOpen: Joi.number().allow(null).optional(),
-            valveInfo: Joi.string().allow('').optional()
-        }).optional()
-    }).optional(),
-    conclusion: Joi.string().allow('').optional(),
-    recommendations: Joi.string().allow('').optional()
-}).min(1).unknown(false);
+            header: Joi.string().allow('').required(),
+            startsToOpen: Joi.string().allow('').required(),
+            valveInfo: Joi.string().allow('').required()
+        }).required()
+    }).required(),
+    conclusion: Joi.string().allow('').required(),
+    recommendations: Joi.string().allow('').required()
+});
 
 module.exports = {
     laporanPubtPayload

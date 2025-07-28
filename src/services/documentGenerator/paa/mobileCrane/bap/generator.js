@@ -85,8 +85,8 @@ const createBapMobileCrane = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const ownerName = g.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
-    const fileName = `BAP-MobileCrane-${ownerName}-${data.id}.docx`;
+    const ownerName = g.ownerName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Mobile Crane-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

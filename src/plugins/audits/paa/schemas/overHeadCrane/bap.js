@@ -5,48 +5,47 @@ const Joi = require('joi');
 const bapOverheadCranePayload = Joi.object({
     laporanId: Joi.string().required(),
     reportHeader: Joi.object({
-        examinationType: Joi.string().allow('').optional(),
-        inspectionDate: Joi.string().allow('').optional(),
-        extraId: Joi.number().allow(null).optional(),
-        inspectionType: Joi.string().allow('').optional(),
-        createdAt: Joi.string().allow('').optional(),
-        equipmentType: Joi.string().allow('').optional()
-    }).optional(),
+        examinationType: Joi.string().allow('').required(),
+        inspectionDate: Joi.string().allow('').required(),
+        extraId: Joi.number().required(),
+        inspectionType: Joi.string().allow('').required(),
+        createdAt: Joi.string().allow('').required(),
+        equipmentType: Joi.string().allow('').required()
+    }).required(),
     generalData: Joi.object({
-        ownerName: Joi.string().allow('').optional(),
-        companyLocation: Joi.string().allow('').optional(),
-        userInCharge: Joi.string().allow('').optional(),
-        ownerAddress: Joi.string().allow('').optional(),
-        unitLocation: Joi.string().allow('').optional()
-    }).optional(),
+        ownerName: Joi.string().allow('').required(),
+        userInCharge: Joi.string().allow('').required(),
+        ownerAddress: Joi.string().allow('').required(),
+        unitLocation: Joi.string().allow('').required()
+    }).required(),
     technicalData: Joi.object({
-        brandType: Joi.string().allow('').optional(),
-        manufacturer: Joi.string().allow('').optional(),
-        locationAndYearOfManufacture: Joi.string().allow('').optional(),
-        serialNumberUnitNumber: Joi.string().allow('').optional(),
-        capacityWorkingLoad: Joi.string().allow('').optional(),
-        liftingSpeedMpm: Joi.string().allow('').optional()
-    }).optional(),
+        brandType: Joi.string().allow('').required(),
+        manufacturer: Joi.string().allow('').required(),
+        locationAndYearOfManufacture: Joi.string().allow('').required(),
+        serialNumberUnitNumber: Joi.string().allow('').required(),
+        capacityWorkingLoad: Joi.string().allow('').required(),
+        liftingSpeedMpm: Joi.string().allow('').required()
+    }).required(),
     visualInspection: Joi.object({
-        hasConstructionDefects: Joi.boolean().allow(null).optional(),
-        hookHasSafetyLatch: Joi.boolean().allow(null).optional(),
-        isEmergencyStopInstalled: Joi.boolean().allow(null).optional(),
-        isWireropeGoodCondition: Joi.boolean().allow(null).optional(),
-        operatorHasK3License: Joi.boolean().allow(null).optional()
-    }).optional(),
+        hasConstructionDefects: Joi.boolean().allow(true, false).required(),
+        hookHasSafetyLatch: Joi.boolean().allow(true, false).required(),
+        isEmergencyStopInstalled: Joi.boolean().allow(true, false).required(),
+        isWireropeGoodCondition: Joi.boolean().allow(true, false).required(),
+        operatorHasK3License: Joi.boolean().allow(true, false).required()
+    }).required(),
     testing: Joi.object({
-        functionTest: Joi.boolean().allow(null).optional(),
+        functionTest: Joi.boolean().allow(true, false).required(),
         loadTest: Joi.object({
-            loadTon: Joi.number().allow(null).optional(),
-            isAbleToLift: Joi.boolean().allow(null).optional(),
-            hasLoadDrop: Joi.boolean().allow(null).optional()
-        }).optional(),
+            loadTon: Joi.string().allow('').required(),
+            isAbleToLift: Joi.boolean().allow(true, false).required(),
+            hasLoadDrop: Joi.boolean().allow(true, false).required()
+        }).required(),
         ndtTest: Joi.object({
-            isNdtResultGood: Joi.boolean().allow(null).optional(),
-            hasCrackIndication: Joi.boolean().allow(null).optional()
-        }).optional()
-    }).optional()
-}).min(1).unknown(false);
+            isNdtResultGood: Joi.boolean().allow(true, false).required(),
+            hasCrackIndication: Joi.boolean().allow(true, false).required()
+        }).required()
+    }).required()
+});
 
 module.exports = {
     bapOverheadCranePayload,

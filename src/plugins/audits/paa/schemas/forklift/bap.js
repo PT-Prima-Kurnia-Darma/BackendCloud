@@ -7,52 +7,52 @@ const bapForkliftPayload = Joi.object({
     laporanId: Joi.string().required(),
 
     // Data utama BAP
-    examinationType: Joi.string().allow('').optional(),
-    inspectionDate: Joi.string().allow('').optional(),
-    createdAt: Joi.string().allow('').optional(),
-    extraId: Joi.number().allow('').optional(),
-    inspectionType: Joi.string().allow('').optional(),
-    equipmentType: Joi.string().allow('').optional(),
+    examinationType: Joi.string().allow('').required(),
+    inspectionDate: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
+    extraId: Joi.number().required(),
+    inspectionType: Joi.string().allow('').required(),
+    equipmentType: Joi.string().allow('').required(),
 
     // Data Umum
     generalData: Joi.object({
-        ownerName: Joi.string().allow('').optional(),
-        ownerAddress: Joi.string().allow('').optional(),
-        userInCharge: Joi.string().allow('').optional()
-    }).optional(),
+        ownerName: Joi.string().allow('').required(),
+        ownerAddress: Joi.string().allow('').required(),
+        userInCharge: Joi.string().allow('').required()
+    }).required(),
 
     // Data Teknis
     technicalData: Joi.object({
-        brandType: Joi.string().allow('').optional(),
-        manufacturer: Joi.string().allow('').optional(),
-        locationAndYearOfManufacture: Joi.string().allow('').optional(),
-        serialNumberUnitNumber: Joi.string().allow('').optional(),
-        capacityWorkingLoad: Joi.string().allow('').optional(),
-        liftingHeightMeters: Joi.string().allow('').optional()
-    }).optional(),
+        brandType: Joi.string().allow('').required(),
+        manufacturer: Joi.string().allow('').required(),
+        locationAndYearOfManufacture: Joi.string().allow('').required(),
+        serialNumberUnitNumber: Joi.string().allow('').required(),
+        capacityWorkingLoad: Joi.string().allow('').required(),
+        liftingHeightMeters: Joi.string().allow('').required()
+    }).required(),
 
     // Hasil Pemeriksaan (menggunakan boolean)
     inspectionResult: Joi.object({
         visualCheck: Joi.object({
-            hasForkDefects: Joi.boolean().allow(null),
-            isNameplateAttached: Joi.boolean().allow(null),
-            isAparAvailable: Joi.boolean().allow(null),
-            isCapacityMarkingDisplayed: Joi.boolean().allow(null),
-            hasHydraulicLeak: Joi.boolean().allow(null),
-            isChainGoodCondition: Joi.boolean().allow(null)
-        }).optional(),
+            hasForkDefects: Joi.boolean().allow(true, false),
+            isNameplateAttached: Joi.boolean().allow(true, false),
+            isAparAvailable: Joi.boolean().allow(true, false),
+            isCapacityMarkingDisplayed: Joi.boolean().allow(true, false),
+            hasHydraulicLeak: Joi.boolean().allow(true, false),
+            isChainGoodCondition: Joi.boolean().allow(true, false)
+        }).required(),
         functionalTest: Joi.object({
-            loadKg: Joi.string().allow('').optional(),
-            liftHeightMeters: Joi.string().allow('').optional(),
-            isAbleToLiftAndHold: Joi.boolean().allow(null),
-            isFunctioningWell: Joi.boolean().allow(null),
-            hasCrackIndication: Joi.boolean().allow(null),
-            isEmergencyStopFunctional: Joi.boolean().allow(null),
-            isWarningLampHornFunctional: Joi.boolean().allow(null)
-        }).optional()
-    }).optional(),
+            loadKg: Joi.string().allow('').required(),
+            liftHeightMeters: Joi.string().allow('').required(),
+            isAbleToLiftAndHold: Joi.boolean().allow(true, false),
+            isFunctioningWell: Joi.boolean().allow(true, false),
+            hasCrackIndication: Joi.boolean().allow(true, false),
+            isEmergencyStopFunctional: Joi.boolean().allow(true, false),
+            isWarningLampHornFunctional: Joi.boolean().allow(true, false)
+        }).required()
+    }).required(),
 
-}).min(1).unknown(false);
+});
 
 module.exports = {
     bapForkliftPayload,

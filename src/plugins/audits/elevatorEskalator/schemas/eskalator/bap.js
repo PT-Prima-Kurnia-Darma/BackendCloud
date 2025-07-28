@@ -7,52 +7,52 @@ const bapEskalatorPayload = Joi.object({
     laporanId: Joi.string().required(),
     
     // Data utama BAP
-    examinationType: Joi.string().allow('').optional(),
-    inspectionType: Joi.string().allow('').optional(),
-    inspectionDate: Joi.string().allow('').optional(),
-    createdAt: Joi.string().allow('').optional(),
-    extraId: Joi.number().allow('').optional(),
+    examinationType: Joi.string().allow('').required(),
+    inspectionType: Joi.string().allow('').required(),
+    inspectionDate: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
+    extraId: Joi.number().required(),
 
     // Data Umum
     generalData: Joi.object({
-        ownerName: Joi.string().allow('').optional(),
-        companyLocation: Joi.string().allow('').optional(),
-        nameUsageLocation: Joi.string().allow('').optional(),
-        locationUsageLocation: Joi.string().allow('').optional()
-    }).optional(),
+        ownerName: Joi.string().allow('').required(),
+        companyLocation: Joi.string().allow('').required(),
+        nameUsageLocation: Joi.string().allow('').required(),
+        locationUsageLocation: Joi.string().allow('').required()
+    }).required(),
 
     // Data Teknis
     technicalData: Joi.object({
-        equipmentType: Joi.string().allow('').optional(),
-        technicalDatamanufacturer: Joi.string().allow('').optional(),
-        technicalDatabrand: Joi.string().allow('').optional(),
-        technicalDatacountryAndYear: Joi.string().allow('').optional(),
-        technicalDataserialNumber: Joi.string().allow('').optional(),
-        technicalDatacapacity: Joi.string().allow('').optional(),
-        technicalDataspeed: Joi.string().allow('').optional(),
-        technicalDatatransports: Joi.string().allow('').optional()
-    }).optional(),
+        equipmentType: Joi.string().allow('').required(),
+        technicalDatamanufacturer: Joi.string().allow('').required(),
+        technicalDatabrand: Joi.string().allow('').required(),
+        technicalDatacountryAndYear: Joi.string().allow('').required(),
+        technicalDataserialNumber: Joi.string().allow('').required(),
+        technicalDatacapacity: Joi.string().allow('').required(),
+        technicalDataspeed: Joi.string().allow('').required(),
+        technicalDatatransports: Joi.string().allow('').required()
+    }).required(),
 
     // Hasil Pemeriksaan Visual
     visualInspection: Joi.object({
-        isMachineRoomConditionAcceptable: Joi.boolean().optional(),
-        isPanelConditionAcceptable: Joi.boolean().optional(),
-        islightingConditionisPitLightAcceptable: Joi.boolean().optional(),
-        areSafetySignsAvailable: Joi.boolean().optional()
-    }).optional(),
+        isMachineRoomConditionAcceptable: Joi.boolean().allow(true, false).required(),
+        isPanelConditionAcceptable: Joi.boolean().allow(true, false).required(),
+        islightingConditionisPitLightAcceptable: Joi.boolean().allow(true, false).required(),
+        areSafetySignsAvailable: Joi.boolean().allow(true, false).required()
+    }).required(),
 
     // Hasil Pengujian
     testing: Joi.object({
-        testingisNdtThermographPanel: Joi.boolean().optional(),
-        testingareSafetyDevicesFunctional: Joi.boolean().optional(),
-        testingisLimitSwitchFunctional: Joi.boolean().optional(),
-        testingisDoorSwitchFunctiona: Joi.boolean().optional(),
-        testingpitEmergencyStopStatusisAvailable: Joi.boolean().optional(),
-        testingpitEmergencyStopStatusisFunctional: Joi.boolean().optional(),
-        isEscalatorFunctionOk: Joi.boolean().optional()
-    }).optional()
+        testingisNdtThermographPanel: Joi.boolean().allow(true, false).required(),
+        testingareSafetyDevicesFunctional: Joi.boolean().allow(true, false).required(),
+        testingisLimitSwitchFunctional: Joi.boolean().allow(true, false).required(),
+        testingisDoorSwitchFunctiona: Joi.boolean().allow(true, false).required(),
+        testingpitEmergencyStopStatusisAvailable: Joi.boolean().allow(true, false).required(),
+        testingpitEmergencyStopStatusisFunctional: Joi.boolean().allow(true, false).required(),
+        isEscalatorFunctionOk: Joi.boolean().allow(true, false).required()
+    }).required()
 
-}).unknown(false).min(1);
+});
 
 module.exports = {
     bapEskalatorPayload,

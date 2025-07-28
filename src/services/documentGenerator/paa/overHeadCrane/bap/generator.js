@@ -80,8 +80,8 @@ const createBapOverheadCrane = async (data) => {
         compression: 'DEFLATE'
     });
 
-    const safeCompanyName = (g.ownerName || 'UnknownCompany').replace(/[^\w\s.-]/g, '_');
-    const fileName = `BAP-OverheadCrane-${safeCompanyName}-${data.id || 'new'}.docx`;
+    const safeCompanyName = (g.ownerName || 'Tidak Ada Nama Perusahaan').replace(/[^\w\s.-]/g, '_');
+    const fileName = `BAP Overhead Crane-${safeCompanyName}-${data.id || 'new'}.docx`;
 
     return { docxBuffer, fileName };
 };

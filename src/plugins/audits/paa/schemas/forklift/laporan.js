@@ -4,97 +4,96 @@ const Joi = require('joi');
 
 // Skema untuk setiap item inspeksi (result dan status boolean)
 const inspectionItemSchema = Joi.object({
-    status: Joi.boolean().allow(null),
-    result: Joi.string().allow('', null).optional()
+    status: Joi.boolean().allow(true, false),
+    result: Joi.string().allow('').required()
 });
 
 // Skema untuk setiap baris pada tabel inspeksi rantai
 const chainInspectionItemSchema = Joi.object({
-    inspectedPart: Joi.string().allow('').optional(),
-    constructionType: Joi.string().allow('').optional(),
-    standardPitch: Joi.string().allow('').optional(),
-    measuredPitch: Joi.string().allow('').optional(),
-    standardPin: Joi.string().allow('').optional(),
-    measuredPin: Joi.string().allow('').optional(),
-    result: Joi.string().allow('').optional()
+    inspectedPart: Joi.string().allow('').required(),
+    constructionType: Joi.string().allow('').required(),
+    standardPitch: Joi.string().allow('').required(),
+    measuredPitch: Joi.string().allow('').required(),
+    standardPin: Joi.string().allow('').required(),
+    measuredPin: Joi.string().allow('').required(),
+    result: Joi.string().allow('').required()
 });
 
 // Skema untuk setiap baris pada tabel NDT
 const nonDestructiveTestItemSchema = Joi.object({
-    inspectedPart: Joi.string().allow('').optional(),
-    location: Joi.string().allow('').optional(),
-    defectFound: Joi.string().allow('').optional(),
-    defectNotFound: Joi.string().allow('').optional(),
-    result: Joi.string().allow('').optional()
+    inspectedPart: Joi.string().allow('').required(),
+    location: Joi.string().allow('').required(),
+    defectFound: Joi.string().allow('').required(),
+    defectNotFound: Joi.string().allow('').required(),
+    result: Joi.string().allow('').required()
 });
 
 // Skema untuk setiap baris pada tabel uji beban
 const loadTestItemSchema = Joi.object({
-    liftingHeight: Joi.string().allow('').optional(),
-    testLoad: Joi.string().allow('').optional(),
-    speed: Joi.string().allow('').optional(),
-    movement: Joi.string().allow('').optional(),
-    remarks: Joi.string().allow('').optional(),
-    result: Joi.string().allow('').optional()
+    liftingHeight: Joi.string().allow('').required(),
+    testLoad: Joi.string().allow('').required(),
+    speed: Joi.string().allow('').required(),
+    movement: Joi.string().allow('').required(),
+    remarks: Joi.string().allow('').required(),
+    result: Joi.string().allow('').required()
 });
 
 // Skema Utama Laporan Forklift (Struktur Final)
 const laporanForkliftPayload = Joi.object({
-    inspectionType: Joi.string().allow('').optional(),
-    equipmentType: Joi.string().allow('').optional(), 
-    inspectionDate: Joi.string().allow('').optional(),
-    createdAt: Joi.string().allow('').optional(),
-    extraId: Joi.number().allow('').optional(),
-    examinationType: Joi.string().allow('').optional(),
+    inspectionType: Joi.string().allow('').required(),
+    inspectionDate: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
+    extraId: Joi.number().allow('').required(),
+    examinationType: Joi.string().allow('').required(),
 
     generalData: Joi.object({
-        ownerName: Joi.string().allow('').optional(), 
-        ownerAddress: Joi.string().allow('').optional(),
-        userInCharge: Joi.string().allow('').optional(),
-        subcontractorPersonInCharge: Joi.string().allow('').optional(),
-        unitLocation: Joi.string().allow('').optional(),
-        operatorName: Joi.string().allow('').optional(),
-        equipmentType: Joi.string().allow('').optional(),
-        manufacturer: Joi.string().allow('').optional(),
-        brandType: Joi.string().allow('').optional(),
-        locationAndYearOfManufacture: Joi.string().allow('').optional(),
-        serialNumberUnitNumber: Joi.string().allow('').optional(),
-        capacityWorkingLoad: Joi.string().allow('').optional(),
-        intendedUse: Joi.string().allow('').optional(),
-        certificateNumber: Joi.string().allow('').optional(),
-        equipmentHistory: Joi.string().allow('').optional()
-    }).optional(),
+        ownerName: Joi.string().allow('').required(), 
+        ownerAddress: Joi.string().allow('').required(),
+        userInCharge: Joi.string().allow('').required(),
+        subcontractorPersonInCharge: Joi.string().allow('').required(),
+        unitLocation: Joi.string().allow('').required(),
+        operatorName: Joi.string().allow('').required(),
+        equipmentType: Joi.string().allow('').required(),
+        manufacturer: Joi.string().allow('').required(),
+        brandType: Joi.string().allow('').required(),
+        locationAndYearOfManufacture: Joi.string().allow('').required(),
+        serialNumberUnitNumber: Joi.string().allow('').required(),
+        capacityWorkingLoad: Joi.string().allow('').required(),
+        intendedUse: Joi.string().allow('').required(),
+        certificateNumber: Joi.string().allow('').required(),
+        equipmentHistory: Joi.string().allow('').required()
+    }).required(),
 
     technicalData: Joi.object({
-        specificationSerialNumber: Joi.string().allow('').optional(),
-        specificationCapacity: Joi.string().allow('').optional(),
-        specificationAttachment: Joi.string().allow('').optional(),
-        specificationForkDimensions: Joi.string().allow('').optional(),
-        specificationSpeedLifting: Joi.string().allow('').optional(),
-        specificationSpeedLowering: Joi.string().allow('').optional(),
-        specificationSpeedTravelling: Joi.string().allow('').optional(),
-        primeMoverBrandType: Joi.string().allow('').optional(),
-        primeMoverSerialNumber: Joi.string().allow('').optional(),
-        primeMoverYearOfManufacture: Joi.string().allow('').optional(),
-        primeMoverRevolution: Joi.string().allow('').optional(),
-        primeMoverPower: Joi.string().allow('').optional(),
-        primeMoverNumberOfCylinders: Joi.string().allow('').optional(),
-        dimensionLength: Joi.string().allow('').optional(),
-        dimensionWidth: Joi.string().allow('').optional(),
-        dimensionHeight: Joi.string().allow('').optional(),
-        dimensionForkLiftingHeight: Joi.string().allow('').optional(),
-        tirePressureDriveWheel: Joi.string().allow('').optional(),
-        tirePressureSteeringWheel: Joi.string().allow('').optional(),
-        driveWheelSize: Joi.string().allow('').optional(),
-        driveWheelType: Joi.string().allow('').optional(),
-        steeringWheelSize: Joi.string().allow('').optional(),
-        steeringWheelType: Joi.string().allow('').optional(),
-        travellingBrakeSize: Joi.string().allow('').optional(),
-        travellingBrakeType: Joi.string().allow('').optional(),
-        hydraulicPumpPressure: Joi.string().allow('').optional(),
-        hydraulicPumpType: Joi.string().allow('').optional(),
-        hydraulicPumpReliefValve: Joi.string().allow('').optional()
-    }).optional(),
+        specificationSerialNumber: Joi.string().allow('').required(),
+        specificationCapacity: Joi.string().allow('').required(),
+        specificationAttachment: Joi.string().allow('').required(),
+        specificationForkDimensions: Joi.string().allow('').required(),
+        specificationSpeedLifting: Joi.string().allow('').required(),
+        specificationSpeedLowering: Joi.string().allow('').required(),
+        specificationSpeedTravelling: Joi.string().allow('').required(),
+        primeMoverBrandType: Joi.string().allow('').required(),
+        primeMoverSerialNumber: Joi.string().allow('').required(),
+        primeMoverYearOfManufacture: Joi.string().allow('').required(),
+        primeMoverRevolution: Joi.string().allow('').required(),
+        primeMoverPower: Joi.string().allow('').required(),
+        primeMoverNumberOfCylinders: Joi.string().allow('').required(),
+        dimensionLength: Joi.string().allow('').required(),
+        dimensionWidth: Joi.string().allow('').required(),
+        dimensionHeight: Joi.string().allow('').required(),
+        dimensionForkLiftingHeight: Joi.string().allow('').required(),
+        tirePressureDriveWheel: Joi.string().allow('').required(),
+        tirePressureSteeringWheel: Joi.string().allow('').required(),
+        driveWheelSize: Joi.string().allow('').required(),
+        driveWheelType: Joi.string().allow('').required(),
+        steeringWheelSize: Joi.string().allow('').required(),
+        steeringWheelType: Joi.string().allow('').required(),
+        travellingBrakeSize: Joi.string().allow('').required(),
+        travellingBrakeType: Joi.string().allow('').required(),
+        hydraulicPumpPressure: Joi.string().allow('').required(),
+        hydraulicPumpType: Joi.string().allow('').required(),
+        hydraulicPumpReliefValve: Joi.string().allow('').required()
+    }).required(),
 
     inspectionAndTesting: Joi.object({
         mainFrameAndChassis: Joi.object({
@@ -107,7 +106,7 @@ const laporanForkliftPayload = Joi.object({
             otherEquipmentStairsStepsResult: inspectionItemSchema,
             otherEquipmentFasteningBoltsResult: inspectionItemSchema,
             otherEquipmentOperatorSeatResult: inspectionItemSchema
-        }).optional(),
+        }).required(),
         primeMover: Joi.object({
             systemCoolingResult: inspectionItemSchema,
             systemLubricationResult: inspectionItemSchema,
@@ -124,7 +123,7 @@ const laporanForkliftPayload = Joi.object({
             electricalSafetyLampsResult: inspectionItemSchema,
             electricalHornResult: inspectionItemSchema,
             electricalFuseResult: inspectionItemSchema
-        }).optional(),
+        }).required(),
         dashboard: Joi.object({
             tempIndicatorResult: inspectionItemSchema,
             oilPressureResult: inspectionItemSchema,
@@ -134,7 +133,7 @@ const laporanForkliftPayload = Joi.object({
             fuelIndicatorResult: inspectionItemSchema,
             loadIndicatorResult: inspectionItemSchema,
             loadChartResult: inspectionItemSchema
-        }).optional(),
+        }).required(),
         powerTrain: Joi.object({
             starterDynamoResult: inspectionItemSchema,
             steeringWheelResult: inspectionItemSchema,
@@ -170,7 +169,7 @@ const laporanForkliftPayload = Joi.object({
             transOilResult: inspectionItemSchema,
             transLeakResult: inspectionItemSchema,
             transMechanicalResult: inspectionItemSchema
-        }).optional(),
+        }).required(),
         attachments: Joi.object({
             mastWearResult: inspectionItemSchema,
             mastCracksResult: inspectionItemSchema,
@@ -180,7 +179,7 @@ const laporanForkliftPayload = Joi.object({
             liftChainConditionResult: inspectionItemSchema,
             liftChainDeformationResult: inspectionItemSchema,
             liftChainLubeResult: inspectionItemSchema
-        }).optional(),
+        }).required(),
         personalBasketAndHandrail: Joi.object({
             basketFloorCorrosionResult: inspectionItemSchema,
             basketFloorCracksResult: inspectionItemSchema,
@@ -208,7 +207,7 @@ const laporanForkliftPayload = Joi.object({
             handrailRailJointGapResult: inspectionItemSchema,
             handrailRailFastenersResult: inspectionItemSchema,
             handrailRailStopperResult: inspectionItemSchema
-        }).optional(),
+        }).required(),
         hydraulicComponents: Joi.object({
             tankLeakageResult: inspectionItemSchema,
             tankOilLevelResult: inspectionItemSchema,
@@ -230,7 +229,7 @@ const laporanForkliftPayload = Joi.object({
             actuatorLeakageResult: inspectionItemSchema,
             actuatorLineConditionResult: inspectionItemSchema,
             actuatorNoiseResult: inspectionItemSchema
-        }).optional(),
+        }).required(),
         engineOnChecks: Joi.object({
             starterDynamoResult: inspectionItemSchema,
             instrumentResult: inspectionItemSchema,
@@ -258,22 +257,22 @@ const laporanForkliftPayload = Joi.object({
             noiseTransmissionResult: inspectionItemSchema,
             noiseHydraulicPumpResult: inspectionItemSchema,
             noiseProtectiveCoverResult: inspectionItemSchema
-        }).optional()
-    }).optional(),
+        }).required()
+    }).required(),
 
     testingForklift: Joi.object({
-        liftingChainInspection: Joi.array().items(chainInspectionItemSchema).optional(),
+        liftingChainInspection: Joi.array().items(chainInspectionItemSchema).required(),
         nonDestructiveTesting: Joi.object({
-            ndtType: Joi.string().allow('').optional(),
-            results: Joi.array().items(nonDestructiveTestItemSchema).optional()
-        }).optional(),
-        loadTesting: Joi.array().items(loadTestItemSchema).optional()
-    }).optional(),
+            ndtType: Joi.string().allow('').required(),
+            results: Joi.array().items(nonDestructiveTestItemSchema).required()
+        }).required(),
+        loadTesting: Joi.array().items(loadTestItemSchema).required()
+    }).required(),
     
-    conclusion: Joi.string().allow('').optional(),
-    recommendation: Joi.string().allow('').optional()
+    conclusion: Joi.string().allow('').required(),
+    recommendation: Joi.string().allow('').required()
     
-}).min(1).unknown(false);
+});
 
 module.exports = {
     laporanForkliftPayload,

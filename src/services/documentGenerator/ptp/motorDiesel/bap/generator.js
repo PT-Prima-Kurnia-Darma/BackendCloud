@@ -82,8 +82,8 @@ const createBapPtpDiesel = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const companyNameSafe = g.companyName?.replace(/\s+/g, '-') || 'UnknownCompany';
-    const fileName = `BAP-PTP-MotorDiesel-${companyNameSafe}-${data.id || 'new'}.docx`;
+    const companyNameSafe = g.companyName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Motor Diesel-${companyNameSafe}-${data.id || 'new'}.docx`;
 
     return { docxBuffer, fileName };
 };

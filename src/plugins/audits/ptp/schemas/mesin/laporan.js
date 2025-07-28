@@ -3,61 +3,61 @@
 const Joi = require('joi');
 
 const inspectionItemSchema = Joi.object({
-    status: Joi.boolean().allow(null),
-    result: Joi.string().allow('', null).optional()
+    status: Joi.boolean().allow(true, false).required(),
+    result: Joi.string().allow('').required()
 });
 
 const laporanPtpMesinPayload = Joi.object({
-    examinationType: Joi.string().allow('').optional(),
-    extraId: Joi.number().allow(null).optional(),
-    inspectionType: Joi.string().allow('').optional(),
-    createdAt: Joi.string().allow('').optional(),
+    examinationType: Joi.string().allow('').required(),
+    extraId: Joi.number().required(),
+    inspectionType: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
 
     generalData: Joi.object({
-        companyName: Joi.string().allow('').optional(),
-        companyLocation: Joi.string().allow('').optional(),
-        userInCharge: Joi.string().allow('').optional(),
-        userAddressInCharge: Joi.string().allow('').optional(),
-        subcontractorPersonInCharge: Joi.string().allow('').optional(),
-        unitLocation: Joi.string().allow('').optional(),
-        equipmentType: Joi.string().allow('').optional(),
-        brandType: Joi.string().allow('').optional(),
-        serialNumberUnitNumber: Joi.string().allow('').optional(),
-        manufacturer: Joi.string().allow('').optional(),
-        locationAndYearOfManufacture: Joi.string().allow('').optional(),
-        technicalDataDieselMotorPowerRpm: Joi.string().allow('').optional(),
-        intendedUse: Joi.string().allow('').optional(),
-        pjk3SkpNo: Joi.string().allow('').optional(),
-        ak3SkpNo: Joi.string().allow('').optional(),
-        usagePermitNumber: Joi.string().allow('').optional(),
-        operatorName: Joi.string().allow('').optional(),
-        equipmentHistory: Joi.string().allow('').optional()
-    }).optional(),
+        companyName: Joi.string().allow('').required(),
+        companyLocation: Joi.string().allow('').required(),
+        userInCharge: Joi.string().allow('').required(),
+        userAddressInCharge: Joi.string().allow('').required(),
+        subcontractorPersonInCharge: Joi.string().allow('').required(),
+        unitLocation: Joi.string().allow('').required(),
+        equipmentType: Joi.string().allow('').required(),
+        brandType: Joi.string().allow('').required(),
+        serialNumberUnitNumber: Joi.string().allow('').required(),
+        manufacturer: Joi.string().allow('').required(),
+        locationAndYearOfManufacture: Joi.string().allow('').required(),
+        technicalDataDieselMotorPowerRpm: Joi.string().allow('').required(),
+        intendedUse: Joi.string().allow('').required(),
+        pjk3SkpNo: Joi.string().allow('').required(),
+        ak3SkpNo: Joi.string().allow('').required(),
+        usagePermitNumber: Joi.string().allow('').required(),
+        operatorName: Joi.string().allow('').required(),
+        equipmentHistory: Joi.string().allow('').required()
+    }).required(),
 
     technicalData: Joi.object({
         machineSpecification: Joi.object({
-            brandType: Joi.string().allow('').optional(),
-            technicalDataMaxFeederSpeed: Joi.number().allow(null).optional(),
-            technicalDataMaxPlateWidth: Joi.number().allow(null).optional(),
-            technicalDataPlateThickness: Joi.number().allow(null).optional(),
-            technicalDataMaxPlateWeight: Joi.number().allow(null).optional(),
-            technicalDataMaxInnerCoilDiameter: Joi.number().allow(null).optional(),
-            technicalDataMaxOuterCoilDiameter: Joi.number().allow(null).optional(),
-            technicalDataDriveMotor: Joi.string().allow('').optional(),
-            technicalDataDieselMotorPowerRpm: Joi.number().allow(null).optional(),
-            serialNumberUnitNumber: Joi.string().allow('').optional(),
-            locationAndYearOfManufacture: Joi.string().allow('').optional(),
-            technicalDataMachineWeight: Joi.number().allow(null).optional(),
-            technicalDataOverallDimension: Joi.string().allow('').optional()
-        }).optional(),
+            brandType: Joi.string().allow('').required(),
+            technicalDataMaxFeederSpeed: Joi.string().allow('').required(),
+            technicalDataMaxPlateWidth: Joi.string().allow('').required(),
+            technicalDataPlateThickness: Joi.string().allow('').required(),
+            technicalDataMaxPlateWeight: Joi.string().allow('').required(),
+            technicalDataMaxInnerCoilDiameter: Joi.string().allow('').required(),
+            technicalDataMaxOuterCoilDiameter: Joi.string().allow('').required(),
+            technicalDataDriveMotor: Joi.string().allow('').required(),
+            technicalDataDieselMotorPowerRpm: Joi.string().allow('').required(),
+            serialNumberUnitNumber: Joi.string().allow('').required(),
+            locationAndYearOfManufacture: Joi.string().allow('').required(),
+            technicalDataMachineWeight: Joi.string().allow('').required(),
+            technicalDataOverallDimension: Joi.string().allow('').required()
+        }).required(),
         foundationDimension: Joi.object({
-            technicalDataFoundationDim: Joi.string().allow('').optional(),
-            technicalDataFoundationDistance: Joi.string().allow('').optional(),
-            technicalDataVibrationDamperType: Joi.string().allow('').optional(),
-            technicalDataFoundationWeight1: Joi.number().allow(null).optional(),
-            technicalDataFoundationWeight2: Joi.number().allow(null).optional()
-        }).optional()
-    }).optional(),
+            technicalDataFoundationDim: Joi.string().allow('').required(),
+            technicalDataFoundationDistance: Joi.string().allow('').required(),
+            technicalDataVibrationDamperType: Joi.string().allow('').required(),
+            technicalDataFoundationWeight1: Joi.string().allow('').required(),
+            technicalDataFoundationWeight2: Joi.string().allow('').required()
+        }).required()
+    }).required(),
 
     visualInspection: Joi.object({
         foundation: inspectionItemSchema,
@@ -65,18 +65,18 @@ const laporanPtpMesinPayload = Joi.object({
         machineFrame: Joi.object({
             mainFrame: inspectionItemSchema,
             braceFrame: inspectionItemSchema
-        }).optional(),
+        }).required(),
         roller: inspectionItemSchema,
         controlPanel: inspectionItemSchema,
         display: inspectionItemSchema,
         operationButtons: inspectionItemSchema,
         electricalComponents: Joi.object({
             measurements: Joi.object({
-                electricVoltage: Joi.number().allow(null).optional(),
-                electricPhase: Joi.number().allow(null).optional(),
-                electricFrequency: Joi.number().allow(null).optional(),
-                electricAmper: Joi.number().allow(null).optional()
-            }).optional(),
+                electricVoltage: Joi.string().allow('').required(),
+                electricPhase: Joi.string().allow('').required(),
+                electricFrequency: Joi.string().allow('').required(),
+                electricAmper: Joi.string().allow('').required()
+            }).required(),
             voltage: inspectionItemSchema,
             power: inspectionItemSchema,
             phase: inspectionItemSchema,
@@ -85,7 +85,7 @@ const laporanPtpMesinPayload = Joi.object({
             electricalPanel: inspectionItemSchema,
             conductor: inspectionItemSchema,
             insulation: inspectionItemSchema
-        }).optional(),
+        }).required(),
         safetyDevices: Joi.object({
             limitSwitchUp: inspectionItemSchema,
             limitSwitchDown: inspectionItemSchema,
@@ -95,12 +95,12 @@ const laporanPtpMesinPayload = Joi.object({
             pressureIndicator: inspectionItemSchema,
             emergencyStop: inspectionItemSchema,
             handSensor: inspectionItemSchema
-        }).optional(),
+        }).required(),
         hydraulic: Joi.object({
             pump: inspectionItemSchema,
             hose: inspectionItemSchema
-        }).optional()
-    }).optional(),
+        }).required()
+    }).required(),
 
     testingAndMeasurement: Joi.object({
         safetyDeviceTest: Joi.object({
@@ -108,73 +108,73 @@ const laporanPtpMesinPayload = Joi.object({
             safetyGuard: inspectionItemSchema,
             roller: inspectionItemSchema,
             emergencyStop: inspectionItemSchema
-        }).optional(),
+        }).required(),
         speedTest: inspectionItemSchema,
         functionTest: inspectionItemSchema,
         weldJointTest: inspectionItemSchema,
         vibrationTest: inspectionItemSchema,
         lightingTest: inspectionItemSchema,
         noiseTest: inspectionItemSchema
-    }).optional(),
+    }).required(),
 
     electricalPanelComponents: Joi.object({
-        ka: Joi.string().allow('').optional(),
+        ka: Joi.string().allow('').required(),
         voltage: Joi.object({
-            rs: Joi.number().allow(null).optional(),
-            rt: Joi.number().allow(null).optional(),
-            st: Joi.number().allow(null).optional(),
-            rn: Joi.number().allow(null).optional(),
-            rg: Joi.number().allow(null).optional(),
-            ng: Joi.number().allow(null).optional()
-        }).optional(),
+            rs: Joi.string().allow('').required(),
+            rt: Joi.string().allow('').required(),
+            st: Joi.string().allow('').required(),
+            rn: Joi.string().allow('').required(),
+            rg: Joi.string().allow('').required(),
+            ng: Joi.string().allow('').required()
+        }).required(),
         powerInfo: Joi.object({
-            frequency: Joi.number().allow(null).optional(),
-            cosQ: Joi.number().allow(null).optional(),
+            frequency: Joi.string().allow('').required(),
+            cosQ: Joi.string().allow('').required(),
             ampere: Joi.object({
-                r: Joi.number().allow(null).optional(),
-                s: Joi.number().allow(null).optional(),
-                t: Joi.number().allow(null).optional()
-            }).optional(),
-            result: Joi.string().allow('').optional()
-        }).optional()
-    }).optional(),
+                r: Joi.string().allow('').required(),
+                s: Joi.string().allow('').required(),
+                t: Joi.string().allow('').required()
+            }).required(),
+            result: Joi.string().allow('').required()
+        }).required()
+    }).required(),
 
     conclusionAndRecommendation: Joi.object({
-        conclusion: Joi.string().allow('').optional(),
-        recommendations: Joi.string().allow('').optional()
-    }).optional(),
+        conclusion: Joi.string().allow('').required(),
+        recommendations: Joi.string().allow('').required()
+    }).required(),
 
     administration: Joi.object({
-        inspectionDate: Joi.string().allow('').optional()
-    }).optional(),
+        inspectionDate: Joi.string().allow('').required()
+    }).required(),
 
     foundationAnalysis: Joi.object({
-        actualWeight: Joi.number().allow(null).optional(),
-        additionalMeterials: Joi.number().allow(null).optional(),
-        totalWeight: Joi.number().allow(null).optional(),
-        minimumFoundationWeight: Joi.number().allow(null).optional(),
-        totalMinimumFoundationWeight: Joi.number().allow(null).optional(),
-        foundationWeight: Joi.number().allow(null).optional(),
-        heightFoundation: Joi.number().allow(null).optional(),
-        foundationAnalysisResult: Joi.string().allow('').optional()
-    }).optional(),
+        actualWeight: Joi.string().allow('').required(),
+        additionalMeterials: Joi.string().allow('').required(),
+        totalWeight: Joi.string().allow('').required(),
+        minimumFoundationWeight: Joi.string().allow('').required(),
+        totalMinimumFoundationWeight: Joi.string().allow('').required(),
+        foundationWeight: Joi.string().allow('').required(),
+        heightFoundation: Joi.string().allow('').required(),
+        foundationAnalysisResult: Joi.string().allow('').required()
+    }).required(),
 
     environmentalMeasurement: Joi.object({
         noise: Joi.object({
-            pointA: Joi.object({ result: Joi.number().allow(null).optional(), status: Joi.string().allow('').optional() }).optional(),
-            pointB: Joi.object({ result: Joi.number().allow(null).optional(), status: Joi.string().allow('').optional() }).optional(),
-            pointC: Joi.object({ result: Joi.number().allow(null).optional(), status: Joi.string().allow('').optional() }).optional(),
-            pointD: Joi.object({ result: Joi.number().allow(null).optional(), status: Joi.string().allow('').optional() }).optional()
-        }).optional(),
+            pointA: Joi.object({ result: Joi.string().allow('').required(), status: Joi.string().allow('').required() }).required(),
+            pointB: Joi.object({ result: Joi.string().allow('').required(), status: Joi.string().allow('').required() }).required(),
+            pointC: Joi.object({ result: Joi.string().allow('').required(), status: Joi.string().allow('').required() }).required(),
+            pointD: Joi.object({ result: Joi.string().allow('').required(), status: Joi.string().allow('').required() }).required()
+        }).required(),
         lighting: Joi.object({
-            pointA: Joi.object({ result: Joi.number().allow(null).optional(), status: Joi.string().allow('').optional() }).optional(),
-            pointB: Joi.object({ result: Joi.number().allow(null).optional(), status: Joi.string().allow('').optional() }).optional(),
-            pointC: Joi.object({ result: Joi.number().allow(null).optional(), status: Joi.string().allow('').optional() }).optional(),
-            pointD: Joi.object({ result: Joi.number().allow(null).optional(), status: Joi.string().allow('').optional() }).optional()
-        }).optional()
-    }).optional()
+            pointA: Joi.object({ result: Joi.string().allow('').required(), status: Joi.string().allow('').required() }).required(),
+            pointB: Joi.object({ result: Joi.string().allow('').required(), status: Joi.string().allow('').required() }).required(),
+            pointC: Joi.object({ result: Joi.string().allow('').required(), status: Joi.string().allow('').required() }).required(),
+            pointD: Joi.object({ result: Joi.string().allow('').required(), status: Joi.string().allow('').required() }).required()
+        }).required()
+    }).required()
 
-}).min(1).unknown(false);
+});
 
 module.exports = {
     laporanPtpMesinPayload

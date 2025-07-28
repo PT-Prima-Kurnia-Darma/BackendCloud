@@ -612,8 +612,8 @@ const createLaporanForklift = async (data) => {
     }
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
-    const ownerName = g.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
-    const fileName = `Laporan-Forklift-${ownerName}-${data.id}.docx`;
+    const ownerName = g.ownerName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `Laporan Forklift-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

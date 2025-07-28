@@ -73,8 +73,8 @@ const createBapPubt = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const companyNameSafe = g.companyName?.replace(/\s+/g, '-') || 'UnknownCompany';
-    const fileName = `BAP-PUBT-${companyNameSafe}-${data.id || 'new'}.docx`;
+    const companyNameSafe = g.companyName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Pesawat Uap dan Bejana Tekan-${companyNameSafe}-${data.id || 'new'}.docx`;
 
     return { docxBuffer, fileName };
 };

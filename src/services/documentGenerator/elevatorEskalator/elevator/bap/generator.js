@@ -87,8 +87,8 @@ const createBapElevator = async (data) => {
         compression: 'DEFLATE',
     });
 
-    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'Perusahaan Tidak Diketahui';
-    const fileName = `BAP-Elevator-${ownerName}-${data.id}.docx`;
+    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Elevator-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

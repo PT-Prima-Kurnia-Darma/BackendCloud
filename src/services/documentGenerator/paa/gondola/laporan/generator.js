@@ -323,9 +323,9 @@ const createLaporanGondola = async (data) => {
     });
     
     // Buat nama file yang aman
-    const ownerName = (data.generalData.ownerName || 'UnknownOwner').replace(/[^\w\s.-]/g, '');
+    const ownerName = (data.generalData.ownerName || 'Tidak Ada Nama Perusahaan').replace(/[^\w\s.-]/g, '');
     const safeOwnerName = ownerName.replace(/\s+/g, '_');
-    const fileName = `Laporan-Gondola-${safeOwnerName}-${data.id}.docx`;
+    const fileName = `Laporan Gondola-${safeOwnerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

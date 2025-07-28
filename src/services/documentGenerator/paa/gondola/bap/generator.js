@@ -74,8 +74,8 @@ const createBapGondola = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
-    const companyName = (data.generalData.companyName || 'UnknownCompany').replace(/[^\w\s.-]/g, '').replace(/\s+/g, '_');
-    const fileName = `BAP-Gondola-${companyName}-${data.id}.docx`;
+    const companyName = (data.generalData.companyName || 'Tidak Ada Nama Perusahaan').replace(/[^\w\s.-]/g, '').replace(/\s+/g, '_');
+    const fileName = `BAP Gondola-${companyName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

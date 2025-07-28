@@ -82,8 +82,8 @@ const createBapPtpMesin = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const companyNameSafe = g.companyName?.replace(/\s+/g, '-') || 'UnknownCompany';
-    const fileName = `BAP-PTP-Mesin-${companyNameSafe}-${data.id || 'new'}.docx`;
+    const companyNameSafe = g.companyName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Mesin-${companyNameSafe}-${data.id || 'new'}.docx`;
 
     return { docxBuffer, fileName };
 };

@@ -4,49 +4,49 @@ const Joi = require('joi');
 
 const bapPetirPayload = Joi.object({
     laporanId: Joi.string().required(),
-    examinationType: Joi.string().allow('').optional(),
-    inspectionType: Joi.string().allow('').optional(),
-    inspectionDate: Joi.string().allow('').optional(),
-    createdAt: Joi.string().allow('').optional(),
-    extraId: Joi.number().allow('').optional(),
-    equipmentType: Joi.string().allow('').optional(),
+    examinationType: Joi.string().allow('').required(),
+    inspectionType: Joi.string().allow('').required(),
+    inspectionDate: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
+    extraId: Joi.number().required(),
+    equipmentType: Joi.string().allow('').required(),
 
     generalData: Joi.object({
-        companyName: Joi.string().allow('').optional(),
-        companyLocation: Joi.string().allow('').optional(),
-        usageLocation: Joi.string().allow('').optional(),
-        addressUsageLocation: Joi.string().allow('').optional()
-    }).optional(),
+        companyName: Joi.string().allow('').required(),
+        companyLocation: Joi.string().allow('').required(),
+        usageLocation: Joi.string().allow('').required(),
+        addressUsageLocation: Joi.string().allow('').required()
+    }).required(),
 
     technicalData: Joi.object({
-        conductorType: Joi.string().allow('').optional(),
-        serialNumber: Joi.string().allow('').optional(),
-        buildingHeight: Joi.number().allow('').optional(),
-        buildingArea: Joi.number().allow('').optional(),
-        receiverHeight: Joi.number().allow('').optional(),
-        receiverCount: Joi.number().allow('').optional(),
-        groundElectrodeCount: Joi.number().allow('').optional(),
-        conductorDescription: Joi.string().allow('').optional(),
-        installer: Joi.string().allow('').optional(),
-        groundingResistance: Joi.number().allow('').optional()
-    }).optional(),
+        conductorType: Joi.string().allow('').required(),
+        serialNumber: Joi.string().allow('').required(),
+        buildingHeight: Joi.string().allow('').required(),
+        buildingArea: Joi.string().allow('').required(),
+        receiverHeight: Joi.string().allow('').required(),
+        receiverCount: Joi.string().allow('').required(),
+        groundElectrodeCount: Joi.string().allow('').required(),
+        conductorDescription: Joi.string().allow('').required(),
+        installer: Joi.string().allow('').required(),
+        groundingResistance: Joi.string().allow('').required()
+    }).required(),
 
     testResults: Joi.object({
         visualInspection: Joi.object({
-            isSystemOverallGood: Joi.boolean().allow(null).optional(),
-            isReceiverConditionGood: Joi.boolean().allow(null).optional(),
-            isReceiverPoleConditionGood: Joi.boolean().allow(null).optional(),
-            isConductorInsulated: Joi.boolean().allow(null).optional(),
-            isControlBoxAvailable: Joi.boolean().allow(null).optional(),
-            isControlBoxConditionGood: Joi.boolean().allow(null).optional()
-        }).optional(),
+            isSystemOverallGood: Joi.boolean().allow(true, false).required(),
+            isReceiverConditionGood: Joi.boolean().allow(true, false).required(),
+            isReceiverPoleConditionGood: Joi.boolean().allow(true, false).required(),
+            isConductorInsulated: Joi.boolean().allow(true, false).required(),
+            isControlBoxAvailable: Joi.boolean().allow(true, false).required(),
+            isControlBoxConditionGood: Joi.boolean().allow(true, false).required()
+        }).required(),
         measurement: Joi.object({
-            conductorContinuityResult: Joi.string().allow('').optional(),
-            measuredGroundingResistance: Joi.string().allow('').optional(),
-            measuredGroundingResistanceResult: Joi.boolean().allow(null).optional()
-        }).optional()
-    }).optional()
-}).min(1).unknown(false);
+            conductorContinuityResult: Joi.string().allow('').required(),
+            measuredGroundingResistance: Joi.string().allow('').required(),
+            measuredGroundingResistanceResult: Joi.boolean().allow(true, false).required()
+        }).required()
+    }).required()
+});
 
 module.exports = {
     bapPetirPayload,

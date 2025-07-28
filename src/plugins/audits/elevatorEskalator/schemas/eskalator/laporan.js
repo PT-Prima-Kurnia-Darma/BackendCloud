@@ -4,42 +4,42 @@ const Joi = require('joi');
 
 // Skema untuk setiap item hasil inspeksi (tidak berubah)
 const inspectionItemSchema = Joi.object({
-    result: Joi.string().allow('').optional(),
-    status: Joi.boolean().optional()
-}).optional();
+    result: Joi.string().allow('').required(),
+    status: Joi.boolean().allow(true, false).required()
+}).required();
 
 // Skema payload utama untuk laporan eskalator (SUDAH DISESUAIKAN DENGAN STRUKTUR BARU)
 const laporanEskalatorPayload = Joi.object({
-    inspectionType: Joi.string().allow('').optional(),
-    equipmentType: Joi.string().allow('').optional(),
-    createdAt: Joi.string().allow('').optional(),
-    extraId: Joi.number().allow('').optional(),
+    inspectionType: Joi.string().allow('').required(),
+    equipmentType: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
+    extraId: Joi.number().required(),
 
     // 1. Menambahkan validasi untuk objek 'generalData'
     generalData: Joi.object({
-        ownerName: Joi.string().allow('').optional(),
-        nameUsageLocation: Joi.string().allow('').optional(),
-        safetyObjectTypeAndNumber: Joi.string().allow('').optional(),
-        intendedUse: Joi.string().allow('').optional(),
-        permitNumber: Joi.string().allow('').optional(),
-        examinationType: Joi.string().allow('').optional(),
-        inspectionDate: Joi.string().allow('').optional()
-    }).optional(),
+        ownerName: Joi.string().allow('').required(),
+        nameUsageLocation: Joi.string().allow('').required(),
+        safetyObjectTypeAndNumber: Joi.string().allow('').required(),
+        intendedUse: Joi.string().allow('').required(),
+        permitNumber: Joi.string().allow('').required(),
+        examinationType: Joi.string().allow('').required(),
+        inspectionDate: Joi.string().allow('').required()
+    }).required(),
 
     technicalData: Joi.object({
-        technicalDatamanufacturer: Joi.string().allow('').optional(),
-        technicalDatabrand: Joi.string().allow('').optional(),
-        technicalDatacountryAndYear: Joi.string().allow('').optional(),
-        technicalDataserialNumber: Joi.string().allow('').optional(),
-        technicalDatatransports: Joi.string().allow('').optional(),
-        technicalDatacapacity: Joi.string().allow('').optional(),
-        technicalDataliftHeight: Joi.string().allow('').optional(),
-        technicalDataspeed: Joi.string().allow('').optional(),
-        technicalDatadriveType: Joi.string().allow('').optional(),
-        technicalDatamotorCurrent: Joi.string().allow('').optional(),
-        technicalDatamotorPower: Joi.string().allow('').optional(),
-        technicalDatasafetyDevices: Joi.string().allow('').optional()
-    }).optional(),
+        technicalDatamanufacturer: Joi.string().allow('').required(),
+        technicalDatabrand: Joi.string().allow('').required(),
+        technicalDatacountryAndYear: Joi.string().allow('').required(),
+        technicalDataserialNumber: Joi.string().allow('').required(),
+        technicalDatatransports: Joi.string().allow('').required(),
+        technicalDatacapacity: Joi.string().allow('').required(),
+        technicalDataliftHeight: Joi.string().allow('').required(),
+        technicalDataspeed: Joi.string().allow('').required(),
+        technicalDatadriveType: Joi.string().allow('').required(),
+        technicalDatamotorCurrent: Joi.string().allow('').required(),
+        technicalDatamotorPower: Joi.string().allow('').required(),
+        technicalDatasafetyDevices: Joi.string().allow('').required()
+    }).required(),
 
     // 2. Menambahkan validasi untuk objek 'inspectionAndTesting'
     inspectionAndTesting: Joi.object({
@@ -53,7 +53,7 @@ const laporanEskalatorPayload = Joi.object({
             inspectionAndTestingframeAndMachineRoompitConditionresult: inspectionItemSchema,
             inspectionAndTestingframeAndMachineRoompitClearanceresult: inspectionItemSchema,
             inspectionAndTestingframeAndMachineRoompitStepCoverPlateresult: inspectionItemSchema
-        }).optional(),
+        }).required(),
 
         driveEquipment: Joi.object({
             driveEquipmentdriveMachineresult: inspectionItemSchema,
@@ -65,7 +65,7 @@ const laporanEskalatorPayload = Joi.object({
             driveEquipmentstoppingDistance0_90result: inspectionItemSchema,
             driveEquipmentdriveChainresult: inspectionItemSchema,
             driveEquipmentchainBreakingStrengthresult: inspectionItemSchema
-        }).optional(),
+        }).required(),
 
         stepsOrPallets: Joi.object({
             stepsOrPalletsstepMaterialresult: inspectionItemSchema,
@@ -75,7 +75,7 @@ const laporanEskalatorPayload = Joi.object({
             stepsOrPalletsstepLevelnessresult: inspectionItemSchema,
             stepsOrPalletsskirtBrushresult: inspectionItemSchema,
             stepsOrPalletsstepWheelsresult: inspectionItemSchema
-        }).optional(),
+        }).required(),
 
         landingArea: Joi.object({
             landingArealandingPlatesresult: inspectionItemSchema,
@@ -83,7 +83,7 @@ const laporanEskalatorPayload = Joi.object({
             landingAreacombConditionresult: inspectionItemSchema,
             landingArealandingCoverresult: inspectionItemSchema,
             landingArealandingAccessArearesult: inspectionItemSchema
-        }).optional(),
+        }).required(),
 
         balustrade: Joi.object({
             balustradebalustradePanelmaterialresult: inspectionItemSchema,
@@ -93,13 +93,13 @@ const laporanEskalatorPayload = Joi.object({
             balustradeskirtPanelresult: inspectionItemSchema,
             balustradeskirtPanelFlexibilityresult: inspectionItemSchema,
             balustradestepToSkirtClearanceresult: inspectionItemSchema
-        }).optional(),
+        }).required(),
 
         handrail: Joi.object({
             handrailhandrailConditionresult: inspectionItemSchema,
             handrailhandrailSpeedSynchronizationresult: inspectionItemSchema,
             handrailhandrailWidthresult: inspectionItemSchema
-        }).optional(),
+        }).required(),
 
         runway: Joi.object({
             runwaybeamStrengthAndPositionresult: inspectionItemSchema,
@@ -111,7 +111,7 @@ const laporanEskalatorPayload = Joi.object({
             runwayantiClimbDeviceHeightresult: inspectionItemSchema,
             runwayornamentPlacementresult: inspectionItemSchema,
             runwayoutdoorClearanceresult: inspectionItemSchema
-        }).optional(),
+        }).required(),
 
         safetyEquipment: Joi.object({
             safetyEquipmentoperationControlKeyresult: inspectionItemSchema,
@@ -125,19 +125,19 @@ const laporanEskalatorPayload = Joi.object({
             safetyEquipmentcombPlateSafetyDeviceresult: inspectionItemSchema,
             safetyEquipmentinnerDeckingBrushresult: inspectionItemSchema,
             safetyEquipmentstopButtonsresult: inspectionItemSchema
-        }).optional(),
+        }).required(),
 
         electricalInstallation: Joi.object({
             electricalInstallationinstallationStandardresult: inspectionItemSchema,
             electricalInstallationelectricalPanelresult: inspectionItemSchema,
             electricalInstallationgroundingCableresult: inspectionItemSchema,
             electricalInstallationfireAlarmConnectionresult: inspectionItemSchema
-        }).optional(),
+        }).required(),
 
         outdoorSpecifics: Joi.object({
             outdoorSpecificspitWaterPumpresult: inspectionItemSchema,
             outdoorSpecificsweatherproofComponentsresult: inspectionItemSchema
-        }).optional(),
+        }).required(),
 
         userSafety: Joi.object({
             userSafetySignagenoBulkyItemsresult: inspectionItemSchema,
@@ -149,15 +149,13 @@ const laporanEskalatorPayload = Joi.object({
             userSafetySignagesoftSoleFootwearWarningresult: inspectionItemSchema,
             userSafetySignagenoSittingOnStepsresult: inspectionItemSchema,
             userSafetySignageholdHandrailresult: inspectionItemSchema
-        }).optional(),
-    }).optional(),
+        }).required(),
+    }).required(),
 
-    testingEscalator: Joi.string().allow('').optional(),
-    conclusion: Joi.string().allow('').optional()
+    testingEscalator: Joi.string().allow('').required(),
+    conclusion: Joi.string().allow('').required()
 
-})
-.unknown(false)
-.min(1); 
+}); 
 
 module.exports = {
     laporanEskalatorPayload,
