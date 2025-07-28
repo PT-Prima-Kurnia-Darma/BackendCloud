@@ -3,62 +3,62 @@
 const Joi = require('joi');
 
 const bapGantryCranePayload = Joi.object({
-  // ID dari laporan utama untuk sinkronisasi data (jika ada)
-  laporanId: Joi.string().optional(),
+
+  laporanId: Joi.string().required(),
   
-  examinationType: Joi.string().allow('').optional(),
-  inspectionType: Joi.string().allow('').optional(),
-  inspectionDate: Joi.string().allow('').optional(),
-  equipmentType: Joi.string().allow('').optional(),
-  createdAt: Joi.string().allow('').optional(),
-  extraId: Joi.number().allow('').optional(),
+  examinationType: Joi.string().allow('').required(),
+  inspectionType: Joi.string().allow('').required(),
+  inspectionDate: Joi.string().allow('').required(),
+  equipmentType: Joi.string().allow('').required(),
+  createdAt: Joi.string().allow('').required(),
+  extraId: Joi.number().required(),
 
   generalData: Joi.object({
-    companyName: Joi.string().allow('').optional(),
-    companyLocation: Joi.string().allow('').optional(),
-    usageLocation: Joi.string().allow('').optional(),
-    location: Joi.string().allow('').optional(),
-  }).optional(),
+    companyName: Joi.string().allow('').required(),
+    companyLocation: Joi.string().allow('').required(),
+    usageLocation: Joi.string().allow('').required(),
+    location: Joi.string().allow('').required(),
+  }).required(),
 
   technicalData: Joi.object({
-    brandOrType: Joi.string().allow('').optional(),
-    manufacturerHoist: Joi.string().allow('').optional(),
-    manufactureStructure: Joi.string().allow('').optional(),
-    manufactureYear: Joi.string().allow('').optional(),
-    manufactureCountry: Joi.string().allow('').optional(),
-    serialNumber: Joi.string().allow('').optional(),
-    maxLiftingCapacityKg: Joi.string().allow('').optional(),
-    liftingSpeedMpm: Joi.string().allow('').optional(),
-  }).optional(),
+    brandOrType: Joi.string().allow('').required(),
+    manufacturerHoist: Joi.string().allow('').required(),
+    manufactureStructure: Joi.string().allow('').required(),
+    manufactureYear: Joi.string().allow('').required(),
+    manufactureCountry: Joi.string().allow('').required(),
+    serialNumber: Joi.string().allow('').required(),
+    maxLiftingCapacityKg: Joi.string().allow('').required(),
+    liftingSpeedMpm: Joi.string().allow('').required(),
+  }).required(),
 
   inspectionResult: Joi.object({
     visualCheck: Joi.object({
-      isMainStructureGood: Joi.boolean().required(),
-      areBoltsAndNutsSecure: Joi.boolean().required(),
-      isWireRopeGoodCondition: Joi.boolean().required(),
-      isHookGoodCondition: Joi.boolean().required(),
-      isGearboxGoodCondition: Joi.boolean().required(),
-      hasGearboxOilLeak: Joi.boolean().required(),
-      isWarningLampGoodCondition: Joi.boolean().required(),
-      isCapacityMarkingDisplayed: Joi.boolean().required(),
-    }).optional(),
+      isMainStructureGood: Joi.boolean().allow(true, false).required(),
+      areBoltsAndNutsSecure: Joi.boolean().allow(true, false).required(),
+      isWireRopeGoodCondition: Joi.boolean().allow(true, false).required(),
+      isHookGoodCondition: Joi.boolean().allow(true, false).required(),
+      isGearboxGoodCondition: Joi.boolean().allow(true, false).required(),
+      hasGearboxOilLeak: Joi.boolean().allow(true, false).required(),
+      isWarningLampGoodCondition: Joi.boolean().allow(true, false).required(),
+      isCapacityMarkingDisplayed: Joi.boolean().allow(true, false).required(),
+    }).required(),
     functionalTest: Joi.object({
-      isForwardReverseFunctionOk: Joi.boolean().required(),
-      isHoistingFunctionOk: Joi.boolean().required(),
-      isLimitSwitchFunctional: Joi.boolean().required(),
-    }).optional(),
+      isForwardReverseFunctionOk: Joi.boolean().allow(true, false).required(),
+      isHoistingFunctionOk: Joi.boolean().allow(true, false).required(),
+      isLimitSwitchFunctional: Joi.boolean().allow(true, false).required(),
+    }).required(),
     ndtTest: Joi.object({
-      method: Joi.string().allow('').optional(),
-      isNdtResultGood: Joi.boolean().required(),
-    }).optional(),
+      method: Joi.string().allow('').required(),
+      isNdtResultGood: Joi.boolean().allow(true, false).required(),
+    }).required(),
     loadTest: Joi.object({
-      loadKg: Joi.string().allow('').optional(),
-      liftHeightMeters: Joi.string().allow('').optional(),
-      holdTimeSeconds: Joi.string().allow('').optional(),
-      isLoadTestResultGood: Joi.boolean().required(),
-    }).optional(),
-  }).optional(),
-}).min(1).unknown(false);
+      loadKg: Joi.string().allow('').required(),
+      liftHeightMeters: Joi.string().allow('').required(),
+      holdTimeSeconds: Joi.string().allow('').required(),
+      isLoadTestResultGood: Joi.boolean().allow(true, false).required(),
+    }).required(),
+  }).required(),
+});
 
 module.exports = {
     bapGantryCranePayload,
