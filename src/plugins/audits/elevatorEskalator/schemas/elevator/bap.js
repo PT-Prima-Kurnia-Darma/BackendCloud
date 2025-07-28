@@ -33,23 +33,23 @@ const bapElevatorPayload = Joi.object({
     }).required(),
 
     visualInspection: Joi.object({
-        isMachineRoomConditionAcceptable: Joi.boolean().allow(null).required(),
-        isPanelGoodCondition: Joi.boolean().allow(null).required(),
-        isAparAvailableInPanelRoom: Joi.boolean().allow(null).required(),
-        lightingCondition: Joi.boolean().allow(null).required(),
-        isPitLadderAvailable: Joi.boolean().allow(null).required(),
+        isMachineRoomConditionAcceptable: Joi.boolean().allow(true, false).allow(true, false).required(),
+        isPanelGoodCondition: Joi.boolean().allow(true, false).required(),
+        isAparAvailableInPanelRoom: Joi.boolean().allow(true, false).required(),
+        lightingCondition: Joi.boolean().allow(true, false).required(),
+        isPitLadderAvailable: Joi.boolean().allow(true, false).required(),
     }).required(),
 
     testing: Joi.object({
-        isNdtThermographPanelOk: Joi.boolean().allow(null).required(),
-        isArdFunctional: Joi.boolean().allow(null).required(),
-        isGovernorFunctional: Joi.boolean().allow(null).required(),
-        isSlingConditionOkByTester: Joi.boolean().allow(null).required(),
-        limitSwitchTest: Joi.boolean().allow(null).required(),
-        isDoorSwitchFunctional: Joi.boolean().allow(null).required(),
-        pitEmergencyStopStatus: Joi.boolean().allow(null).required(),
-        isIntercomFunctional: Joi.boolean().allow(null).required(),
-        isFiremanSwitchFunctional: Joi.boolean().allow(null).required(),
+        isNdtThermographPanelOk: Joi.boolean().allow(true, false).required(),
+        isArdFunctional: Joi.boolean().allow(true, false).required(),
+        isGovernorFunctional: Joi.boolean().allow(true, false).required(),
+        isSlingConditionOkByTester: Joi.boolean().allow(true, false).required(),
+        limitSwitchTest: Joi.boolean().allow(true, false).required(),
+        isDoorSwitchFunctional: Joi.boolean().allow(true, false).required(),
+        pitEmergencyStopStatus: Joi.boolean().allow(true, false).required(),
+        isIntercomFunctional: Joi.boolean().allow(true, false).required(),
+        isFiremanSwitchFunctional: Joi.boolean().allow(true, false).required(),
     }).required()
 }).unknown(false).min(1);
 
