@@ -13,7 +13,7 @@ const laporanElevatorPayload = Joi.object({
     inspectionType: Joi.string().allow('').required(),
     examinationType: Joi.string().allow('').required(),
     createdAt: Joi.string().allow('').required(),
-    extraId: Joi.number().allow('').required(),
+    extraId: Joi.number().required(),
     equipmentType: Joi.string().allow('').required(),
 
     generalData: Joi.object({

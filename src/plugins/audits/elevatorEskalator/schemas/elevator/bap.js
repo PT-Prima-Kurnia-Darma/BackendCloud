@@ -4,14 +4,14 @@ const Joi = require('joi');
 
 const bapElevatorPayload = Joi.object({
     // Menyimpan ID laporan asal untuk keterhubungan data
-    laporanId: Joi.string().allow('').required(),
+    laporanId: Joi.string().required(),
     
     // Field-field utama dari BAP
     inspectionDate: Joi.string().allow('').required(),
     examinationType: Joi.string().allow('').required(),
     equipmentType: Joi.string().allow('').required(),
     createdAt: Joi.string().allow('').required(),
-    extraId: Joi.number().allow('').required(),
+    extraId: Joi.number().required(),
     inspectionType: Joi.string().allow('').required(),
 
     generalData: Joi.object({
