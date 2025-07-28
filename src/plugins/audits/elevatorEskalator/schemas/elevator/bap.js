@@ -33,23 +33,23 @@ const bapElevatorPayload = Joi.object({
     }).optional(),
 
     visualInspection: Joi.object({
-        isMachineRoomConditionAcceptable: Joi.boolean().optional(),
-        isPanelGoodCondition: Joi.boolean().optional(),
-        isAparAvailableInPanelRoom: Joi.boolean().optional(),
-        lightingCondition: Joi.boolean().optional(), // Merepresentasikan kondisi baik/tidak baik
-        isPitLadderAvailable: Joi.boolean().optional(),
+        isMachineRoomConditionAcceptable: Joi.boolean().allow(null).optional(),
+        isPanelGoodCondition: Joi.boolean().allow(null).optional(),
+        isAparAvailableInPanelRoom: Joi.boolean().allow(null).optional(),
+        lightingCondition: Joi.boolean().allow(null).optional(),
+        isPitLadderAvailable: Joi.boolean().allow(null).optional(),
     }).optional(),
 
     testing: Joi.object({
-        isNdtThermographPanelOk: Joi.boolean().optional(),
-        isArdFunctional: Joi.boolean().optional(),
-        isGovernorFunctional: Joi.boolean().optional(),
-        isSlingConditionOkByTester: Joi.boolean().optional(),
-        limitSwitchTest: Joi.boolean().optional(), // Merepresentasikan berfungsi/tidak berfungsi
-        isDoorSwitchFunctional: Joi.boolean().optional(),
-        pitEmergencyStopStatus: Joi.boolean().optional(), // Merepresentasikan tersedia & berfungsi / tidak
-        isIntercomFunctional: Joi.boolean().optional(),
-        isFiremanSwitchFunctional: Joi.boolean().optional(),
+        isNdtThermographPanelOk: Joi.boolean().allow(null).optional(),
+        isArdFunctional: Joi.boolean().allow(null).optional(),
+        isGovernorFunctional: Joi.boolean().allow(null).optional(),
+        isSlingConditionOkByTester: Joi.boolean().allow(null).optional(),
+        limitSwitchTest: Joi.boolean().allow(null).optional(),
+        isDoorSwitchFunctional: Joi.boolean().allow(null).optional(),
+        pitEmergencyStopStatus: Joi.boolean().allow(null).optional(),
+        isIntercomFunctional: Joi.boolean().allow(null).optional(),
+        isFiremanSwitchFunctional: Joi.boolean().allow(null).optional(),
     }).optional()
 }).unknown(false).min(1);
 
