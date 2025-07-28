@@ -5,7 +5,7 @@ const Joi = require('joi');
 // Skema untuk setiap item inspeksi, sekarang sepenuhnya opsional
 const inspectionItemSchema = Joi.object({
     result: Joi.string().allow('').optional(),
-    status: Joi.boolean().allow(null).optional()
+    status: Joi.boolean().allow(true, false).optional()
 }).optional();
 
 // Skema payload utama, di mana semua field dan objek bersifat opsional
