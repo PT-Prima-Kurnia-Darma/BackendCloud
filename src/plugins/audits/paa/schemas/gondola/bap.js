@@ -4,58 +4,58 @@ const Joi = require('joi');
 
 const bapGondolaPayload = Joi.object({
     laporanId: Joi.string().required(),
-    examinationType: Joi.string().required(),
-    inspectionType: Joi.string().required(),
-    inspectionDate: Joi.string().required(),
-    equipmentType: Joi.string().required(),
-    createdAt: Joi.string().optional(),
-    extraId: Joi.number().optional(),
+    examinationType: Joi.string().allow('').required(),
+    inspectionType: Joi.string().allow('').required(),
+    inspectionDate: Joi.string().allow('').required(),
+    equipmentType: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
+    extraId: Joi.number().required(),
 
     generalData: Joi.object({
-        companyName: Joi.string().required(),
-        companyLocation: Joi.string().required(),
-        userInCharge: Joi.string().required(),
-        ownerAddress: Joi.string().required()
+        companyName: Joi.string().allow('').required(),
+        companyLocation: Joi.string().allow('').required(),
+        userInCharge: Joi.string().allow('').required(),
+        ownerAddress: Joi.string().allow('').required()
     }).required(),
 
     technicalData: Joi.object({
-        manufacturer: Joi.string().required(),
-        locationAndYearOfManufacture: Joi.string().required(),
-        serialNumberUnitNumber: Joi.string().required(),
-        intendedUse: Joi.string().required(),
-        capacityWorkingLoad: Joi.string().required(),
-        maxLiftingHeightMeters: Joi.string().required()
+        manufacturer: Joi.string().allow('').required(),
+        locationAndYearOfManufacture: Joi.string().allow('').required(),
+        serialNumberUnitNumber: Joi.string().allow('').required(),
+        intendedUse: Joi.string().allow('').required(),
+        capacityWorkingLoad: Joi.string().allow('').required(),
+        maxLiftingHeightMeters: Joi.string().allow('').required()
     }).required(),
 
     inspectionResult: Joi.object({
         visualCheck: Joi.object({
-            isSlingDiameterAcceptable: Joi.boolean().required(),
-            isBumperInstalled: Joi.boolean().required(),
-            isCapacityMarkingDisplayed: Joi.boolean().required(),
-            isPlatformConditionAcceptable: Joi.boolean().required(),
+            isSlingDiameterAcceptable: Joi.boolean().allow(true, false).required(),
+            isBumperInstalled: Joi.boolean().allow(true, false).required(),
+            isCapacityMarkingDisplayed: Joi.boolean().allow(true, false).required(),
+            isPlatformConditionAcceptable: Joi.boolean().allow(true, false).required(),
             driveMotorCondition: Joi.object({
-                isGoodCondition: Joi.boolean().required(),
-                hasOilLeak: Joi.boolean().required()
+                isGoodCondition: Joi.boolean().allow(true, false).required(),
+                hasOilLeak: Joi.boolean().allow(true, false).required()
             }).required(),
-            isControlPanelClean: Joi.boolean().required(),
-            isBodyHarnessAvailable: Joi.boolean().required(),
-            isLifelineAvailable: Joi.boolean().required(),
-            isButtonLabelsDisplayed: Joi.boolean().required()
+            isControlPanelClean: Joi.boolean().allow(true, false).required(),
+            isBodyHarnessAvailable: Joi.boolean().allow(true, false).required(),
+            isLifelineAvailable: Joi.boolean().allow(true, false).required(),
+            isButtonLabelsDisplayed: Joi.boolean().allow(true, false).required()
         }).required(),
         functionalTest: Joi.object({
-            isWireRopeMeasurementOk: Joi.boolean().required(),
-            isUpDownFunctionOk: Joi.boolean().required(),
-            isDriveMotorFunctionOk: Joi.boolean().required(),
-            isEmergencyStopFunctional: Joi.boolean().required(),
-            isSafetyLifelineFunctional: Joi.boolean().required(),
+            isWireRopeMeasurementOk: Joi.boolean().allow(true, false).required(),
+            isUpDownFunctionOk: Joi.boolean().allow(true, false).required(),
+            isDriveMotorFunctionOk: Joi.boolean().allow(true, false).required(),
+            isEmergencyStopFunctional: Joi.boolean().allow(true, false).required(),
+            isSafetyLifelineFunctional: Joi.boolean().allow(true, false).required(),
             ndtTest: Joi.object({
-                method: Joi.string().required(),
-                isResultGood: Joi.boolean().required(),
-                hasCrackIndication: Joi.boolean().required()
+                method: Joi.string().allow('').required(),
+                isResultGood: Joi.boolean().allow(true, false).required(),
+                hasCrackIndication: Joi.boolean().allow(true, false).required()
             }).required()
         }).required()
     }).required()
-}).min(1).unknown(false);
+});
 
 module.exports = {
     bapGondolaPayload,
