@@ -34,13 +34,13 @@ const laporanElevatorPayload = Joi.object({
     }).required(),
 
     technicalDocumentInspection: Joi.object({
-        designDrawing: Joi.boolean().required(),
-        technicalCalculation: Joi.boolean().required(),
-        materialCertificate: Joi.boolean().required(),
-        controlPanelDiagram: Joi.boolean().required(),
-        asBuiltDrawing: Joi.boolean().required(),
-        componentCertificates: Joi.boolean().required(),
-        safeWorkProcedure: Joi.boolean().required()
+        designDrawing: Joi.boolean().allow(true, false).required(),
+        technicalCalculation: Joi.boolean().allow(true, false).required(),
+        materialCertificate: Joi.boolean().allow(true, false).required(),
+        controlPanelDiagram: Joi.boolean().allow(true, false).required(),
+        asBuiltDrawing: Joi.boolean().allow(true, false).required(),
+        componentCertificates: Joi.boolean().allow(true, false).required(),
+        safeWorkProcedure: Joi.boolean().allow(true, false).required()
     }).required(),
 
     inspectionAndTesting: Joi.object({
@@ -200,7 +200,7 @@ const laporanElevatorPayload = Joi.object({
     
     conclusion: Joi.string().allow('').required(),
     recomendations: Joi.string().allow('').required()
-}).unknown(false).min(1);
+});
 
 module.exports = {
     laporanElevatorPayload,

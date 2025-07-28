@@ -51,7 +51,7 @@ const bapElevatorPayload = Joi.object({
         isIntercomFunctional: Joi.boolean().allow(true, false).required(),
         isFiremanSwitchFunctional: Joi.boolean().allow(true, false).required(),
     }).required()
-}).unknown(false).min(1);
+});
 
 module.exports = {
     bapElevatorPayload,
