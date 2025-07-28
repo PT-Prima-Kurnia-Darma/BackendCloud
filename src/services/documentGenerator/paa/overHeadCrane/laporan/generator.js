@@ -697,8 +697,8 @@ const createLaporanOverheadCrane = async (data) => {
         compression: 'DEFLATE'
     });
 
-    const safeOwnerName = (general.ownerName || 'UnknownOwner').replace(/[^\w\s.-]/g, '_');
-    const fileName = `Laporan-OverheadCrane-${safeOwnerName}-${data.id || 'new'}.docx`;
+    const safeOwnerName = (general.ownerName || 'Tidak Ada Nama Perusahaan').replace(/[^\w\s.-]/g, '_');
+    const fileName = `Laporan Overhead Crane-${safeOwnerName}-${data.id || 'new'}.docx`;
 
     return { docxBuffer, fileName };
 };

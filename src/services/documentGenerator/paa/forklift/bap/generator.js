@@ -72,8 +72,8 @@ const createBapForklift = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const ownerName = g.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
-    const fileName = `BAP-Forklift-${ownerName}-${data.id}.docx`;
+    const ownerName = g.ownerName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Forklift-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

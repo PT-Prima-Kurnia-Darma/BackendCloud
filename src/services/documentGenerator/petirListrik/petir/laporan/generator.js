@@ -138,8 +138,8 @@ const createLaporanPetir = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
-    const companyName = owner.companyName?.replace(/\s+/g, '-') || 'UnknownCompany';
-    const fileName = `Laporan-Instalasi-Petir-${companyName}-${data.id}.docx`;
+    const companyName = owner.companyName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `Laporan Instalasi Penyalur Petir-${companyName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

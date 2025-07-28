@@ -197,8 +197,8 @@ const createLaporanProteksiKebakaran = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const companyName = g.companyName?.replace(/\s+/g, '-') || 'UnknownCompany';
-    const fileName = `Laporan-Proteksi-Kebakaran-${companyName}-${data.id}.docx`;
+    const companyName = g.companyName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `Laporan Instalasi Proteksi Kebakaran-${companyName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

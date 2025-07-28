@@ -172,8 +172,8 @@ const createLaporanListrik = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const companyName = data.generalData.companyName.replace(/[^a-zA-Z0-9]/g, '_');
-    const fileName = `Laporan-Instalasi-Listrik-${companyName}-${data.id}.docx`;
+    const companyName = data.generalData.companyName.replace(/[^a-zA-Z0-9]/g, '_') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `Laporan Instalasi Listrik-${companyName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

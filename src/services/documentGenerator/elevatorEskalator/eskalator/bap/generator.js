@@ -66,8 +66,8 @@ const renderData = {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
-    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
-    const fileName = `BAP-Eskalator-${ownerName}-${data.id}.docx`;
+    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Eskalator-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

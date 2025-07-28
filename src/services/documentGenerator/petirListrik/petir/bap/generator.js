@@ -65,8 +65,8 @@ const createBapPetir = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const companyName = g.companyName?.replace(/\s+/g, '-') || 'UnknownCompany';
-    const fileName = `BAP-Instalasi-Petir-${companyName}-${data.id || 'new'}.docx`;
+    const companyName = g.companyName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Instalasi Penyalur Petir-${companyName}-${data.id || 'new'}.docx`;
 
     return { docxBuffer, fileName };
 };

@@ -87,8 +87,8 @@ const createBapGantryCrane = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const ownerName = g.companyName?.replace(/\s+/g, '-') || 'UnknownOwner';
-    const fileName = `BAP-GantryCrane-${ownerName}-${data.id || 'new'}.docx`;
+    const ownerName = g.companyName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Gantry Crane-${ownerName}-${data.id || 'new'}.docx`;
 
     return { docxBuffer, fileName };
 };

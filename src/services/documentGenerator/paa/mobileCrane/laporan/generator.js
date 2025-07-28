@@ -947,8 +947,8 @@ const createLaporanMobileCrane = async (data) => {
         type: 'nodebuffer',
         compression: 'DEFLATE'
     });
-    const ownerName = (g.ownerName || 'UnknownOwner').replace(/[^\w.-]/g, '_');
-    const fileName = `Laporan-MobileCrane-${ownerName}-${data.id || 'new'}.docx`;
+    const ownerName = (g.ownerName || 'Tidak Ada Nama Perusahaan').replace(/[^\w.-]/g, '_');
+    const fileName = `Laporan Mobile Crane-${ownerName}-${data.id || 'new'}.docx`;
 
     return {
         docxBuffer,

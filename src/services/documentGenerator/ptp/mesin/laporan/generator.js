@@ -242,8 +242,8 @@ const createLaporanPtpMesin = async (data) => {
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
     
-    const companyName = g.companyName?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'UnknownCompany';
-    const fileName = `Laporan-PTP-Mesin-${companyName}-${data.id}.docx`;
+    const companyName = g.companyName?.replace(/[^a-z0-9]/gi, '_').toLowerCase() || 'Tidak Ada Nama Perusahaan';
+    const fileName = `Laporan Mesin-${companyName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

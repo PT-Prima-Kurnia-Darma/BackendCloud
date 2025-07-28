@@ -385,8 +385,8 @@ const createLaporanEskalator = async (data) => {
     });
 
     // Membuat nama file yang dinamis dan aman
-    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'UnknownOwner';
-    const fileName = `Laporan-Eskalator-${ownerName}-${data.id}.docx`;
+    const ownerName = data.generalData?.ownerName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `Laporan Eskalator-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

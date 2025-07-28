@@ -67,8 +67,8 @@ const createBapProteksiKebakaran = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const companyNameSafe = g.companyName?.replace(/\s+/g, '-') || 'UnknownCompany';
-    const fileName = `BAP-Proteksi-Kebakaran-${companyNameSafe}-${data.id || 'new'}.docx`;
+    const companyNameSafe = g.companyName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `BAP Instalasi Proteksi Kebakaran-${companyNameSafe}-${data.id || 'new'}.docx`;
 
     return { docxBuffer, fileName };
 };

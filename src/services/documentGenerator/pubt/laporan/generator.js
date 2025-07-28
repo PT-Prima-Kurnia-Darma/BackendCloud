@@ -391,8 +391,8 @@ const createLaporanPubt = async (data) => {
     doc.render(renderData);
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer' });
-    const companyName = g.companyName?.replace(/\s+/g, '-') || 'UnknownCompany';
-    const fileName = `Laporan-PUBT-${companyName}-${data.id}.docx`;
+    const companyName = g.companyName?.replace(/\s+/g, '-') || 'Tidak Ada Nama Perusahaan';
+    const fileName = `Laporan Pesawat Uap dan Bejana Tekan-${companyName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };

@@ -723,8 +723,8 @@ const createLaporanGantryCrane = async (data) => {
     }
 
     const docxBuffer = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
-    const ownerName = (g.companyName || 'UnknownCompany').replace(/[^\w.-]/g, '_');
-    const fileName = `Laporan-GantryCrane-${ownerName}-${data.id}.docx`;
+    const ownerName = (g.companyName || 'Tidak Ada Nama Perusahaan').replace(/[^\w.-]/g, '_');
+    const fileName = `Laporan Gantry Crane-${ownerName}-${data.id}.docx`;
 
     return { docxBuffer, fileName };
 };
