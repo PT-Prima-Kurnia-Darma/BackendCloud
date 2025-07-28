@@ -4,44 +4,44 @@ const Joi = require('joi');
 
 // Skema untuk setiap item inspeksi, sekarang sepenuhnya opsional
 const inspectionItemSchema = Joi.object({
-    result: Joi.string().allow('').optional(),
-    status: Joi.boolean().allow(true, false).optional()
-}).optional();
+    result: Joi.string().allow('').required(),
+    status: Joi.boolean().allow(true, false).required()
+}).required();
 
 // Skema payload utama, di mana semua field dan objek bersifat opsional
 const laporanElevatorPayload = Joi.object({
-    inspectionType: Joi.string().allow('').optional(),
-    examinationType: Joi.string().allow('').optional(),
-    createdAt: Joi.string().allow('').optional(),
-    extraId: Joi.number().allow('').optional(),
-    equipmentType: Joi.string().allow('').optional(),
+    inspectionType: Joi.string().allow('').required(),
+    examinationType: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(),
+    extraId: Joi.number().allow('').required(),
+    equipmentType: Joi.string().allow('').required(),
 
     generalData: Joi.object({
-        ownerName: Joi.string().allow('').optional(),
-        ownerAddress: Joi.string().allow('').optional(),
-        nameUsageLocation: Joi.string().allow('').optional(),
-        addressUsageLocation: Joi.string().allow('').optional(),
-        manufacturerOrInstaller: Joi.string().allow('').optional(),
-        elevatorType: Joi.string().allow('').optional(),
-        brandOrType: Joi.string().allow('').optional(),
-        countryAndYear: Joi.string().allow('').optional(),
-        serialNumber: Joi.string().allow('').optional(),
-        capacity: Joi.string().allow('').optional(),
-        speed: Joi.string().allow('').optional(),
-        floorsServed: Joi.string().allow('').optional(),
-        permitNumber: Joi.string().allow('').optional(),
-        inspectionDate: Joi.string().allow('').optional()
-    }).optional(),
+        ownerName: Joi.string().allow('').required(),
+        ownerAddress: Joi.string().allow('').required(),
+        nameUsageLocation: Joi.string().allow('').required(),
+        addressUsageLocation: Joi.string().allow('').required(),
+        manufacturerOrInstaller: Joi.string().allow('').required(),
+        elevatorType: Joi.string().allow('').required(),
+        brandOrType: Joi.string().allow('').required(),
+        countryAndYear: Joi.string().allow('').required(),
+        serialNumber: Joi.string().allow('').required(),
+        capacity: Joi.string().allow('').required(),
+        speed: Joi.string().allow('').required(),
+        floorsServed: Joi.string().allow('').required(),
+        permitNumber: Joi.string().allow('').required(),
+        inspectionDate: Joi.string().allow('').required()
+    }).required(),
 
     technicalDocumentInspection: Joi.object({
-        designDrawing: Joi.boolean().optional(),
-        technicalCalculation: Joi.boolean().optional(),
-        materialCertificate: Joi.boolean().optional(),
-        controlPanelDiagram: Joi.boolean().optional(),
-        asBuiltDrawing: Joi.boolean().optional(),
-        componentCertificates: Joi.boolean().optional(),
-        safeWorkProcedure: Joi.boolean().optional()
-    }).optional(),
+        designDrawing: Joi.boolean().required(),
+        technicalCalculation: Joi.boolean().required(),
+        materialCertificate: Joi.boolean().required(),
+        controlPanelDiagram: Joi.boolean().required(),
+        asBuiltDrawing: Joi.boolean().required(),
+        componentCertificates: Joi.boolean().required(),
+        safeWorkProcedure: Joi.boolean().required()
+    }).required(),
 
     inspectionAndTesting: Joi.object({
         machineRoomAndMachinery: Joi.object({
@@ -65,9 +65,9 @@ const laporanElevatorPayload = Joi.object({
                 lightingBetweenWorkArea: inspectionItemSchema,
                 manualBrakeRelease: inspectionItemSchema,
                 fireExtinguisherPlacement: inspectionItemSchema,
-            }).optional(),
+            }).required(),
             emergencyStopSwitch: inspectionItemSchema,
-        }).optional(),
+        }).required(),
         suspensionRopesAndBelts: Joi.object({
             condition: inspectionItemSchema,
             chainUsage: inspectionItemSchema,
@@ -76,12 +76,12 @@ const laporanElevatorPayload = Joi.object({
             ropeWithoutCounterweight: inspectionItemSchema,
             belt: inspectionItemSchema,
             slackRopeDevice: inspectionItemSchema,
-        }).optional(),
+        }).required(),
         drumsAndSheaves: Joi.object({
             drumGrooves: inspectionItemSchema,
             passengerDrumDiameter: inspectionItemSchema,
             governorDrumDiameter: inspectionItemSchema,
-        }).optional(),
+        }).required(),
         hoistwayAndPit: Joi.object({
             construction: inspectionItemSchema,
             walls: inspectionItemSchema,
@@ -103,7 +103,7 @@ const laporanElevatorPayload = Joi.object({
             floorLeveling: inspectionItemSchema,
             hoistwaySeparatorBeam: inspectionItemSchema,
             inclinedElevatorStairs: inspectionItemSchema,
-        }).optional(),
+        }).required(),
         car: Joi.object({
             frame: inspectionItemSchema,
             body: inspectionItemSchema,
@@ -115,7 +115,7 @@ const laporanElevatorPayload = Joi.object({
                 size: inspectionItemSchema,
                 lockAndSwitch: inspectionItemSchema,
                 sillClearance: inspectionItemSchema,
-            }).optional(),
+            }).required(),
             carToBeamClearance: inspectionItemSchema,
             alarmBell: inspectionItemSchema,
             backupPowerARD: inspectionItemSchema,
@@ -133,7 +133,7 @@ const laporanElevatorPayload = Joi.object({
                 floorButtons: inspectionItemSchema,
                 alarmButton: inspectionItemSchema,
                 twoWayIntercom: inspectionItemSchema,
-            }).optional(),
+            }).required(),
             carRoofStrength: inspectionItemSchema,
             carTopEmergencyExit: inspectionItemSchema,
             carSideEmergencyExit: inspectionItemSchema,
@@ -143,7 +143,7 @@ const laporanElevatorPayload = Joi.object({
             carTopLighting: inspectionItemSchema,
             manualOperationButtons: inspectionItemSchema,
             carInterior: inspectionItemSchema,
-        }).optional(),
+        }).required(),
         governorAndSafetyBrake: Joi.object({
             governorRopeClamp: inspectionItemSchema,
             governorSwitch: inspectionItemSchema,
@@ -156,7 +156,7 @@ const laporanElevatorPayload = Joi.object({
             electricalCutoutSwitch: inspectionItemSchema,
             limitSwitch: inspectionItemSchema,
             overloadDevice: inspectionItemSchema,
-        }).optional(),
+        }).required(),
         counterweightGuideRailsAndBuffers: Joi.object({
             counterweightMaterial: inspectionItemSchema,
             counterweightGuardScreen: inspectionItemSchema,
@@ -164,7 +164,7 @@ const laporanElevatorPayload = Joi.object({
             bufferType: inspectionItemSchema,
             bufferFunction: inspectionItemSchema,
             bufferSafetySwitch: inspectionItemSchema,
-        }).optional(),
+        }).required(),
         electricalInstallation: Joi.object({
             installationStandard: inspectionItemSchema,
             electricalPanel: inspectionItemSchema,
@@ -182,7 +182,7 @@ const laporanElevatorPayload = Joi.object({
                 doorSize: inspectionItemSchema,
                 travelTime: inspectionItemSchema,
                 evacuationFloor: inspectionItemSchema,
-            }).optional(),
+            }).required(),
             accessibilityElevator: Joi.object({
                 operatingPanel: inspectionItemSchema,
                 panelHeight: inspectionItemSchema,
@@ -190,16 +190,16 @@ const laporanElevatorPayload = Joi.object({
                 doorWidth: inspectionItemSchema,
                 audioInformation: inspectionItemSchema,
                 label: inspectionItemSchema,
-            }).optional(),
+            }).required(),
             seismicSensor: Joi.object({
                 availability: inspectionItemSchema,
                 function: inspectionItemSchema,
-            }).optional(),
-        }).optional(),
-    }).optional(),
+            }).required(),
+        }).required(),
+    }).required(),
     
-    conclusion: Joi.string().allow('').optional(),
-    recomendations: Joi.string().allow('').optional()
+    conclusion: Joi.string().allow('').required(),
+    recomendations: Joi.string().allow('').required()
 }).unknown(false).min(1);
 
 module.exports = {
