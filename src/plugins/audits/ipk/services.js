@@ -51,6 +51,7 @@ const proteksiKebakaranServices = {
                 return null;
             }
             
+            delete payload.createdAt;
             // 1. Update Laporan
             await laporanRef.update(payload);
 

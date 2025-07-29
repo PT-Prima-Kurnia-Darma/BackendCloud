@@ -50,6 +50,8 @@ const motorDieselServices = {
                 return null;
             }
 
+            delete payload.createdAt;
+
             await laporanRef.update(payload);
 
             const bapQuery = await auditCollection
@@ -281,6 +283,7 @@ const mesinServices = {
                 return null;
             }
 
+            delete payload.createdAt;
             // 1. Update Laporan
             await laporanRef.update(payload);
 

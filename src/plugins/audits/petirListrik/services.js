@@ -50,6 +50,8 @@ const petirServices = {
             if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Instalasi Penyalur Petir') {
                 return null;
             }
+
+            delete payload.createdAt;
             // 1. Update Laporan
             await laporanRef.update(payload);
 
@@ -300,6 +302,9 @@ const listrikServices = {
             if (!doc.exists || doc.data().subInspectionType !== 'Instalasi Listrik' || doc.data().documentType !== 'Laporan') {
                 return null;
             }
+
+            delete payload.createdAt;
+
             await laporanRef.update(payload);
 
             const bapQuery = await auditCollection

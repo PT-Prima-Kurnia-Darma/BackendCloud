@@ -43,6 +43,8 @@ const elevatorServices = {
                 return null;
             }
             
+            delete payload.createdAt;
+
             await laporanRef.update(payload);
 
             // --- SINKRONISASI DARI LAPORAN KE BAP ---
@@ -287,6 +289,8 @@ const eskalatorServices = {
             if (!doc.exists || doc.data().documentType !== 'Laporan' || doc.data().subInspectionType !== 'Eskalator') {
                 return null;
             }
+
+            delete payload.createdAt;
 
             await laporanRef.update(payload);
 
