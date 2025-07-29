@@ -7,7 +7,7 @@ const auditCollection = db.collection('elevatorEskalator');
 const elevatorServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Laporan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -164,7 +164,7 @@ const elevatorServices = {
                 await laporanRef.update(dataToSync);
             }
             
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -256,7 +256,7 @@ const elevatorServices = {
 const eskalatorServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { ...payload, subInspectionType: "Eskalator", documentType: "Laporan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -396,7 +396,7 @@ const eskalatorServices = {
             
             await laporanDocRef.update(dataToSync);
             
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { ...payload, subInspectionType: "Eskalator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             

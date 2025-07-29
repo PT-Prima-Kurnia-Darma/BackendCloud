@@ -31,7 +31,7 @@ const init = async () => {
   // Logging sederhana
   server.ext('onRequest', (request, h) => {
     // ✅ Diubah ke WIB dengan format 'Z'
-    const timestamp = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+    const timestamp = new Date.toISOString();
     console.log(`[${timestamp}] ${request.method.toUpperCase()} ${request.path}`);
     return h.continue;
   });

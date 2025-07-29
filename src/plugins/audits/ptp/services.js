@@ -6,7 +6,7 @@ const auditCollection = db.collection('ptp');
 const motorDieselServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = {
                 ...payload,
                 subInspectionType: "Motor Diesel",
@@ -160,7 +160,7 @@ const motorDieselServices = {
                 await laporanRef.update(dataToSync);
             }
 
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { ...payload, subInspectionType: "Motor Diesel", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -237,7 +237,7 @@ const motorDieselServices = {
 const mesinServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = {
                 ...payload,
                 subInspectionType: "Mesin",
@@ -387,7 +387,7 @@ const mesinServices = {
                 await laporanRef.update(dataToSync);
             }
 
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { ...payload, subInspectionType: "Mesin", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
