@@ -7,7 +7,7 @@ const auditCollection = db.collection('petirListrik');
 const petirServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { 
                 ...payload, 
                 subInspectionType: "Instalasi Penyalur Petir", 
@@ -175,7 +175,7 @@ const petirServices = {
                 await laporanRef.update(dataToSync);
             }
             
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { ...payload, subInspectionType: "Instalasi Penyalur Petir", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -257,7 +257,7 @@ const petirServices = {
 const listrikServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { 
                 ...payload, 
                 subInspectionType: "Instalasi Listrik", 
@@ -405,7 +405,7 @@ const listrikServices = {
                 await laporanRef.update(dataToSync);
             }
             
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { ...payload, subInspectionType: "Instalasi Listrik", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };

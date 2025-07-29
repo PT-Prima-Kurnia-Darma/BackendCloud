@@ -7,7 +7,7 @@ const auditCollection = db.collection('proteksiKebakaran');
 const proteksiKebakaranServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { 
                 ...payload, 
                 subInspectionType: "Instalasi Proteksi Kebakaran", 
@@ -170,7 +170,7 @@ const proteksiKebakaranServices = {
                 await laporanRef.update(dataToSync);
             }
 
-            const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+            const createdAt = new Date().toISOString();
             const dataToSave = { 
                 ...payload,
                 subInspectionType: "Instalasi Proteksi Kebakaran",
