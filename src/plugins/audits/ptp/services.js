@@ -1,12 +1,18 @@
 'use strict';
 
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 const db = require('../../../utils/firestore');
 const auditCollection = db.collection('ptp');
 
 const motorDieselServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = {
                 ...payload,
                 subInspectionType: "Motor Diesel",
@@ -160,7 +166,7 @@ const motorDieselServices = {
                 await laporanRef.update(dataToSync);
             }
 
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Motor Diesel", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -237,7 +243,7 @@ const motorDieselServices = {
 const mesinServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = {
                 ...payload,
                 subInspectionType: "Mesin",
@@ -387,7 +393,7 @@ const mesinServices = {
                 await laporanRef.update(dataToSync);
             }
 
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Mesin", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };

@@ -1,5 +1,11 @@
 'use strict';
 
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 const db = require('../../../utils/firestore');
 const Boom = require('@hapi/boom');
 const auditCollection = db.collection('proteksiKebakaran');
@@ -7,7 +13,7 @@ const auditCollection = db.collection('proteksiKebakaran');
 const proteksiKebakaranServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { 
                 ...payload, 
                 subInspectionType: "Instalasi Proteksi Kebakaran", 
@@ -170,7 +176,7 @@ const proteksiKebakaranServices = {
                 await laporanRef.update(dataToSync);
             }
 
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { 
                 ...payload,
                 subInspectionType: "Instalasi Proteksi Kebakaran",

@@ -1,5 +1,11 @@
 'use strict';
 
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 const db = require('../../../utils/firestore');
 const Boom = require('@hapi/boom');
 const auditCollection = db.collection('petirListrik');
@@ -7,7 +13,7 @@ const auditCollection = db.collection('petirListrik');
 const petirServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { 
                 ...payload, 
                 subInspectionType: "Instalasi Penyalur Petir", 
@@ -175,7 +181,7 @@ const petirServices = {
                 await laporanRef.update(dataToSync);
             }
             
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Instalasi Penyalur Petir", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -257,7 +263,7 @@ const petirServices = {
 const listrikServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { 
                 ...payload, 
                 subInspectionType: "Instalasi Listrik", 
@@ -405,7 +411,7 @@ const listrikServices = {
                 await laporanRef.update(dataToSync);
             }
             
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Instalasi Listrik", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
