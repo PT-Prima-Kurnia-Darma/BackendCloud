@@ -43,7 +43,7 @@ const laporanOverheadCranePayload = Joi.object({
     examinationType: Joi.string().allow('').required(),
     inspectionType: Joi.string().allow('').required(),
     inspectionDate: Joi.string().allow('').required(),
-    extraId: Joi.number().allow('').required(),
+    extraId: Joi.number().required(),
     createdAt: Joi.string().allow('').required(),
 
     generalData: Joi.object({
