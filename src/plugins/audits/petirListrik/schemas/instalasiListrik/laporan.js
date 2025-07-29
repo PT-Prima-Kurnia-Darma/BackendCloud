@@ -5,8 +5,8 @@ const Joi = require('joi');
 const laporanListrikPayload = Joi.object({
     examinationType: Joi.string().allow('').required(),
     inspectionType: Joi.string().allow('').required(),
-    extraid: Joi.number().required(),
-    createdaAt: Joi.string().allow('').required(),
+    extraId: Joi.number().required(),
+    createdAt: Joi.string().allow('').required(),
     equipmentType: Joi.string().allow('').required(),
     generalData: Joi.object({
         companyName: Joi.string().allow('').required(),
