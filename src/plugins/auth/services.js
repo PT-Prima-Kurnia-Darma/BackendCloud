@@ -22,7 +22,7 @@ const register = async (firestore, payload) => {
   // 3. Simpan data user
   const newDocRef = usersRef.doc();
   const userId = newDocRef.id;
-  // ✅ Diubah ke WIB dengan format 'Z'
+
   const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
   const userData = {
     name,
