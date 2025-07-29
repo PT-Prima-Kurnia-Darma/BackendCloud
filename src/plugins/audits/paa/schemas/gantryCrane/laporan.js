@@ -48,11 +48,11 @@ const defleksiItemSchema = Joi.object({
 }).required();
 
 const laporanGantryCranePayload = Joi.object({
-    examinationType: Joi.string().required(),
-    inspectionType: Joi.string().required(),
-    createdAt: Joi.date().iso().required(), 
+    examinationType: Joi.string().allow('').required(),
+    inspectionType: Joi.string().allow('').required(),
+    createdAt: Joi.string().allow('').required(), 
     extraId: Joi.number().required(),
-    equipmentType: Joi.string().required(),
+    equipmentType: Joi.string().allow('').required(),
 
     generalData: Joi.object({
         companyName: Joi.string().allow('').required(),
@@ -68,7 +68,7 @@ const laporanGantryCranePayload = Joi.object({
         usagePermitNumber: Joi.string().allow('').required(),
         operatorcertificateStatus: Joi.string().allow('').required(),
         technicalDataManualStatus: Joi.string().allow('').required(),
-        inspectionDate: Joi.string().required()
+        inspectionDate: Joi.string().allow('').required()
     }).required(),
 
     technicalData: Joi.object({
