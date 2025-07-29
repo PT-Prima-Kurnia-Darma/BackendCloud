@@ -51,6 +51,8 @@ const pubtServices = {
                 return null;
             }
 
+            delete payload.createdAt;
+
             await laporanRef.update(payload);
 
             // --- SINKRONISASI DARI LAPORAN KE BAP (LENGKAP) ---

@@ -52,6 +52,7 @@ const forkliftServices = {
                 return null;
             }
 
+            delete payload.createdAt;
             // 1. Update Laporan utama
             await laporanRef.update(payload);
 
@@ -273,6 +274,8 @@ const mobileCraneServices = {
             const laporanDoc = await laporanRef.get();
             if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Mobile Crane') {return null;}
 
+            delete payload.createdAt;
+
             await laporanRef.update(payload);
 
             const bapQuery = await auditCollection
@@ -475,6 +478,9 @@ const gantryCraneServices = {
             const laporanRef = auditCollection.doc(id);
             const laporanDoc = await laporanRef.get();
             if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gantry Crane') {return null;}
+            
+            delete payload.createdAt;
+
             await laporanRef.update(payload);
 
             const bapQuery = await auditCollection
@@ -656,6 +662,7 @@ const gondolaServices = {
             // }
             if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gondola') {return null;}
 
+            delete payload.createdAt;
             // 1. Update Laporan utama
             await laporanRef.update(payload);
 
@@ -888,6 +895,9 @@ const overheadCraneServices = {
             const laporanDoc = await laporanRef.get();
             if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Overhead Crane') 
             {return null;}
+
+            delete payload.createdAt;
+            
             await laporanRef.update(payload);
 
             // --- SINKRONISASI LAPORAN KE BAP ---
