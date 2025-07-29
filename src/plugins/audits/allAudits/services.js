@@ -1,5 +1,4 @@
-'use strict';
-
+// services.js
 
 const db = require('../../../utils/firestore');
 const Boom = require('@hapi/boom');
@@ -13,58 +12,65 @@ const AUDIT_COLLECTIONS = [
   'pubt'
 ];
 
-const fetchCollectionData = async (collectionName) => {
+// FUNGSI YANG DIMODIFIKASI
+const fetchCollectionData = async (collectionName, limit) => {
   try {
-    const snapshot = await db.collection(collectionName).get();
+    // Gunakan orderBy dan limit untuk efisiensi
+    const snapshot = await db.collection(collectionName)
+      .orderBy('createdAt', 'desc') // Urutkan di Firestore (menggunakan index)
+      .limit(limit) // Batasi jumlah dokumen yang diambil
+      .get();
+      
     if (snapshot.empty) {
       return [];
     }
-    // Menambahkan field `id` dan `tipeAudit` ke setiap dokumen.
     return snapshot.docs.map(doc => ({
       id: doc.id,
-    //   tipeAudit: collectionName,
       ...doc.data()
     }));
   } catch (error) {
     console.error(`Error fetching collection ${collectionName}:`, error);
-    // Mengembalikan array kosong jika satu koleksi gagal, agar tidak menghentikan semua.
     return [];
   }
 };
 
+// FUNGSI YANG DIMODIFIKASI
 const getCombinedAudits = async ({ page, size }) => {
   try {
-    // 1. Ambil data dari semua koleksi secara paralel untuk efisiensi.
-    const promises = AUDIT_COLLECTIONS.map(collection => fetchCollectionData(collection));
+    // Tentukan batas pengambilan data dari setiap koleksi.
+    // Kita ambil lebih banyak dari 'size' untuk memastikan data terbaru tidak terlewat
+    // saat menggabungkan dari berbagai koleksi.
+    const limitPerCollection = (page * size) + 20; // Ambil data hingga halaman saat ini + buffer 20 item
+
+    const promises = AUDIT_COLLECTIONS.map(collection => fetchCollectionData(collection, limitPerCollection));
     const resultsFromCollections = await Promise.all(promises);
 
-    // 2. Gabungkan semua data menjadi satu array besar.
     const allAudits = resultsFromCollections.flat();
 
-    // 3. Urutkan berdasarkan field `createdAt` (dari terbaru ke terlama).
-    allAudits.sort((a, b) => {
-        const dateA = new Date(a.createdAt);
-        const dateB = new Date(b.createdAt);
-        return dateB - dateA;
-    });
+    // Urutkan kembali di memory (karena data berasal dari koleksi berbeda)
+    allAudits.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    const totalItems = allAudits.length;
-    const totalPages = Math.ceil(totalItems / size) || 1; // Jika 0 item, tetap 1 halaman
+    const totalItems = allAudits.length; // Perhatikan: totalItems di sini adalah total dari yang di-fetch, bukan total di DB
+    const totalPages = Math.ceil(totalItems / size) || 1;
     const startIndex = (page - 1) * size;
 
-    // Cek jika halaman yang diminta melebihi total halaman yang ada
     if (page > totalPages && totalItems > 0) {
       throw Boom.badRequest(`Halaman yang diminta (${page}) melebihi total halaman yang tersedia (${totalPages}).`);
     }
     
     const paginatedAudits = allAudits.slice(startIndex, startIndex + size);
 
+    // CATATAN: Karena kita tidak mengambil SEMUA data, `totalItems` dan `totalPages` di sini
+    // mungkin tidak merepresentasikan jumlah total sebenarnya di database,
+    // namun ini adalah pendekatan paling efisien tanpa mengubah struktur database.
     return {
       audits: paginatedAudits,
       pagination: {
         currentPage: page,
         pageSize: size,
-        totalItems,
+        // Untuk totalItems yang akurat, Anda perlu melakukan query count terpisah yang bisa jadi mahal.
+        // Untuk saat ini, kita bisa menyajikan total berdasarkan data yang diambil.
+        totalItems: totalItems, 
         totalPages,
       }
     };

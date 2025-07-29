@@ -1,22 +1,15 @@
-// src/plugins/audits/allAudits/handlers.js
-'use strict';
+// handlers.js
 
 const Boom = require('@hapi/boom');
-const services = require('./services');
+const { getCombinedAudits } = require('./services');
 
-/**
- * Handler untuk memproses permintaan GET /audits/all.
- */
 const getAllAuditsHandler = async (request, h) => {
   try {
-    // Ambil query params dari URL, dengan nilai default jika tidak ada.
-    const { page = 1, size = 10 } = request.query;
 
-    const result = await services.getCombinedAudits({
-      page: parseInt(page, 10),
-      size: parseInt(size, 10),
-    });
+    const { page, size } = request.query;
 
+    const result = await getCombinedAudits({ page, size });
+    
     return h.response({
       status: 'success',
       message: 'Semua data audit berhasil diambil',
@@ -24,12 +17,10 @@ const getAllAuditsHandler = async (request, h) => {
       paging: result.pagination,
     }).code(200);
 
-  } catch (err) {
-    // Jika error sudah dalam format Boom, lempar kembali.
-    if (Boom.isBoom(err)) {
-      throw err;
+  } catch (error) {
+    if (Boom.isBoom(error)) {
+      return error;
     }
-    // Untuk error tak terduga, kembalikan response 500.
     console.error('Unhandled error in getAllAuditsHandler:', err);
     throw Boom.internal('Terjadi kesalahan pada server.');
   }
