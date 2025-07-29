@@ -8,7 +8,9 @@ const AUDIT_COLLECTIONS = [
   'paa',
   'petirListrik',
   'elevatorEskalator',
-  'proteksiKebakaran'
+  'proteksiKebakaran',
+  'ptp',
+  'pubt'
 ];
 
 const fetchCollectionData = async (collectionName) => {
