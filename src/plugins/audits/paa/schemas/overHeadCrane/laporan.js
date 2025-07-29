@@ -146,8 +146,8 @@ const laporanOverheadCranePayload = Joi.object({
         }).required(),
         mainHook: Joi.object({
             method: Joi.string().allow('').required(),
-            measurements: Joi.object().pattern(Joi.string(), Joi.string().allow('').required()).required(),
-            tolerances: Joi.object().pattern(Joi.string(), Joi.string().allow('').required()).required(),
+            measurements: Joi.object().pattern(Joi.string().allow(''), Joi.string().allow('').required()).required(),
+            tolerances: Joi.object().pattern(Joi.string().allow(''), Joi.string().allow('').required()).required(),
             result: Joi.string().allow('').required()
         }).required()
     }).required(),
