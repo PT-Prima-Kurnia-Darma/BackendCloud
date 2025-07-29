@@ -17,12 +17,13 @@ module.exports = [
       auth: 'jwt',
       description: 'Mengambil semua data audit dari semua koleksi dengan sistem paging',
       notes: 'Mengembalikan daftar data audit yang sudah digabung dan diurutkan berdasarkan tanggal terbaru.',
-      tags: ['api', 'Audits-Combined'], // Tag untuk dokumentasi Swagger/OpenAPI
+      tags: ['api', 'Audits-Combined'],
+      cache: false,
       validate: {
         query: Joi.object({
           page: Joi.number().integer().min(1).default(1)
             .description('Nomor halaman yang ingin ditampilkan.'),
-          size: Joi.number().integer().min(1).max(100).default(10)
+          size: Joi.number().integer().min(1).max(30).default(10)
             .description('Jumlah item per halaman (maksimal 100).')
         })
       }
