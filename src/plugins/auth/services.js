@@ -5,6 +5,12 @@ const Boom = require('@hapi/boom');
 const jwt = require('jsonwebtoken');
 const config = require('../../config');
 
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 const register = async (firestore, payload) => {
   const { name, username, password } = payload;
   const usersRef = firestore.collection('users');
@@ -23,7 +29,7 @@ const register = async (firestore, payload) => {
   const newDocRef = usersRef.doc();
   const userId = newDocRef.id;
 
-  const createdAt = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString();
+  const createdAt = dayjs().tz("Asia/Jakarta").format();
   const userData = {
     name,
     username,
