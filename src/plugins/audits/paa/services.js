@@ -1,5 +1,11 @@
 'use strict';
 
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 const db = require('../../../utils/firestore');
 const Boom = require('@hapi/boom');
 const auditCollection = db.collection('paa');
@@ -8,7 +14,7 @@ const auditCollection = db.collection('paa');
 const forkliftServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { 
                 ...payload,
                 subInspectionType: "Forklift",
@@ -157,7 +163,7 @@ const forkliftServices = {
                 await laporanRef.update(dataToSync);
             }
 
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { 
                 ...payload,
                 subInspectionType: "Forklift",
@@ -242,7 +248,7 @@ const forkliftServices = {
 const mobileCraneServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Mobile Crane", documentType: "Laporan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -377,7 +383,7 @@ const mobileCraneServices = {
                 await laporanRef.update(dataToSync);
             }
             
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Mobile Crane", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -447,7 +453,7 @@ const mobileCraneServices = {
 const gantryCraneServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Gantry Crane", documentType: "Laporan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -554,7 +560,7 @@ const gantryCraneServices = {
             if (p.technicalData?.maxLiftingCapacityKg !== undefined) dataToSync['generalData.maxLiftingCapacityKg'] = p.technicalData.maxLiftingCapacityKg;
             if (p.technicalData?.liftingSpeedMpm !== undefined) dataToSync['technicalData.hoistingSpeed'] = p.technicalData.liftingSpeedMpm;
             if (Object.keys(dataToSync).length > 0) await laporanRef.update(dataToSync);
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
 
             const dataToSave = { ...payload, subInspectionType: "Gantry Crane", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
@@ -621,7 +627,7 @@ const gantryCraneServices = {
 const gondolaServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Gondola", documentType: "Laporan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -773,7 +779,7 @@ const gondolaServices = {
             await laporanRef.update(dataToSyncWithLaporan);
             // --- AKHIR LOGIKA SINKRONISASI ---
 
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Gondola", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -848,7 +854,7 @@ const gondolaServices = {
 const overheadCraneServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { 
                 ...payload, 
                 subInspectionType: "Overhead Crane", 
@@ -1020,7 +1026,7 @@ const overheadCraneServices = {
                 await laporanRef.update(dataToSync);
             }
 
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Overhead Crane", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };

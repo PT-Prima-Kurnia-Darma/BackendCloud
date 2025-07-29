@@ -6,6 +6,13 @@ const Hapi = require('@hapi/hapi');
 const config = require('./src/config');
 const firestore = require('./src/utils/firestore');
 
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+
 const init = async () => {
   const server = Hapi.server({
     port: config.PORT,
@@ -30,11 +37,12 @@ const init = async () => {
 
   // Logging sederhana
   server.ext('onRequest', (request, h) => {
-    // ✅ Diubah ke WIB dengan format 'Z'
-    const timestamp = new Date().toISOString();
+    // <-- UBAH BARIS INI UNTUK MENGGUNAKAN WAKTU JAKARTA
+    const timestamp = dayjs().tz("Asia/Jakarta").format();
     console.log(`[${timestamp}] ${request.method.toUpperCase()} ${request.path}`);
     return h.continue;
   });
+;
 
 //  —— Health-check endpoint ——
   server.route({

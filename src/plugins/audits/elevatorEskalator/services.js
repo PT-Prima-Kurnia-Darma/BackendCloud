@@ -1,4 +1,9 @@
 'use strict';
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const db = require('../../../utils/firestore');
 const Boom = require('@hapi/boom');
@@ -7,7 +12,7 @@ const auditCollection = db.collection('elevatorEskalator');
 const elevatorServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Laporan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -164,7 +169,7 @@ const elevatorServices = {
                 await laporanRef.update(dataToSync);
             }
             
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Elevator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -256,7 +261,7 @@ const elevatorServices = {
 const eskalatorServices = {
     laporan: {
         create: async (payload) => {
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Eskalator", documentType: "Laporan", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             return { id: docRef.id, ...dataToSave };
@@ -396,7 +401,7 @@ const eskalatorServices = {
             
             await laporanDocRef.update(dataToSync);
             
-            const createdAt = new Date().toISOString();
+            const createdAt = dayjs().tz("Asia/Jakarta").format();
             const dataToSave = { ...payload, subInspectionType: "Eskalator", documentType: "Berita Acara dan Pemeriksaan Pengujian", createdAt };
             const docRef = await auditCollection.add(dataToSave);
             

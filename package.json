@@ -17,6 +17,7 @@
     "@hapi/joi": "^17.1.1",
     "@hapi/jwt": "^3.2.0",
     "bcrypt": "^6.0.0",
+    "dayjs": "^1.11.13",
     "docxtemplater": "^3.65.1",
     "dotenv": "^16.5.0",
     "firebase-admin": "^13.4.0",
