@@ -4,14 +4,14 @@ require('dotenv').config();
 const {
   PORT = process.env.PORT || 3000,
   HOST = '0.0.0.0',
-  FIRESTORE_PROJECT_ID,
-  FIRESTORE_CLIENT_EMAIL,
-  FIRESTORE_PRIVATE_KEY,
+  GOOGLE_CLOUD_PROJECT_ID,
+  GOOGLE_CLOUD_CLIENT_EMAIL,
+  GOOGLE_CLOUD_PRIVATE_KEY,
   JWT_SECRET,
 } = process.env;
 
-if (!FIRESTORE_PROJECT_ID || !FIRESTORE_CLIENT_EMAIL || !FIRESTORE_PRIVATE_KEY) {
-  console.warn('Environment variable Firestore credentials belum lengkap.');
+if (!GOOGLE_CLOUD_PROJECT_ID || !GOOGLE_CLOUD_CLIENT_EMAIL || !GOOGLE_CLOUD_PRIVATE_KEY) {
+  console.warn('Environment variable Googel Cloud credentials belum lengkap.');
 }
 if (!JWT_SECRET) {
   console.warn('Environment variable JWT_SECRET belum didefinisikan.');
@@ -20,8 +20,8 @@ if (!JWT_SECRET) {
 module.exports = {
   PORT: Number(PORT),
   HOST,
-  FIRESTORE_PROJECT_ID,
-  FIRESTORE_CLIENT_EMAIL,
-  FIRESTORE_PRIVATE_KEY,
+  GOOGLE_CLOUD_PROJECT_ID,
+  GOOGLE_CLOUD_CLIENT_EMAIL,
+  GOOGLE_CLOUD_PRIVATE_KEY,
   JWT_SECRET,
 };
