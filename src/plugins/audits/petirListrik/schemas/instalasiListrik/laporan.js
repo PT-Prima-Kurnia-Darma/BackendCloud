@@ -141,7 +141,7 @@ const laporanListrikPayload = Joi.object({
             hasVentilationAndSigns: Joi.boolean().allow(true, false).required()
         }).required(),
         sdpFloors: Joi.array().items(Joi.object({
-            floorNumber: Joi.number().required(),
+            floorNumber: Joi.string().allow('').required(),
             hasCover: Joi.boolean().allow(true, false).required(),
             hasSld: Joi.boolean().allow(true, false).required(),
             hasBonding: Joi.boolean().allow(true, false).required(),
