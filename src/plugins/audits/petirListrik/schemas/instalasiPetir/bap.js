@@ -7,7 +7,7 @@ const bapPetirPayload = Joi.object({
     examinationType: Joi.string().allow('').required(),
     inspectionType: Joi.string().allow('').required(),
     inspectionDate: Joi.string().allow('').required(),
-    createdAt: Joi.string().allow('').required(),
+    createdAt: Joi.string().required(),
     extraId: Joi.number().required(),
     equipmentType: Joi.string().allow('').required(),
 

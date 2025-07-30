@@ -9,7 +9,7 @@ const bapOverheadCranePayload = Joi.object({
         inspectionDate: Joi.string().allow('').required(),
         extraId: Joi.number().required(),
         inspectionType: Joi.string().allow('').required(),
-        createdAt: Joi.string().allow('').required(),
+        createdAt: Joi.string().required(),
         equipmentType: Joi.string().allow('').required()
     }).required(),
     generalData: Joi.object({

@@ -10,7 +10,7 @@ const inspectionItemSchema = Joi.object({
 const laporanPubtPayload = Joi.object({
     examinationType: Joi.string().allow('').required(),
     inspectionType: Joi.string().allow('').required(),
-    createdAt: Joi.string().allow('').required(),
+    createdAt: Joi.string().required(),
     extraId: Joi.number().required(),
 
     generalData: Joi.object({
