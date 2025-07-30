@@ -51,7 +51,7 @@ const petirServices = {
                 return null;
             }
 
-            delete payload.createdAt;
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format()
             // 1. Update Laporan
             await laporanRef.update(payload);
 
@@ -211,6 +211,8 @@ const petirServices = {
                 return null; 
             }
             
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
+
             const { laporanId } = bapDoc.data();
 
             if (laporanId) {
@@ -303,7 +305,7 @@ const listrikServices = {
                 return null;
             }
 
-            delete payload.createdAt;
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format()
 
             await laporanRef.update(payload);
 
@@ -445,6 +447,8 @@ const listrikServices = {
             if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Instalasi Listrik') {
                 return null;
             }
+
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
 
             const { laporanId } = bapDoc.data();
             if (laporanId) {

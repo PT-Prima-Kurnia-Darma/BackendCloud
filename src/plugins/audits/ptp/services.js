@@ -50,7 +50,7 @@ const motorDieselServices = {
                 return null;
             }
 
-            delete payload.createdAt;
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format()
 
             await laporanRef.update(payload);
 
@@ -197,6 +197,8 @@ const motorDieselServices = {
                 return null;
             }
 
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
+
             await bapRef.update(payload);
 
             const { laporanId } = bapDoc.data();
@@ -283,7 +285,7 @@ const mesinServices = {
                 return null;
             }
 
-            delete payload.createdAt;
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format()
             // 1. Update Laporan
             await laporanRef.update(payload);
 
@@ -424,6 +426,8 @@ const mesinServices = {
             if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Mesin') {
                 return null;
             }
+
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
 
             await bapRef.update(payload);
 

@@ -51,7 +51,7 @@ const pubtServices = {
                 return null;
             }
 
-            delete payload.createdAt;
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format()
 
             await laporanRef.update(payload);
 
@@ -199,6 +199,8 @@ const pubtServices = {
             if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Pesawat Uap dan Bejana Tekan') {
                 return null;
             }
+
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
 
             await bapRef.update(payload);
 
