@@ -43,7 +43,7 @@ const elevatorServices = {
                 return null;
             }
             
-             payload.createdAt = dayjs().tz("Asia/Jakarta").format()
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format()
 
             await laporanRef.update(payload);
 
@@ -201,6 +201,7 @@ const elevatorServices = {
                 return null; 
             }
             
+            
             const { laporanId } = bapDoc.data();
 
             if (!laporanId) {
@@ -213,6 +214,8 @@ const elevatorServices = {
             if (!laporanDoc.exists) {
                 throw Boom.notFound('Update gagal. Laporan yang terhubung dengan BAP tidak ditemukan.');
             }
+
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
 
             await bapRef.update(payload);
             
@@ -430,6 +433,8 @@ const eskalatorServices = {
             if (!doc.exists || doc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || doc.data().subInspectionType !== 'Eskalator') {
                 return null;
             }
+
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
 
             await docRef.update(payload);
 

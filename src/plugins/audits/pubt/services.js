@@ -200,6 +200,8 @@ const pubtServices = {
                 return null;
             }
 
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
+
             await bapRef.update(payload);
 
             const { laporanId } = bapDoc.data();

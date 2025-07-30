@@ -200,6 +200,7 @@ const forkliftServices = {
                 return null;
             }
             
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
             // 1. Update BAP utama
             await bapRef.update(payload);
 
@@ -408,6 +409,8 @@ const mobileCraneServices = {
             const bapDoc = await bapRef.get();
             if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Mobile Crane') return null;
             
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
+
             await bapRef.update(payload);
 
             const { laporanId } = bapDoc.data();
@@ -591,6 +594,8 @@ const gantryCraneServices = {
              if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Gantry Crane') return null;
             await bapRef.update(payload);
 
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
+            
             const { laporanId } = bapDoc.data();
 
             if (laporanId) {
@@ -822,6 +827,8 @@ const gondolaServices = {
             if (!laporanDoc.exists || laporanDoc.data().documentType !== 'Laporan' || laporanDoc.data().subInspectionType !== 'Gondola') {
                 throw new InvariantError('BAP gagal diupdate. Laporan Gondola tidak ditemukan');
             }
+
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
 
             await bapRef.update(payload);
 
@@ -1066,6 +1073,9 @@ const overheadCraneServices = {
             if (!bapDoc.exists  || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Overhead Crane') {
                 return null;
             }
+
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
+
             await bapRef.update(payload);
 
             const { laporanId } = bapDoc.data();

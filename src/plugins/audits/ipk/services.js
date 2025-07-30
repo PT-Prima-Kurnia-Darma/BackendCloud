@@ -212,6 +212,8 @@ const proteksiKebakaranServices = {
             if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian') {
                 return null;
             }
+
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
             
             await bapRef.update(payload);
 

@@ -211,6 +211,8 @@ const petirServices = {
                 return null; 
             }
             
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
+
             const { laporanId } = bapDoc.data();
 
             if (laporanId) {
@@ -445,6 +447,8 @@ const listrikServices = {
             if (!bapDoc.exists || bapDoc.data().documentType !== 'Berita Acara dan Pemeriksaan Pengujian' || bapDoc.data().subInspectionType !== 'Instalasi Listrik') {
                 return null;
             }
+
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format();
 
             const { laporanId } = bapDoc.data();
             if (laporanId) {
