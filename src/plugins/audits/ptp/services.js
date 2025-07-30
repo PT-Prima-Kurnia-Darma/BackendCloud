@@ -50,7 +50,7 @@ const motorDieselServices = {
                 return null;
             }
 
-            delete payload.createdAt;
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format()
 
             await laporanRef.update(payload);
 
@@ -283,7 +283,7 @@ const mesinServices = {
                 return null;
             }
 
-            delete payload.createdAt;
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format()
             // 1. Update Laporan
             await laporanRef.update(payload);
 

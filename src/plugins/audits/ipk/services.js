@@ -51,7 +51,7 @@ const proteksiKebakaranServices = {
                 return null;
             }
             
-            delete payload.createdAt;
+            payload.createdAt = dayjs().tz("Asia/Jakarta").format()
             // 1. Update Laporan
             await laporanRef.update(payload);
 
