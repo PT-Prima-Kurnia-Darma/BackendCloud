@@ -11,7 +11,7 @@ const laporanPtpMesinPayload = Joi.object({
     examinationType: Joi.string().allow('').required(),
     extraId: Joi.number().required(),
     inspectionType: Joi.string().allow('').required(),
-    createdAt: Joi.string().allow('').required(),
+    createdAt: Joi.string().required(),
 
     generalData: Joi.object({
         companyName: Joi.string().allow('').required(),

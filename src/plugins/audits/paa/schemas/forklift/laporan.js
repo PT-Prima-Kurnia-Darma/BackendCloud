@@ -42,7 +42,7 @@ const loadTestItemSchema = Joi.object({
 const laporanForkliftPayload = Joi.object({
     inspectionType: Joi.string().allow('').required(),
     inspectionDate: Joi.string().allow('').required(),
-    createdAt: Joi.string().allow('').required(),
+    createdAt: Joi.string().required(),
     extraId: Joi.number().allow('').required(),
     examinationType: Joi.string().allow('').required(),
 

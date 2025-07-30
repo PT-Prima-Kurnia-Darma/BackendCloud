@@ -6,7 +6,7 @@ const bapPtpMotorDieselPayload = Joi.object({
     laporanId: Joi.string().required(),
     examinationType: Joi.string().allow('').required(),
     inspectionDate: Joi.string().allow('').required(),
-    createdAt: Joi.string().allow('').required(),
+    createdAt: Joi.string().required(),
     extraId: Joi.number().required(),
 
     generalData: Joi.object({

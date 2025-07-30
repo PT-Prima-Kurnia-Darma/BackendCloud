@@ -18,7 +18,7 @@ const dynamicItemSchema = Joi.object({
 });
 
 const laporanPetirPayload = Joi.object({
-    createdAt: Joi.string().allow('').required(), 
+    createdAt: Joi.string().required(), 
     examinationType: Joi.string().allow('').required(),
     equipmentType: Joi.string().allow('').required(),
     inspectionType: Joi.string().allow('').required(),

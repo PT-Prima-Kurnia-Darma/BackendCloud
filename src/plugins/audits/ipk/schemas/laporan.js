@@ -38,7 +38,7 @@ const Joi = require('joi');
     const laporanProteksiKebakaranPayload = Joi.object({
         examinationType: Joi.string().allow('').required(),
         extraid: Joi.number().required(),
-        createdAt: Joi.string().allow('').required(),
+        createdAt: Joi.string().required(),
         inspectionType: Joi.string().allow('').required(),
         equipmentType: Joi.string().allow('').required(),
         documentChecklist: Joi.object({

@@ -6,7 +6,7 @@ const bapProteksiKebakaranPayload = Joi.object({
     laporanId: Joi.string().required(),
     examinationType: Joi.string().allow('').required(),
     inspectionDate: Joi.string().allow('').required(),
-    createdAt: Joi.string().allow('').required(),
+    createdAt: Joi.string().required(),
     extraid: Joi.number().required(),
     inspectionType: Joi.string().allow('').required(),
     equipmentType: Joi.string().allow('').required(),

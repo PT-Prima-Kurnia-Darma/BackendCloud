@@ -93,7 +93,7 @@ const ndtMeasurementSchema = (hasTolerance = false) => {
 // === SKEMA UTAMA UNTUK PAYLOAD LAPORAN MOBILE CRANE ===
 const laporanMobileCranePayload = Joi.object({
     inspectionType: Joi.string().allow('').required(),
-    createdAt: Joi.string().allow('').required(),
+    createdAt: Joi.string().required(),
     extraId: Joi.number().required(),
     equipmentType: Joi.string().allow('').required(),
     examinationType: Joi.string().allow('').required(),
